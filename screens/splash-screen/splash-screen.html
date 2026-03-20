@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LittleSteps - Splash</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#f74b6d",
+              "on-secondary-container": "#7c0091",
+              "on-tertiary-fixed-variant": "#770033",
+              "secondary": "#9720ab",
+              "surface-container-high": "#eeddf1",
+              "surface-bright": "#fff3ff",
+              "on-error": "#ffefef",
+              "inverse-on-surface": "#a599a8",
+              "on-secondary-fixed": "#5d006d",
+              "on-secondary": "#ffeefb",
+              "outline": "#7e7381",
+              "inverse-primary": "#a775ff",
+              "primary-container": "#b58bff",
+              "tertiary-fixed": "#ff8fa9",
+              "secondary-dim": "#89089e",
+              "primary": "#751fe7",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-primary": "#f9efff",
+              "tertiary-dim": "#a00047",
+              "on-surface-variant": "#625865",
+              "tertiary": "#b60051",
+              "tertiary-fixed-dim": "#ff769b",
+              "surface-container-highest": "#e8d7ed",
+              "secondary-fixed": "#fcbcff",
+              "on-tertiary": "#ffeff0",
+              "primary-fixed": "#b58bff",
+              "on-tertiary-fixed": "#380014",
+              "surface-tint": "#751fe7",
+              "outline-variant": "#b5a9b8",
+              "primary-dim": "#6800d8",
+              "on-primary-fixed-variant": "#3b0081",
+              "background": "#fff3ff",
+              "error": "#b41340",
+              "primary-fixed-dim": "#a978ff",
+              "inverse-surface": "#120c16",
+              "secondary-container": "#fcbcff",
+              "surface-container": "#f3e3f6",
+              "on-tertiary-container": "#66002b",
+              "surface": "#fff3ff",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-container": "#30006a",
+              "surface-dim": "#e0cfe5",
+              "secondary-fixed-dim": "#f9a7ff",
+              "on-background": "#342c38",
+              "error-dim": "#a70138",
+              "surface-variant": "#e8d7ed",
+              "surface-container-low": "#fbecfe",
+              "tertiary-container": "#ff8fa9",
+              "on-surface": "#342c38",
+              "on-error-container": "#510017",
+              "on-primary-fixed": "#000000"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      .mesh-gradient {
+        background: radial-gradient(at 50% 100%, #f3e3f6 0%, #fff3ff 70%);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface overflow-hidden">
+<!-- Splash Screen Container -->
+<main class="relative min-h-screen w-full flex flex-col items-center justify-center mesh-gradient px-6">
+<!-- Animated Background Elements (Subtle Blobs) -->
+<div class="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-primary-container/20 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-5%] right-[-5%] w-[50vw] h-[50vw] bg-secondary-container/30 rounded-full blur-[100px]"></div>
+<!-- Content Shell (Task-Focused - Suppression of Nav) -->
+<div class="relative z-10 flex flex-col items-center text-center space-y-12">
+<!-- Minimalist Logo Section -->
+<div class="flex flex-col items-center gap-6">
+<!-- Brand Icon -->
+<div class="w-24 h-24 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-2xl shadow-primary/20">
+<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">bubble_chart</span>
+</div>
+<!-- Brand Name -->
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface">
+                    LittleSteps
+                </h1>
+</div>
+<!-- Tagline Section -->
+<div class="max-w-xs md:max-w-md">
+<p class="text-lg md:text-xl font-medium text-on-surface-variant leading-relaxed">
+                    Your Child’s Health, Always Protected.
+                </p>
+</div>
+<!-- Interactive Entry Indicator (Subtle UI Cue) -->
+<div class="pt-24">
+<div class="flex flex-col items-center gap-4">
+<div class="w-1.5 h-16 bg-gradient-to-b from-primary/40 to-transparent rounded-full"></div>
+<span class="text-xs font-bold uppercase tracking-[0.2em] text-primary/60">Entering Sanctuary</span>
+</div>
+</div>
+</div>
+<!-- Editorial Depth: Glass Card Accent -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
+<div class="bg-surface-container-lowest/40 backdrop-blur-xl rounded-xl p-6 border border-white/20 shadow-sm flex items-center justify-between">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border-2 border-white flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a caring pediatric doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiZ8sfWv0fAbGwRAFVF3vFGLI-R4LWllca2Ll7WxBtVwg60p_6apf8au1SoPmsVS4QEE2p8RkNAWAPjnCWM1jpwdCckB4wdN5w2eCPvNTl7FZpPECi8FdLAXR9LqCROevWgemqYJuve75M5v3MSG-fRL2yG9jsR7I_r70bk_HStIuZ-sn0b24-SG9k4d_47C-26JDmpuZG0kClj1drxhg1G1pjUNhq8srg6IECJq5_-1-fkQ-ASbFTusgHWBTj3QpurF2UM-KrDKw"/>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border-2 border-white flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up of a smiling nurse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiZ8sfWv0fAbGwRAFVF3vFGLI-R4LWllca2Ll7WxBtVwg60p_6apf8au1SoPmsVS4QEE2p8RkNAWAPjnCWM1jpwdCckB4wdN5w2eCPvNTl7FZpPECi8FdLAXR9LqCROevWgemqYJuve75M5v3MSG-fRL2yG9jsR7I_r70bk_HStIuZ-sn0b24-SG9k4d_47C-26JDmpuZG0kClj1drxhg1G1pjUNhq8srg6IECJq5_-1-fkQ-ASbFTusgHWBTj3QpurF2UM-KrDKw"/>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container border-2 border-white flex items-center justify-center">
+<span class="text-[10px] font-bold text-on-primary-container">500+</span>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-[10px] font-bold text-primary uppercase tracking-wider">Trusted Network</span>
+<span class="text-sm font-semibold text-on-surface">Top-tier Specialists</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Visual Polish: Decorative Corner Gradients -->
+<div class="fixed top-0 right-0 w-64 h-64 bg-tertiary-container/10 blur-[100px] pointer-events-none"></div>
+<div class="fixed bottom-0 left-0 w-80 h-80 bg-primary/5 blur-[120px] pointer-events-none"></div>
+</body></html>

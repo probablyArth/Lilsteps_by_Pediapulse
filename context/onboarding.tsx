@@ -1,0 +1,54 @@
+import { createContext, useContext, useState, ReactNode } from 'react';
+
+type AgeBracket = 'A' | 'B' | 'C' | null;
+type ChildSex = 'male' | 'female' | null;
+
+interface OnboardingState {
+  childName: string;
+  bracket: AgeBracket;
+  childSex: ChildSex;
+  dob: Date | null;
+  weight: string;
+  bloodGroup: string;
+  allergies: string[];
+  conditions: string[];
+  setChildName: (name: string) => void;
+  setBracket: (bracket: AgeBracket) => void;
+  setChildSex: (sex: ChildSex) => void;
+  setDob: (dob: Date) => void;
+  setWeight: (weight: string) => void;
+  setBloodGroup: (bg: string) => void;
+  setAllergies: (allergies: string[]) => void;
+  setConditions: (conditions: string[]) => void;
+}
+
+const OnboardingContext = createContext<OnboardingState | null>(null);
+
+export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const [childName, setChildName] = useState('');
+  const [bracket, setBracket] = useState<AgeBracket>(null);
+  const [childSex, setChildSex] = useState<ChildSex>(null);
+  const [dob, setDob] = useState<Date | null>(null);
+  const [weight, setWeight] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [allergies, setAllergies] = useState<string[]>([]);
+  const [conditions, setConditions] = useState<string[]>([]);
+
+  return (
+    <OnboardingContext.Provider
+      value={{
+        childName, bracket, childSex, dob, weight, bloodGroup, allergies, conditions,
+        setChildName, setBracket, setChildSex, setDob, setWeight, setBloodGroup,
+        setAllergies, setConditions,
+      }}
+    >
+      {children}
+    </OnboardingContext.Provider>
+  );
+}
+
+export function useOnboarding() {
+  const ctx = useContext(OnboardingContext);
+  if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider');
+  return ctx;
+}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PediaPulse - Home Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-container": "#b58bff",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed-dim": "#f9a7ff",
+              "primary": "#751fe7",
+              "outline-variant": "#b5a9b8",
+              "on-tertiary-fixed": "#380014",
+              "on-primary": "#f9efff",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-secondary-fixed": "#5d006d",
+              "secondary-dim": "#89089e",
+              "tertiary-dim": "#a00047",
+              "outline": "#7e7381",
+              "surface-bright": "#fff3ff",
+              "surface": "#fff3ff",
+              "on-background": "#342c38",
+              "secondary": "#9720ab",
+              "inverse-surface": "#120c16",
+              "tertiary-fixed-dim": "#ff769b",
+              "on-secondary": "#ffeefb",
+              "inverse-on-surface": "#a599a8",
+              "tertiary-fixed": "#ff8fa9",
+              "tertiary-container": "#ff8fa9",
+              "on-tertiary-container": "#66002b",
+              "on-tertiary": "#ffeff0",
+              "on-primary-fixed": "#000000",
+              "error-dim": "#a70138",
+              "surface-container": "#f3e3f6",
+              "primary-fixed": "#b58bff",
+              "on-error-container": "#510017",
+              "surface-container-high": "#eeddf1",
+              "surface-container-low": "#fbecfe",
+              "primary-fixed-dim": "#a978ff",
+              "primary-dim": "#6800d8",
+              "on-primary-fixed-variant": "#3b0081",
+              "on-secondary-container": "#7c0091",
+              "inverse-primary": "#a775ff",
+              "surface-tint": "#751fe7",
+              "on-error": "#ffefef",
+              "surface-dim": "#e0cfe5",
+              "error-container": "#f74b6d",
+              "secondary-fixed": "#fcbcff",
+              "surface-variant": "#e8d7ed",
+              "on-surface": "#342c38",
+              "surface-container-highest": "#e8d7ed",
+              "on-primary-container": "#30006a",
+              "secondary-container": "#fcbcff",
+              "tertiary": "#b60051",
+              "error": "#b41340",
+              "on-tertiary-fixed-variant": "#770033",
+              "on-surface-variant": "#625865",
+              "background": "#fff3ff"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff3ff; color: #342c38; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .tonal-transition { transition: background-color 0.3s ease; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
+<div class="flex justify-between items-center px-6 py-4 w-full max-w-screen-xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full overflow-hidden bg-surface-container border-2 border-primary/20">
+<img alt="Child profile photo" class="w-full h-full object-cover" data-alt="Happy young boy smiling for portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0f0kmMyRjbSCBE4o95IS8JXe9dSKS1llQ1vrRJltf9BbIh4_m5Lxi7yWVvKfZ5OH_OLNORsRKKjrxAQP4Qm79QZhHmRx5hBjI1kEk3zINNbLxb0CnZF-kGCoA_Hl4aQaKC5Yk0T1pA8zvVFyorzVRrSIuCgfNARZ52FLnzp7IUoaKLydsOMqhhRakHz-UHZOeUpvS7w-vWfzB-lGPMW0mMYtTSdSzbnr6ILrU5zkz2Ha4hq3eC2hXJGVpScW57NdoCkJ0bB39Z1w"/>
+</div>
+<div class="flex items-center gap-1 cursor-pointer">
+<span class="text-on-surface font-bold tracking-tight">Arav</span>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">expand_more</span>
+</div>
+</div>
+<div class="text-xl font-bold text-primary tracking-tight">PediaPulse</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-50 transition-colors relative">
+<span class="material-symbols-outlined text-primary">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-screen-md mx-auto space-y-8">
+<!-- Greeting Section -->
+<section class="mt-4">
+<h1 class="text-on-surface font-extrabold text-2xl tracking-tight">Good morning, Priya</h1>
+<p class="text-on-surface-variant text-sm mt-1 flex items-center gap-2">
+                Arav <span class="w-1 h-1 bg-outline-variant rounded-full"></span> 9 years <span class="w-1 h-1 bg-outline-variant rounded-full"></span> Last seen 21 days ago
+            </p>
+</section>
+<!-- Allergy Banner -->
+<section class="bg-error-container/20 p-4 rounded-lg flex items-center gap-3 border-l-4 border-error">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div class="text-sm">
+<span class="font-bold text-on-error-container">Allergy on file:</span>
+<span class="text-on-error-container">Penicillin, Nuts</span>
+</div>
+</section>
+<!-- Primary CTA Card -->
+<section class="relative overflow-hidden bg-gradient-to-br from-primary to-primary-container rounded-xl p-6 shadow-lg">
+<div class="relative z-10">
+<h2 class="text-white text-xl font-bold mb-4">Start health check-in</h2>
+<div class="flex justify-between items-end">
+<p class="text-on-primary/80 text-sm max-w-[200px]">Update Arav's symptoms and vitals for today's report.</p>
+<button class="bg-white text-primary w-12 h-12 rounded-full flex items-center justify-center shadow-md transform hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Decorative circle -->
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+</section>
+<!-- Quick Actions Chips -->
+<section class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+<button class="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-full whitespace-nowrap text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary text-lg">calendar_month</span> Book
+            </button>
+<button class="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-full whitespace-nowrap text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary text-lg">monitoring</span> Growth
+            </button>
+<button class="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-full whitespace-nowrap text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary text-lg">vaccines</span> Vaccines
+            </button>
+<button class="flex items-center gap-2 bg-surface-container-low px-4 py-2.5 rounded-full whitespace-nowrap text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary text-lg">history</span> History
+            </button>
+</section>
+<!-- Child Status Bento Grid -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest glass-card p-5 rounded-lg shadow-sm">
+<span class="text-on-surface-variant text-xs font-bold uppercase tracking-wider block mb-2">Next appointment</span>
+<p class="text-on-surface font-bold text-lg leading-tight">Tomorrow,</p>
+<p class="text-primary font-bold">10:30am</p>
+<div class="mt-4 flex items-center text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm mr-1">location_on</span> Main Clinic
+                </div>
+</div>
+<div class="bg-surface-container-lowest glass-card p-5 rounded-lg shadow-sm">
+<span class="text-on-surface-variant text-xs font-bold uppercase tracking-wider block mb-2">Last visit</span>
+<p class="text-on-surface font-bold text-lg leading-tight">21 days</p>
+<p class="text-on-surface-variant font-medium">ago</p>
+<div class="mt-4 flex items-center text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-sm mr-1">check_circle</span> Follow-up ok
+                </div>
+</div>
+</section>
+<!-- Activity Card (Sage/Green) -->
+<section class="bg-[#e8f5e9] p-6 rounded-xl flex items-center justify-between border-l-4 border-emerald-400">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-emerald-600 shadow-sm">
+<span class="material-symbols-outlined text-2xl">child_care</span>
+</div>
+<div>
+<h3 class="text-on-surface font-bold text-lg">Tummy time</h3>
+<p class="text-on-surface-variant text-sm">10 minutes session</p>
+</div>
+</div>
+<button class="bg-emerald-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-sm hover:bg-emerald-700 transition-colors">
+                Do it
+            </button>
+</section>
+<!-- Recent Activity Feed -->
+<section class="pb-8">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-on-surface font-bold text-xl">Recent Activity</h3>
+<button class="text-primary text-sm font-bold">See all</button>
+</div>
+<div class="space-y-6 relative">
+<!-- Timeline line -->
+<div class="absolute left-6 top-0 bottom-0 w-px bg-surface-container"></div>
+<!-- Doctor Message -->
+<div class="relative flex gap-6">
+<div class="z-10 w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border-4 border-surface shadow-sm text-primary">
+<span class="material-symbols-outlined text-xl">mail</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest rounded-lg p-4 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-on-surface">Dr. Sarah Miller</span>
+<span class="text-[10px] text-on-surface-variant font-medium">2H AGO</span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-2">The latest lab results for Arav are in. Everything looks normal, just continue with the regular...</p>
+</div>
+</div>
+<!-- Growth Update -->
+<div class="relative flex gap-6">
+<div class="z-10 w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border-4 border-surface shadow-sm text-secondary">
+<span class="material-symbols-outlined text-xl">straighten</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest rounded-lg p-4 shadow-sm">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-on-surface">Growth Update</span>
+<span class="text-[10px] text-on-surface-variant font-medium">YESTERDAY</span>
+</div>
+<p class="text-sm text-on-surface-variant">Arav reached the 75th percentile for height. Great progress!</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50">
+<div class="bg-white/80 backdrop-blur-2xl px-6 pb-8 pt-2 flex justify-around items-end shadow-[0_-8px_32px_rgba(52,44,56,0.06)] rounded-t-[3rem]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-primary font-bold transition-all p-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] mt-1 tracking-wide">Home</span>
+</a>
+<!-- Growth -->
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-[10px] mt-1 tracking-wide">Growth</span>
+</a>
+<!-- Elevated Sparkle Button -->
+<button class="flex flex-col items-center justify-center bg-gradient-to-br from-primary to-primary-container text-white rounded-full p-4 mb-6 shadow-lg transform -translate-y-2 scale-110 active:scale-90 transition-all">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</button>
+<!-- Vaccine -->
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">vaccines</span>
+<span class="text-[10px] mt-1 tracking-wide">Vaccine</span>
+</a>
+<!-- Records -->
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-[10px] mt-1 tracking-wide">Records</span>
+</a>
+</div>
+</nav>
+</body></html>
