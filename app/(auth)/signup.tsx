@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
@@ -8,9 +9,83 @@ import { GradientButton } from '@/components/gradient-button';
 import { TextInputField } from '@/components/text-input-field';
 import { AppColors } from '@/constants/theme';
 import { layout, typography } from '@/styles/global';
+import { useAuth } from '@/context/auth';
+import { supabase } from '@/lib/supabase';
+import { dbg } from '@/lib/debug';
 
 export default function SignupScreen() {
   const insets = useSafeAreaInsets();
+  const { signInWithOtp, verifyOtp } = useAuth();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'details' | 'otp'>('details');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSendOtp() {
+    if (!email.trim() || !name.trim()) return;
+    setLoading(true);
+    setError(null);
+
+    dbg.auth('Signup: sending OTP', { name: name.trim(), email: email.trim().toLowerCase() });
+    const { error: err } = await signInWithOtp(email.trim().toLowerCase());
+    setLoading(false);
+
+    if (err) {
+      dbg.authError('Signup: OTP send failed', err);
+      setError(err);
+    } else {
+      dbg.auth('Signup: OTP sent, showing code input');
+      setStep('otp');
+    }
+  }
+
+  async function handleVerifyOtp() {
+    if (otp.length !== 6) {
+      setError('Please enter the 6-digit code');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    dbg.auth('Signup: verifying OTP', { email: email.trim().toLowerCase() });
+    const { error: err } = await verifyOtp(email.trim().toLowerCase(), otp);
+
+    if (err) {
+      setLoading(false);
+      dbg.authError('Signup: OTP verify failed', err);
+      setError(err);
+      return;
+    }
+
+    // Update parent name — use upsert for safety
+    dbg.db('Signup: upserting parent name');
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (currentUser) {
+      const { error: upsertErr } = await supabase
+        .from('parents')
+        .upsert({
+          id: currentUser.id,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+        }, { onConflict: 'id' });
+
+      if (upsertErr) {
+        dbg.dbError('Signup: parent upsert failed', upsertErr);
+        // Non-fatal — name can be updated later in onboarding
+      } else {
+        dbg.db('Signup: parent upsert success');
+      }
+    } else {
+      dbg.authError('Signup: no user after OTP verify', 'currentUser is null');
+    }
+
+    setLoading(false);
+    dbg.nav('Signup → Onboarding');
+    router.replace('/(onboarding)/parent-details');
+  }
 
   return (
     <View style={layout.screenContainer}>
@@ -27,56 +102,90 @@ export default function SignupScreen() {
         >
           {/* Header */}
           <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Pressable onPress={() => step === 'otp' ? setStep('details') : router.back()} style={styles.backButton}>
               <Text style={styles.backArrow}>{'\u2190'}</Text>
             </Pressable>
           </Animated.View>
 
           {/* Title */}
           <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.titleSection}>
-            <Text style={typography.headingXL}>Create{'\n'}Account</Text>
+            <Text style={typography.headingXL}>
+              {step === 'details' ? 'Create\nAccount' : 'Enter\nCode'}
+            </Text>
             <Text style={[typography.bodySM, styles.subtitle]}>
-              Join thousands of parents protecting their children's health
+              {step === 'details'
+                ? 'Join thousands of parents protecting their children\'s health'
+                : `We sent a 6-digit code to ${email}`}
             </Text>
           </Animated.View>
 
           {/* Form */}
           <Animated.View entering={FadeInUp.delay(400).duration(600)} style={styles.form}>
-            <View style={styles.fields}>
-              <TextInputField
-                label="Your Name"
-                hint="(Parent or Guardian)"
-                placeholder="e.g. Sarah Johnson"
-                autoCapitalize="words"
-                autoComplete="name"
-              />
-              <TextInputField
-                label="Email"
-                placeholder="you@example.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-              />
-              <TextInputField
-                label="Password"
-                placeholder="Min. 8 characters"
-                secureTextEntry
-                autoComplete="new-password"
-              />
-            </View>
+            {step === 'details' ? (
+              <View style={styles.fields}>
+                <TextInputField
+                  label="Your Name"
+                  hint="(Parent or Guardian)"
+                  placeholder="e.g. Sarah Johnson"
+                  autoCapitalize="words"
+                  autoComplete="name"
+                  value={name}
+                  onChangeText={setName}
+                />
+                <TextInputField
+                  label="Email"
+                  placeholder="you@example.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+            ) : (
+              <View style={styles.fields}>
+                <TextInputField
+                  label="Verification Code"
+                  placeholder="000000"
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  value={otp}
+                  onChangeText={(text) => setOtp(text.replace(/[^0-9]/g, ''))}
+                  autoFocus
+                />
+              </View>
+            )}
+
+            {error && (
+              <Text style={styles.errorText}>{error}</Text>
+            )}
 
             <GradientButton
-              label="Create Account"
-              onPress={() => router.push('/(onboarding)/parent-details')}
+              label={loading ? '' : step === 'details' ? 'Create Account' : 'Verify'}
+              onPress={step === 'details' ? handleSendOtp : handleVerifyOtp}
               style={styles.submitButton}
             />
+            {loading && (
+              <ActivityIndicator
+                color={AppColors.onPrimary}
+                style={styles.loadingOverlay}
+              />
+            )}
 
-            <Text style={styles.termsText}>
-              By signing up, you agree to our{' '}
-              <Text style={styles.termsLink}>Terms of Service</Text>
-              {' '}and{' '}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
-            </Text>
+            {step === 'details' && (
+              <Text style={styles.termsText}>
+                By signing up, you agree to our{' '}
+                <Text style={styles.termsLink}>Terms of Service</Text>
+                {' '}and{' '}
+                <Text style={styles.termsLink}>Privacy Policy</Text>
+              </Text>
+            )}
+
+            {step === 'otp' && (
+              <Pressable onPress={handleSendOtp} style={styles.resendButton}>
+                <Text style={styles.resendText}>Didn&apos;t receive it? Resend code</Text>
+              </Pressable>
+            )}
           </Animated.View>
 
           {/* Footer */}
@@ -131,6 +240,27 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: 24,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    bottom: 18,
+    alignSelf: 'center',
+  },
+  errorText: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 13,
+    color: AppColors.tertiary,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  resendButton: {
+    alignSelf: 'center',
+    marginTop: 16,
+  },
+  resendText: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 13,
+    color: AppColors.primary,
   },
   termsText: {
     fontFamily: 'PlusJakartaSans_400Regular',

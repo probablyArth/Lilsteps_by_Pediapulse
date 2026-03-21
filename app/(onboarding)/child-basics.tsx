@@ -7,7 +7,6 @@ import { ChipGroup } from '@/components/chip-group';
 import { OnboardingShell } from '@/components/onboarding-shell';
 import { TextInputField } from '@/components/text-input-field';
 import { AppColors } from '@/constants/theme';
-import { typography } from '@/styles/global';
 import { useOnboarding } from '@/context/onboarding';
 
 const SEX_OPTIONS = ['Male', 'Female'];

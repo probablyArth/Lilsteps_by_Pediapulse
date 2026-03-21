@@ -102,7 +102,7 @@ export default function AllergiesScreen() {
       {allSelected.length > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>
-            {displayName}'s allergy alert: {allSelected.join(', ')}
+            {displayName}&apos;s allergy alert: {allSelected.join(', ')}
           </Text>
         </View>
       )}

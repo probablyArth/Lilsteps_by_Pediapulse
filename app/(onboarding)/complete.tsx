@@ -30,16 +30,16 @@ export default function CompleteScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(300).duration(600)} style={styles.textSection}>
-          <Text style={typography.headingXL}>You're All Set!</Text>
+          <Text style={typography.headingXL}>You&apos;re All Set!</Text>
           <Text style={[typography.bodyLG, styles.subtitle]}>
-            {displayName}'s health profile is ready. Doctors will now have instant access to this information during consultations.
+            {displayName}&apos;s health profile is ready. Doctors will now have instant access to this information during consultations.
           </Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
           <GradientButton
             label="Go to Home"
-            onPress={() => router.dismissAll()}
+            onPress={() => router.replace('/(tabs)')}
           />
         </Animated.View>
       </View>

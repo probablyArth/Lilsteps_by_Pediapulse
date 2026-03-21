@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -20,9 +20,26 @@ import { GlassCard } from '@/components/glass-card';
 import { GradientBackground } from '@/components/gradient-background';
 import { AppColors } from '@/constants/theme';
 import { layout, typography } from '@/styles/global';
+import { useAuth } from '@/context/auth';
+import { dbg } from '@/lib/debug';
 
 export default function SplashScreen() {
+  const { session, loading, hasChildren } = useAuth();
+  const hasNavigated = useRef(false);
   const arrowBounce = useSharedValue(0);
+
+  // Auto-navigate if already authenticated
+  // Wait until BOTH loading is done AND hasChildren is resolved (not null)
+  useEffect(() => {
+    dbg.nav('Splash effect', { loading, hasSession: !!session, hasChildren, hasNavigated: hasNavigated.current });
+    if (loading || hasNavigated.current) return;
+    if (session && hasChildren !== null) {
+      hasNavigated.current = true;
+      const target = hasChildren ? '/(tabs)' : '/(onboarding)/parent-details';
+      dbg.nav(`Splash → ${target}`);
+      router.replace(target as '/(tabs)');
+    }
+  }, [session, loading, hasChildren]);
 
   useEffect(() => {
     arrowBounce.value = withRepeat(
@@ -50,7 +67,7 @@ export default function SplashScreen() {
           entering={FadeInUp.delay(500).duration(600)}
           style={[typography.bodyLG, styles.tagline]}
         >
-          Your Child's Health, Always{'\n'}Protected.
+          Your Child&apos;s Health, Always{'\n'}Protected.
         </Animated.Text>
 
         {/* Tappable arrow CTA */}

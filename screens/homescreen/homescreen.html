@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LittleSteps - Pediatric Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error-container": "#510017",
+              "primary-fixed": "#b58bff",
+              "primary-container": "#b58bff",
+              "surface-tint": "#751fe7",
+              "on-tertiary-fixed": "#380014",
+              "surface-container-low": "#fbecfe",
+              "surface-container-highest": "#e8d7ed",
+              "background": "#fff3ff",
+              "inverse-surface": "#120c16",
+              "secondary-container": "#fcbcff",
+              "on-secondary": "#ffeefb",
+              "outline": "#7e7381",
+              "on-tertiary": "#ffeff0",
+              "surface-bright": "#fff3ff",
+              "surface-container-high": "#eeddf1",
+              "tertiary-dim": "#a00047",
+              "secondary-fixed-dim": "#f9a7ff",
+              "on-primary-container": "#30006a",
+              "inverse-on-surface": "#a599a8",
+              "on-primary-fixed": "#000000",
+              "error": "#b41340",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#f3e3f6",
+              "outline-variant": "#b5a9b8",
+              "on-surface": "#342c38",
+              "on-error": "#ffefef",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-tertiary-fixed-variant": "#770033",
+              "surface": "#fff3ff",
+              "primary-fixed-dim": "#a978ff",
+              "error-dim": "#a70138",
+              "secondary": "#9720ab",
+              "primary-dim": "#6800d8",
+              "tertiary-container": "#ff8fa9",
+              "error-container": "#f74b6d",
+              "inverse-primary": "#a775ff",
+              "on-tertiary-container": "#66002b",
+              "surface-dim": "#e0cfe5",
+              "tertiary-fixed-dim": "#ff769b",
+              "tertiary": "#b60051",
+              "on-primary-fixed-variant": "#3b0081",
+              "on-primary": "#f9efff",
+              "secondary-dim": "#89089e",
+              "surface-variant": "#e8d7ed",
+              "on-secondary-fixed": "#5d006d",
+              "on-background": "#342c38",
+              "tertiary-fixed": "#ff8fa9",
+              "secondary-fixed": "#fcbcff",
+              "primary": "#751fe7",
+              "on-secondary-container": "#7c0091",
+              "on-surface-variant": "#625865"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl flex items-center justify-between px-6 h-16 shadow-[0_8px_32px_rgba(52,44,56,0.06)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container/30 ring-2 ring-primary-container/50">
+<img alt="Child profile photo" class="w-full h-full object-cover" data-alt="Portrait of a smiling young child" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_g9nWdg7RZbx9Dbk-3kS_wSSC_Z_3LNeop3sblSEHKc0cKNUmX3B-_vFB7oAbwu2ZxAe86DYo7jVRYMllYg1baktknKnse6G9Fdb8sNWARoYNixqtj3Eg29kcv0md8D6-pOQ1BiroQsr9XTpdTcyBzdipul8dLFD3Zk0qczO9RhergMu5Y0RQqSeK7eerI3QBrZpQHyz_XfpwLqB-xLWLeYGrkhnV2YtHo_C5BmstytUwmB7wA0mElaC6W19Oseak-olYG35_jYE"/>
+</div>
+<span class="text-xl font-bold text-purple-700 tracking-tight font-headline">LittleSteps</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-50 transition-colors active:scale-95 duration-200 text-slate-500">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-24 px-6 space-y-10">
+<!-- Personalized Greeting -->
+<section class="space-y-2">
+<h1 class="text-3xl font-extrabold tracking-tight text-on-surface leading-tight">Good morning, Priya. Arav is thriving today.</h1>
+<p class="text-on-surface-variant body-lg leading-relaxed opacity-80">He's reaching his rolling milestones ahead of schedule.</p>
+</section>
+<!-- Quick Actions Row -->
+<section class="grid grid-cols-4 gap-4">
+<div class="flex flex-col items-center gap-2">
+<div class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-2xl" data-icon="calendar_month">calendar_month</span>
+</div>
+<span class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Book</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-2xl" data-icon="trending_up">trending_up</span>
+</div>
+<span class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Growth</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-2xl" data-icon="vaccines">vaccines</span>
+</div>
+<span class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Vaccines</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary shadow-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-2xl" data-icon="folder_shared">folder_shared</span>
+</div>
+<span class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Records</span>
+</div>
+</section>
+<!-- Primary CTA Card -->
+<section>
+<div class="relative overflow-hidden rounded-xl p-8 bg-gradient-to-br from-primary to-primary-container text-white shadow-xl shadow-purple-200/50 group active:scale-[0.98] transition-transform duration-300">
+<!-- Abstract Decorative Shapes -->
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-8 -left-8 w-32 h-32 bg-purple-900/10 rounded-full blur-2xl"></div>
+<div class="relative z-10 flex items-center justify-between">
+<div>
+<h2 class="text-2xl font-bold mb-1">Start Health Check-in</h2>
+<p class="text-white/80 text-sm font-medium">Log symptoms or daily wellness</p>
+</div>
+<div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-inner">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Growth Analytics -->
+<section class="grid grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest glass-card rounded-xl p-6 shadow-[0_8px_32px_rgba(52,44,56,0.04)]">
+<div class="flex justify-between items-start mb-4">
+<span class="text-on-surface-variant font-semibold text-sm">Weight</span>
+<span class="material-symbols-outlined text-primary text-xl" data-icon="monitor_weight">monitor_weight</span>
+</div>
+<div class="flex items-baseline gap-1 mb-4">
+<span class="text-3xl font-extrabold text-on-surface">12.4</span>
+<span class="text-on-surface-variant text-sm font-bold">kg</span>
+</div>
+<div class="flex items-end gap-1.5 h-12">
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-3/5"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-4/5"></div>
+<div class="flex-1 bg-primary/60 rounded-t-sm h-full"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-2/5"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-3/5"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest glass-card rounded-xl p-6 shadow-[0_8px_32px_rgba(52,44,56,0.04)]">
+<div class="flex justify-between items-start mb-4">
+<span class="text-on-surface-variant font-semibold text-sm">Height</span>
+<span class="material-symbols-outlined text-primary text-xl" data-icon="straighten">straighten</span>
+</div>
+<div class="flex items-baseline gap-1 mb-4">
+<span class="text-3xl font-extrabold text-on-surface">84</span>
+<span class="text-on-surface-variant text-sm font-bold">cm</span>
+</div>
+<div class="flex items-end gap-1.5 h-12">
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-2/5"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-3/5"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-4/5"></div>
+<div class="flex-1 bg-primary/60 rounded-t-sm h-full"></div>
+<div class="flex-1 bg-surface-container-high rounded-t-sm h-3/5"></div>
+</div>
+</div>
+</section>
+<!-- Vaccination Status -->
+<section>
+<div class="bg-surface-container-lowest glass-card rounded-lg p-6 flex items-center justify-between border-l-4 border-primary">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Next: MMR Booster (Oct 24)</h3>
+<a class="text-primary text-sm font-semibold hover:underline decoration-2 underline-offset-4" href="#">View Schedule</a>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-30" data-icon="chevron_right">chevron_right</span>
+</div>
+</section>
+<!-- Care Team -->
+<section class="space-y-4">
+<h3 class="text-xl font-bold px-1">Care Team</h3>
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6">
+<div class="flex-shrink-0 w-44 bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/10">
+<div class="w-16 h-16 rounded-full overflow-hidden mb-3 mx-auto ring-4 ring-surface-container">
+<img alt="Dr. Sarah profile" class="w-full h-full object-cover" data-alt="Portrait of a female pediatrician in medical attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcusIP4QkqCqWlR-b_BP5cLHfxAuMcRBKf_7AUoHd8lzOQjoGYweZCQPe9kQ6yd3-LdFWxaZh50X_xiyq3axmOvqinl5ItnoKE_iaOfwMORMmxEkT7gB1uagzKVwBonhPdOP7aql-QlYPG8Y9MqLVgZ9c4fNJh9lX94bX_yll7X1VGW7YK7E7nLYYouJYHxjLGJWZKalKHbLaCtekUlLBePhYOCuSsZt3JBmr5qVNkWNwfc5xzrbV95mXxBAs5StgxnrVh1WtRk5k"/>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">Dr. Sarah</p>
+<p class="text-[11px] font-medium text-on-surface-variant/70 uppercase">Pediatrician</p>
+</div>
+</div>
+<div class="flex-shrink-0 w-44 bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/10">
+<div class="w-16 h-16 rounded-full overflow-hidden mb-3 mx-auto ring-4 ring-surface-container">
+<img alt="Dr. James profile" class="w-full h-full object-cover" data-alt="Portrait of a male specialist doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPCAiNvjjsrfSv7_9_-ImfuThRG6SSY0UpoLSI02idvb3eDGf_jiR2L65lgntF8qxL6oQDf4mANSTwY2AQkjnUk2k4GLKAauV2D4h-lyWFGVz102iTIFqmqARwPIO0vtB0Uff5nvZkMjkQ1NznPXQ6-nK2gdxqHuLcVWNmdNs1OBy1bG5NAAHigsMdy9WxM9GiVihvbhTRQRIbXfsNf94Ynij8YRhnKFMxPyJIODzc65vk0dbGWAeLqXBopRdazuvsDGIk4iIM-yI"/>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">Dr. James</p>
+<p class="text-[11px] font-medium text-on-surface-variant/70 uppercase">Nutritionist</p>
+</div>
+</div>
+<div class="flex-shrink-0 w-44 bg-surface-container/50 border-2 border-dashed border-outline-variant/30 rounded-xl p-4 flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-3xl" data-icon="person_add">person_add</span>
+<span class="text-xs font-bold">Add Provider</span>
+</div>
+</div>
+</section>
+<!-- Daily Insight -->
+<section>
+<div class="bg-[#e7f5ed] rounded-xl p-6 flex gap-4 items-start shadow-sm shadow-emerald-100">
+<div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+</div>
+<div>
+<h4 class="font-bold text-emerald-900 mb-1">Healthy Tip</h4>
+<p class="text-emerald-800/80 text-sm leading-relaxed font-medium">Tummy time helps neck strength and prepares your little one for crawling.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white/70 backdrop-blur-2xl rounded-t-[3rem] shadow-[0_-8px_32px_rgba(52,44,56,0.06)] flex justify-around items-center px-4 pb-6 pt-3">
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-purple-600 to-purple-400 text-white rounded-2xl p-3 shadow-lg shadow-purple-200/50" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:text-purple-500 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium mt-1">Health</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:text-purple-500 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium mt-1">AI Check-in</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:text-purple-500 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

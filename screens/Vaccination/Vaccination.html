@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LittleSteps - Vaccination Progress</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#ffffff",
+              "on-background": "#342c38",
+              "secondary-dim": "#89089e",
+              "surface-tint": "#751fe7",
+              "surface": "#fff3ff",
+              "surface-bright": "#fff3ff",
+              "on-error-container": "#510017",
+              "on-secondary-fixed": "#5d006d",
+              "primary": "#751fe7",
+              "surface-container-high": "#eeddf1",
+              "tertiary-fixed-dim": "#ff769b",
+              "error-container": "#f74b6d",
+              "surface-container-highest": "#e8d7ed",
+              "secondary-container": "#fcbcff",
+              "on-tertiary-fixed": "#380014",
+              "error-dim": "#a70138",
+              "primary-fixed": "#b58bff",
+              "inverse-on-surface": "#a599a8",
+              "secondary": "#9720ab",
+              "inverse-primary": "#a775ff",
+              "surface-dim": "#e0cfe5",
+              "primary-container": "#b58bff",
+              "on-error": "#ffefef",
+              "on-surface": "#342c38",
+              "outline-variant": "#b5a9b8",
+              "tertiary-container": "#ff8fa9",
+              "surface-container-low": "#fbecfe",
+              "inverse-surface": "#120c16",
+              "on-primary-container": "#30006a",
+              "background": "#fff3ff",
+              "error": "#b41340",
+              "on-tertiary": "#ffeff0",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-tertiary-fixed-variant": "#770033",
+              "secondary-fixed-dim": "#f9a7ff",
+              "tertiary-fixed": "#ff8fa9",
+              "outline": "#7e7381",
+              "tertiary-dim": "#a00047",
+              "surface-variant": "#e8d7ed",
+              "on-surface-variant": "#625865",
+              "on-primary-fixed-variant": "#3b0081",
+              "secondary-fixed": "#fcbcff",
+              "on-tertiary-container": "#66002b",
+              "on-primary": "#f9efff",
+              "on-secondary": "#ffeefb",
+              "primary-dim": "#6800d8",
+              "tertiary": "#b60051",
+              "surface-container": "#f3e3f6",
+              "primary-fixed-dim": "#a978ff",
+              "on-primary-fixed": "#000000",
+              "on-secondary-container": "#7c0091"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fff3ff; color: #342c38; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-32">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(52,44,56,0.06)] flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up of a smiling infant face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvj2hmORvdbL4SaZAzQxLy8MycZDymucyLWvB3PpOfBhUXA2Y3k6UsCVnKHGERLsiY2y3vHnfuRFQ47TKMGry-Ym4fxSQ__c6FzYR6YG0PGQDJrDP0wR8Wb7UT5XnRsBz5IvEMdSBQKLrt1F-e0UU2RFF5YIk9RtjwLC52N7qQTbWtiAC0NSBHpcQIhHzCF20vx--mS2_TFtgy4t-aCMublkZ2xeEniFcU07Q9DseQyxM15hIUvDuz-RFWlkFdIqt67kK8F9dYGIo"/>
+</div>
+<span class="text-xl font-extrabold text-purple-700 font-headline tracking-tight">LittleSteps</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-purple-600 hover:bg-purple-50/50 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</nav>
+<main class="pt-24 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Header Section -->
+<header class="space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-on-surface-variant font-label text-sm uppercase tracking-widest font-semibold">Infant Bracket A (0-2 years)</p>
+<h1 class="text-3xl font-extrabold text-on-surface font-headline tracking-tight">Vaccination Progress</h1>
+</div>
+<div class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-5 py-2 rounded-full shadow-lg flex items-center gap-2">
+<span class="text-lg font-bold">8/12</span>
+<span class="text-xs font-medium opacity-90">Given</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="h-4 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full w-[66%] shadow-[0_0_12px_rgba(117,31,231,0.3)]"></div>
+</div>
+</header>
+<!-- Upload Certificate Section -->
+<section>
+<button class="w-full glass-card p-6 rounded-2xl border-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-3 group transition-all hover:bg-white/80 hover:border-primary/50 active:scale-[0.98]">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">cloud_upload</span>
+</div>
+<div class="text-center">
+<h3 class="font-bold text-on-surface text-lg">Upload Vaccination Certificate</h3>
+<p class="text-xs text-on-surface-variant font-medium">Keep your records digital and safe</p>
+</div>
+</button>
+</section>
+<!-- Bento Stats Grid -->
+<section class="grid grid-cols-2 gap-4">
+<div class="glass-card p-6 rounded-xl border-0 shadow-sm flex flex-col justify-between h-32">
+<span class="material-symbols-outlined text-primary text-3xl">event_upcoming</span>
+<div>
+<p class="text-xs text-on-surface-variant font-bold uppercase tracking-tighter">Next Dose</p>
+<p class="text-lg font-bold text-on-surface">Measles/MR</p>
+</div>
+</div>
+<div class="glass-card p-6 rounded-xl border-0 shadow-sm flex flex-col justify-between h-32">
+<span class="material-symbols-outlined text-tertiary text-3xl">warning</span>
+<div>
+<p class="text-xs text-on-surface-variant font-bold uppercase tracking-tighter">Upcoming</p>
+<p class="text-lg font-bold text-on-surface">In 4 Days</p>
+</div>
+</div>
+</section>
+<!-- Vaccination List -->
+<section class="space-y-4">
+<h2 class="text-xl font-bold text-on-surface px-1">NIS Schedule</h2>
+<div class="space-y-3">
+<!-- BCG Card -->
+<div class="glass-card p-6 rounded-xl shadow-sm flex items-center justify-between group transition-all hover:translate-y-[-2px]">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface text-lg">BCG</h3>
+<p class="text-sm text-on-surface-variant">At Birth</p>
+</div>
+</div>
+<span class="bg-green-50 text-green-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Given</span>
+</div>
+<!-- Hep B Card -->
+<div class="glass-card p-6 rounded-xl shadow-sm flex items-center justify-between group transition-all hover:translate-y-[-2px]">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface text-lg">Hep B (Birth dose)</h3>
+<p class="text-sm text-on-surface-variant">At Birth</p>
+</div>
+</div>
+<span class="bg-green-50 text-green-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Given</span>
+</div>
+<!-- OPV Card -->
+<div class="glass-card p-6 rounded-xl shadow-sm flex items-center justify-between group transition-all hover:translate-y-[-2px]">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface text-lg">OPV 0, 1, 2</h3>
+<p class="text-sm text-on-surface-variant">Birth, 6, 10 Weeks</p>
+</div>
+</div>
+<span class="bg-green-50 text-green-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Given</span>
+</div>
+<!-- Pentavalent Card (Active/Due) -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_12px_40px_rgba(117,31,231,0.08)] border-2 border-primary/10 flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-primary-container/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">medical_services</span>
+</div>
+<div>
+<h3 class="font-extrabold text-on-surface text-lg">Pentavalent 1, 2, 3</h3>
+<p class="text-sm text-on-surface-variant">6, 10, 14 Weeks</p>
+</div>
+</div>
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">Due Now</span>
+</div>
+<div class="flex gap-2 pt-2">
+<button class="flex-1 bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-full font-bold text-sm shadow-md active:scale-95 transition-transform">Mark as Given</button>
+<button class="flex-1 bg-surface-container-highest text-on-surface-variant py-3 rounded-full font-bold text-sm active:scale-95 transition-transform">Not Sure</button>
+</div>
+</div>
+<!-- Rotavirus Card -->
+<div class="glass-card p-6 rounded-xl shadow-sm flex items-center justify-between group opacity-80">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">hourglass_top</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface text-lg">Rotavirus</h3>
+<p class="text-sm text-on-surface-variant">6, 10, 14 Weeks</p>
+</div>
+</div>
+<span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Scheduled</span>
+</div>
+<!-- Measles/MR Card (Urgent/Missed focus) -->
+<div class="glass-card p-6 rounded-xl shadow-sm flex items-center justify-between group border-l-4 border-error/30">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">event_busy</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface text-lg">Measles/MR 1st Dose</h3>
+<p class="text-sm text-on-surface-variant">9 Completed Months</p>
+</div>
+</div>
+<span class="bg-error-container text-on-error-container text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Pending</span>
+</div>
+<!-- Vitamin A Card -->
+<div class="glass-card p-6 rounded-xl shadow-sm flex items-center justify-between group opacity-60">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface text-lg">Vitamin A (1st Dose)</h3>
+<p class="text-sm text-on-surface-variant">9 Months (with MR)</p>
+</div>
+</div>
+<span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Future</span>
+</div>
+</div>
+</section>
+<!-- CTA Floating Info -->
+<div class="bg-tertiary-container/20 p-6 rounded-xl border border-tertiary/10 flex gap-4 items-start">
+<span class="material-symbols-outlined text-tertiary">info</span>
+<div class="space-y-1">
+<p class="font-bold text-on-tertiary-container text-sm">Doctor's Note</p>
+<p class="text-xs text-on-tertiary-fixed-variant leading-relaxed">Minor fever after Pentavalent is common. Apply cold compress on injection site if swelling occurs. Contact pediatrician if fever exceeds 101°F.</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-2 bg-white/70 dark:bg-purple-950/70 backdrop-blur-2xl shadow-[0_-8px_32px_rgba(52,44,56,0.08)] rounded-t-[3rem] z-50">
+<div class="flex flex-col items-center justify-center text-purple-400 p-3 transition-all hover:text-purple-700 active:scale-90 duration-300">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-br from-purple-600 to-purple-400 text-white rounded-full p-3 shadow-lg active:scale-90 duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">vaccines</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider mt-1">Health</span>
+</div>
+<div class="flex flex-col items-center justify-center text-purple-400 p-3 transition-all hover:text-purple-700 active:scale-90 duration-300">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider mt-1">Growth</span>
+</div>
+<div class="flex flex-col items-center justify-center text-purple-400 p-3 transition-all hover:text-purple-700 active:scale-90 duration-300">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider mt-1">Settings</span>
+</div>
+</nav>
+<!-- Floating Action Button for Adding Record -->
+<div class="fixed bottom-28 right-6">
+<button class="w-14 h-14 bg-primary rounded-full shadow-2xl flex items-center justify-center text-white active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</body></html>

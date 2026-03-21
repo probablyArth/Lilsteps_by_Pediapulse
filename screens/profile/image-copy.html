@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medical Record Detail - LittleSteps</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffefef",
+              "secondary": "#9720ab",
+              "on-secondary": "#ffeefb",
+              "surface-container": "#f3e3f6",
+              "on-primary-container": "#30006a",
+              "surface-container-high": "#eeddf1",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-secondary-fixed": "#5d006d",
+              "surface-container-highest": "#e8d7ed",
+              "on-surface-variant": "#625865",
+              "error-dim": "#a70138",
+              "secondary-fixed": "#fcbcff",
+              "error-container": "#f74b6d",
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#f9efff",
+              "tertiary-fixed": "#ff8fa9",
+              "tertiary": "#b60051",
+              "tertiary-dim": "#a00047",
+              "inverse-surface": "#120c16",
+              "primary-dim": "#6800d8",
+              "on-error-container": "#510017",
+              "on-background": "#342c38",
+              "on-tertiary-fixed": "#380014",
+              "on-primary-fixed-variant": "#3b0081",
+              "surface-container-lowest": "#ffffff",
+              "inverse-primary": "#a775ff",
+              "inverse-on-surface": "#a599a8",
+              "on-secondary-container": "#7c0091",
+              "tertiary-container": "#ff8fa9",
+              "primary-container": "#b58bff",
+              "on-tertiary-container": "#66002b",
+              "secondary-fixed-dim": "#f9a7ff",
+              "on-tertiary": "#ffeff0",
+              "outline": "#7e7381",
+              "outline-variant": "#b5a9b8",
+              "on-tertiary-fixed-variant": "#770033",
+              "on-primary-fixed": "#000000",
+              "secondary-dim": "#89089e",
+              "primary-fixed-dim": "#a978ff",
+              "background": "#fff3ff",
+              "tertiary-fixed-dim": "#ff769b",
+              "primary-fixed": "#b58bff",
+              "surface-container-low": "#fbecfe",
+              "primary": "#751fe7",
+              "surface-dim": "#e0cfe5",
+              "secondary-container": "#fcbcff",
+              "error": "#b41340",
+              "surface": "#fff3ff",
+              "surface-tint": "#751fe7",
+              "surface-bright": "#fff3ff",
+              "on-surface": "#342c38"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm dark:shadow-none flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-purple-600 dark:text-purple-400">arrow_back</span>
+</button>
+<h1 class="font-plus-jakarta-sans text-on-surface font-semibold tracking-tight text-lg">Medical Record</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-purple-600 dark:text-purple-400">share</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-4xl mx-auto space-y-8">
+<!-- Header Section: Editorial Layout -->
+<section class="space-y-2">
+<div class="inline-flex items-center px-3 py-1 bg-primary-container text-on-primary-container rounded-full text-xs font-bold tracking-wider mb-2">
+                PEDIATRIC CHECKUP
+            </div>
+<h2 class="text-4xl font-extrabold tracking-tight text-on-surface leading-tight">12-Month Wellness Examination</h2>
+<div class="flex flex-wrap gap-6 pt-2 text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="text-sm font-medium">Oct 12, 2023</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">person</span>
+<span class="text-sm font-medium">Dr. Sarah Miller</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-sm font-medium">St. Jude's Pediatric Center</span>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout for Details -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Document Preview Card (Larger) -->
+<div class="md:col-span-8 group">
+<div class="glass-card rounded-xl overflow-hidden border border-outline-variant/10 shadow-sm relative transition-all duration-300 hover:shadow-xl">
+<div class="aspect-[3/4] bg-surface-container relative overflow-hidden">
+<img alt="Medical report preview" class="w-full h-full object-cover opacity-60 mix-blend-multiply" data-alt="Clean minimalist medical document with purple accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAppgfmilOEPNhlpccXA3ZROit9ZV8Wrvhl3VvhieCTu6AbIvBj47_lXxL0W9W2rSzdCkmuk4fWvDfAgWgBeiq4cWyXTSrLDFMtf_CyqMfGxjkrIgKBd51LEYFcFJlQOWuOUzKSTQdb5R4n0p1fy6LOe11zISpRsnWkEw1WcISZL-84vwPQ0Tk5yIJJnPZ_O6qfRQgvpieJwEOGdU7aYYIKqGQcZUymUVbOf4o7DLKcS203WOBhlT_RvkAW4Xy0ltLoZOlruLdLB-8"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-gradient-to-t from-white via-transparent to-transparent">
+<div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white mb-4 shadow-lg group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">visibility</span>
+</div>
+<p class="font-bold text-on-surface">Tap to expand report</p>
+<p class="text-sm text-on-surface-variant">High-resolution PDF preview</p>
+</div>
+</div>
+<div class="p-6 bg-white flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+<span class="font-semibold">Wellness_Report_10_23.pdf</span>
+</div>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Side Action Column -->
+<div class="md:col-span-4 space-y-6">
+<!-- Vitals Card -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/5">
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary mb-4">Patient Vitals</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center pb-3 border-b border-outline-variant/10">
+<span class="text-on-surface-variant text-sm">Weight</span>
+<span class="font-bold">22.4 lbs</span>
+</div>
+<div class="flex justify-between items-center pb-3 border-b border-outline-variant/10">
+<span class="text-on-surface-variant text-sm">Height</span>
+<span class="font-bold">29.1 in</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Head Circ.</span>
+<span class="font-bold">18.2 in</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-3">
+<button class="w-full py-4 px-6 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+<span class="material-symbols-outlined">share</span>
+                        Share with Doctor
+                    </button>
+<button class="w-full py-4 px-6 rounded-full bg-surface-container-highest text-on-primary-container font-bold flex items-center justify-center gap-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined">print</span>
+                        Print Record
+                    </button>
+</div>
+</div>
+<!-- Findings Section (Full Width) -->
+<div class="md:col-span-12">
+<div class="glass-card rounded-xl p-8 border border-outline-variant/10">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">assignment</span>
+</div>
+<h3 class="text-2xl font-bold tracking-tight">Clinical Findings</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-4">
+<h4 class="font-bold text-primary text-sm uppercase tracking-widest">Observations</h4>
+<p class="text-on-surface leading-relaxed body-lg">
+                                The patient is meeting all major developmental milestones for a 12-month-old. Growth continues to follow the 75th percentile curve consistently. 
+                            </p>
+<p class="text-on-surface leading-relaxed body-lg">
+                                Lungs are clear to auscultation, and heart sounds are normal with no murmurs detected. Abdomen is soft and non-tender.
+                            </p>
+</div>
+<div class="space-y-4">
+<h4 class="font-bold text-primary text-sm uppercase tracking-widest">Immunizations</h4>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-lowest">
+<span class="material-symbols-outlined text-green-500" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-medium">MMR - Dose 1 Administered</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-lowest">
+<span class="material-symbols-outlined text-green-500" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-medium">Varicella - Dose 1 Administered</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Next Steps (High Impact Section) -->
+<div class="md:col-span-12">
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-on-primary-container to-primary p-8 text-white">
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="max-w-xl">
+<h3 class="text-2xl font-bold mb-2">Next Steps &amp; Recommendations</h3>
+<p class="text-purple-100/80 mb-4">Dr. Miller has recommended the following for the next 3 months:</p>
+<ul class="space-y-3">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed">info</span>
+<span class="text-sm">Transition from formula to whole milk (approx. 16-24 oz daily).</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed">info</span>
+<span class="text-sm">Introduce a wider variety of finger foods to encourage self-feeding.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed">event</span>
+<span class="text-sm">Schedule 15-month wellness check for January 15, 2024.</span>
+</li>
+</ul>
+</div>
+<button class="px-8 py-4 bg-white text-primary font-bold rounded-full shadow-xl hover:bg-purple-50 transition-colors">
+                            Book Next Visit
+                        </button>
+</div>
+<!-- Abstract Background Pattern -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-t border-purple-100/20 dark:border-purple-800/20 shadow-[0_-8px_32px_rgba(52,44,56,0.06)] z-50">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:bg-purple-50/50 dark:hover:bg-purple-800/30 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-plus-jakarta-sans text-[11px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:bg-purple-50/50 dark:hover:bg-purple-800/30 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-plus-jakarta-sans text-[11px] font-medium tracking-wide">Health</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-200 rounded-2xl px-5 py-2 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-plus-jakarta-sans text-[11px] font-medium tracking-wide">Records</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:bg-purple-50/50 dark:hover:bg-purple-800/30 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-plus-jakarta-sans text-[11px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

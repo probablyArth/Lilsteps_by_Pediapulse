@@ -37,7 +37,7 @@ export default function AddChildScreen() {
           <Text style={styles.iconEmoji}>{'\u{1F476}'}</Text>
         </LinearGradient>
         <Text style={[typography.bodyMD, styles.helperText]}>
-          Adding your child's health profile helps doctors give faster, safer care during consultations.
+          Adding your child&apos;s health profile helps doctors give faster, safer care during consultations.
         </Text>
       </Animated.View>
     </OnboardingShell>

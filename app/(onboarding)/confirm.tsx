@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,7 +9,9 @@ import { GradientBackground } from '@/components/gradient-background';
 import { GradientButton } from '@/components/gradient-button';
 import { AppColors } from '@/constants/theme';
 import { useOnboarding } from '@/context/onboarding';
-import { typography } from '@/styles/global';
+import { useAuth } from '@/context/auth';
+import { supabase } from '@/lib/supabase';
+import { dbg } from '@/lib/debug';
 
 function getAge(dob: Date): string {
   const now = new Date();
@@ -26,7 +28,10 @@ function getAge(dob: Date): string {
 export default function ConfirmScreen() {
   const insets = useSafeAreaInsets();
   const { childName, childSex, dob, weight, bloodGroup, allergies, conditions } = useOnboarding();
+  const { user, refreshHasChildren } = useAuth();
   const [agreed, setAgreed] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const displayName = childName || 'Your child';
   const initial = displayName.charAt(0).toUpperCase();
@@ -35,6 +40,96 @@ export default function ConfirmScreen() {
 
   const hasAllergies = allergies.length > 0;
   const hasConditions = conditions.length > 0;
+
+  async function handleConfirm() {
+    if (!agreed || !user || !dob || !childSex) {
+      dbg.db('Confirm: guard failed', { agreed, hasUser: !!user, hasDob: !!dob, childSex });
+      return;
+    }
+    setSaving(true);
+    setError(null);
+
+    try {
+      // First ensure parent row exists
+      dbg.db('Confirm: ensuring parent row', { userId: user.id });
+      const { error: parentErr } = await supabase
+        .from('parents')
+        .upsert({ id: user.id, email: user.email }, { onConflict: 'id' });
+
+      if (parentErr) {
+        dbg.dbError('Confirm: parent upsert failed', parentErr);
+        // Continue anyway — row might already exist
+      }
+
+      // Insert child
+      const childPayload = {
+        parent_id: user.id,
+        name: childName.trim(),
+        dob: dob.toISOString().split('T')[0],
+        sex: childSex,
+        blood_group: bloodGroup || null,
+        weight: weight ? parseFloat(weight) : null,
+        height: null,
+        weight_updated_at: weight ? new Date().toISOString() : null,
+      };
+      dbg.db('Confirm: inserting child', childPayload);
+
+      const { data: child, error: childErr } = await supabase
+        .from('children')
+        .insert(childPayload)
+        .select()
+        .single();
+
+      if (childErr) {
+        dbg.dbError('Confirm: child insert failed', childErr);
+        throw new Error(childErr.message);
+      }
+      dbg.db('Confirm: child created', { childId: child.id });
+
+      // Insert allergies and conditions in parallel
+      const promises: PromiseLike<unknown>[] = [];
+
+      if (allergies.length > 0) {
+        dbg.db('Confirm: inserting allergies', { count: allergies.length });
+        promises.push(
+          supabase.from('allergies').insert(
+            allergies.map(a => ({
+              child_id: child.id,
+              type: 'food' as const,
+              name: a,
+              severity: 'mild',
+            }))
+          )
+        );
+      }
+
+      if (conditions.length > 0) {
+        dbg.db('Confirm: inserting conditions', { count: conditions.length });
+        promises.push(
+          supabase.from('conditions').insert(
+            conditions.map(c => ({
+              child_id: child.id,
+              name: c,
+            }))
+          )
+        );
+      }
+
+      await Promise.all(promises);
+      dbg.db('Confirm: all related data saved');
+
+      // Refresh auth context so it knows we have children now
+      await refreshHasChildren();
+      dbg.db('Confirm: hasChildren refreshed');
+
+      router.replace('/(onboarding)/complete');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <View style={styles.screen}>
@@ -129,6 +224,11 @@ export default function ConfirmScreen() {
           )}
         </Animated.View>
 
+        {/* Error */}
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
         {/* Accuracy checkbox */}
         <Animated.View entering={FadeInUp.delay(400).duration(500)} style={styles.checkboxSection}>
           <Pressable style={styles.checkboxRow} onPress={() => setAgreed((v) => !v)}>
@@ -150,11 +250,18 @@ export default function ConfirmScreen() {
 
         {/* CTA */}
         <Animated.View entering={FadeInUp.delay(550).duration(500)}>
-          <GradientButton
-            label={`${displayName} is ready. Let's go.`}
-            onPress={() => router.replace('/(onboarding)/complete')}
-            style={[styles.cta, !agreed && styles.ctaDisabled]}
-          />
+          {saving ? (
+            <View style={styles.loadingCta}>
+              <ActivityIndicator color={AppColors.primary} />
+              <Text style={styles.loadingText}>Saving profile...</Text>
+            </View>
+          ) : (
+            <GradientButton
+              label={`${displayName} is ready. Let's go.`}
+              onPress={handleConfirm}
+              style={[styles.cta, (!agreed || saving) && styles.ctaDisabled]}
+            />
+          )}
         </Animated.View>
       </ScrollView>
     </View>
@@ -310,6 +417,12 @@ const styles = StyleSheet.create({
     color: AppColors.onSurfaceVariant,
     fontStyle: 'italic',
   },
+  errorText: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 13,
+    color: AppColors.tertiary,
+    textAlign: 'center',
+  },
   checkboxSection: {
     gap: 12,
   },
@@ -361,5 +474,18 @@ const styles = StyleSheet.create({
   },
   ctaDisabled: {
     opacity: 0.45,
+  },
+  loadingCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 4,
+    height: 56,
+  },
+  loadingText: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 14,
+    color: AppColors.primary,
   },
 });
