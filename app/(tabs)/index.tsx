@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AllergyBanner } from '@/components/home/AllergyBanner';
 import { CareTeam, type CareProvider } from '@/components/home/CareTeam';
 import { GrowthCards } from '@/components/home/GrowthCards';
-import { HealthTip } from '@/components/home/HealthTip';
+import { DailyInsight } from '@/components/home/DailyInsight';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { PrimaryCtaCard } from '@/components/home/PrimaryCtaCard';
 import { QuickActions } from '@/components/home/QuickActions';
@@ -104,8 +104,8 @@ export default function HomeScreen() {
         {/* Care team horizontal scroll */}
         <CareTeam providers={careProviders} onAddProvider={() => router.push('/consult/booking')} />
 
-        {/* Daily health tip */}
-        <HealthTip tip={bracketCfg.activity.description} />
+        {/* Daily insights horizontal scroll */}
+        <DailyInsight bracket={bracketKey} />
       </ScrollView>
     </View>
   );

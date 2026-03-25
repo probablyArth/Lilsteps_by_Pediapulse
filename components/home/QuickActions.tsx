@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: AppColors.onSurface,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,

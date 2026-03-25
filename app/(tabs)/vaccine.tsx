@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppColors } from '@/constants/theme';
@@ -176,7 +176,7 @@ function VaccineCard({
       <View style={styles.cardDone}>
         <View style={styles.cardLeft}>
           <View style={styles.iconDone}>
-            <Ionicons name="checkmark-circle" size={22} color="#16a34a" />
+            <Ionicons name="checkmark-circle" size={22} color={AppColors.successGreen} />
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.cardName}>{displayName}</Text>
@@ -235,7 +235,7 @@ function VaccineCard({
       <View style={styles.cardOverdue}>
         <View style={styles.cardLeft}>
           <View style={styles.iconOverdue}>
-            <Ionicons name="calendar-clear-outline" size={20} color="#b91c1c" />
+            <Ionicons name="calendar-clear-outline" size={20} color={AppColors.errorRed} />
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.cardName}>{displayName}</Text>
@@ -268,11 +268,11 @@ function VaccineCard({
   );
 }
 
-const CARD_BASE: object = {
+const CARD_BASE: ViewStyle = {
   backgroundColor: 'rgba(255,255,255,0.9)',
   borderRadius: 16,
   padding: 16,
-  shadowColor: '#342c38',
+  shadowColor: AppColors.onSurface,
   shadowOffset: { width: 0, height: 1 },
   shadowOpacity: 0.05,
   shadowRadius: 6,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   bracketLabel: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, color: AppColors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 },
   heroTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 26, color: AppColors.onSurface, letterSpacing: -0.5 },
   progressBadge: { borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, alignItems: 'center', flexDirection: 'row', gap: 6 },
-  progressBadgeCount: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16, color: '#fff' },
+  progressBadgeCount: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16, color: AppColors.onPrimary },
   progressBadgeLabel: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 11, color: 'rgba(255,255,255,0.85)' },
   progressTrack: { height: 12, backgroundColor: `${AppColors.surfaceContainerHigh}80`, borderRadius: 999, overflow: 'hidden' },
   progressFill: { height: 12, borderRadius: 999 },
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   bentoCard: {
     flex: 1, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16,
     padding: 16, gap: 12,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
   bentoText: { gap: 2 },
   bentoLabel: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.6 },
@@ -348,15 +348,15 @@ const styles = StyleSheet.create({
 
   // Done card
   cardDone: {
-    ...(CARD_BASE as any),
+    ...CARD_BASE,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
   iconDone: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: AppColors.successGreenSurface, alignItems: 'center', justifyContent: 'center',
   },
-  badgeDone: { backgroundColor: '#f0fdf4', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeDoneText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: '#166534', textTransform: 'uppercase', letterSpacing: 0.5 },
+  badgeDone: { backgroundColor: AppColors.successGreenSurface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  badgeDoneText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.successGreenDark, textTransform: 'uppercase', letterSpacing: 0.5 },
 
   // Due soon card
   cardDueSoon: {
@@ -378,11 +378,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   badgeDueSoon: { backgroundColor: AppColors.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeDueSoonText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: '#fff', textTransform: 'uppercase', letterSpacing: 0.5 },
+  badgeDueSoonText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.onPrimary, textTransform: 'uppercase', letterSpacing: 0.5 },
   cardActions: { flexDirection: 'row', gap: 10 },
   actionPrimary: { flex: 1, borderRadius: 999, overflow: 'hidden' },
   actionPrimaryGrad: { paddingVertical: 12, alignItems: 'center' },
-  actionPrimaryText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: '#fff' },
+  actionPrimaryText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onPrimary },
   actionSecondary: {
     flex: 1, backgroundColor: AppColors.surfaceContainerHighest, borderRadius: 999,
     paddingVertical: 12, alignItems: 'center',
@@ -391,20 +391,20 @@ const styles = StyleSheet.create({
 
   // Overdue card
   cardOverdue: {
-    ...(CARD_BASE as any),
+    ...CARD_BASE,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderLeftWidth: 3, borderLeftColor: '#ef4444',
+    borderLeftWidth: 3, borderLeftColor: AppColors.errorRed,
   },
   iconOverdue: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: AppColors.errorRedSurface, alignItems: 'center', justifyContent: 'center',
   },
-  badgeOverdue: { backgroundColor: '#fef2f2', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeOverdueText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: 0.5 },
+  badgeOverdue: { backgroundColor: AppColors.errorRedSurface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  badgeOverdueText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.errorRed, textTransform: 'uppercase', letterSpacing: 0.5 },
 
   // Upcoming card
   cardUpcoming: {
-    ...(CARD_BASE as any),
+    ...CARD_BASE,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     opacity: 0.72,
   },

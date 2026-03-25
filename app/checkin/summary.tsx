@@ -87,7 +87,7 @@ export default function CheckinSummaryScreen() {
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <View style={styles.successContainer}>
           <View style={styles.successIcon}>
-            <Ionicons name="checkmark" size={40} color="#16a34a" />
+            <Ionicons name="checkmark" size={40} color={AppColors.successGreen} />
           </View>
           <Text style={styles.successTitle}>All set!</Text>
           <Text style={styles.successSub}>
@@ -129,7 +129,7 @@ export default function CheckinSummaryScreen() {
           <View style={styles.summaryCard}>
             <View style={styles.summaryCardHeader}>
               <LinearGradient
-                colors={[AppColors.primary, '#8b3cf7']}
+                colors={[AppColors.primary, AppColors.gradientEnd]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.summaryGradBar}
@@ -160,7 +160,7 @@ export default function CheckinSummaryScreen() {
 
               {summary.allergyNote && (
                 <View style={styles.allergyRow}>
-                  <Ionicons name="warning-outline" size={13} color="#d97706" />
+                  <Ionicons name="warning-outline" size={13} color={AppColors.warningAmber} />
                   <Text style={styles.allergyText}>{summary.allergyNote}</Text>
                 </View>
               )}
@@ -259,17 +259,17 @@ export default function CheckinSummaryScreen() {
           onPress={handleConfirm}
         >
           <LinearGradient
-            colors={selectedSlot ? [AppColors.primary, '#8b3cf7'] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
+            colors={selectedSlot ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.confirmGrad}
           >
             {booking ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={AppColors.onPrimary} />
             ) : (
               <>
                 <Text style={[styles.confirmText, !selectedSlot && styles.confirmTextDisabled]}>Confirm Booking</Text>
-                <Ionicons name="arrow-forward" size={18} color={selectedSlot ? '#fff' : AppColors.onSurfaceVariant} />
+                <Ionicons name="arrow-forward" size={18} color={selectedSlot ? AppColors.onPrimary : AppColors.onSurfaceVariant} />
               </>
             )}
           </LinearGradient>
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     borderRadius: 16, overflow: 'hidden',
     backgroundColor: 'rgba(255,255,255,0.92)',
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
     borderLeftWidth: 3, borderLeftColor: AppColors.primary,
   },
   summaryCardHeader: { flexDirection: 'row' },
@@ -332,10 +332,10 @@ const styles = StyleSheet.create({
 
   allergyRow: {
     flexDirection: 'row', gap: 8, alignItems: 'flex-start',
-    marginTop: 8, backgroundColor: '#fef3c710', borderRadius: 10, padding: 10,
-    borderWidth: 1, borderColor: '#fde68a',
+    marginTop: 8, backgroundColor: `${AppColors.warningAmberSurface}10`, borderRadius: 10, padding: 10,
+    borderWidth: 1, borderColor: AppColors.warningAmberBorder,
   },
-  allergyText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: '#92400e', flex: 1, lineHeight: 17 },
+  allergyText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.warningAmber, flex: 1, lineHeight: 17 },
 
   section: { gap: 12 },
   sectionTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onSurface },
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   },
   dayChipActive: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
   dayLabel: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: AppColors.onSurface },
-  dayLabelActive: { color: '#fff' },
+  dayLabelActive: { color: AppColors.onPrimary },
   dayDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 10, color: AppColors.onSurfaceVariant },
   dayDateActive: { color: 'rgba(255,255,255,0.8)' },
 
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   slotSelected: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
   slotText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.onSurface },
   slotTextDisabled: { color: `${AppColors.onSurfaceVariant}50` },
-  slotTextSelected: { color: '#fff' },
+  slotTextSelected: { color: AppColors.onPrimary },
 
   bottomBar: {
     paddingHorizontal: 20, paddingTop: 12,
@@ -385,14 +385,14 @@ const styles = StyleSheet.create({
   confirmBtn: { borderRadius: 999, overflow: 'hidden' },
   confirmBtnDisabled: { opacity: 0.5 },
   confirmGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  confirmText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: '#fff' },
+  confirmText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onPrimary },
   confirmTextDisabled: { color: AppColors.onSurfaceVariant },
 
   // Success screen
   successContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
   successIcon: {
-    width: 80, height: 80, borderRadius: 40, backgroundColor: '#f0fdf4',
-    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#bbf7d0',
+    width: 80, height: 80, borderRadius: 40, backgroundColor: AppColors.successGreenSurface,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: AppColors.successGreenBright,
   },
   successTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 28, color: AppColors.onSurface },
   successSub: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurfaceVariant, textAlign: 'center', lineHeight: 20 },
@@ -404,5 +404,5 @@ const styles = StyleSheet.create({
   successRowLabel: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant, flex: 1 },
   successRowValue: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurface, textAlign: 'right', flex: 2 },
   doneBtn: { width: '100%', backgroundColor: AppColors.primary, borderRadius: 999, paddingVertical: 16, alignItems: 'center' },
-  doneBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: '#fff' },
+  doneBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onPrimary },
 });

@@ -28,7 +28,8 @@ const RIGHT_TABS_5PLUS = [
   { name: 'records', label: 'Records', icon: 'folder-outline', iconActive: 'folder' },
 ] as const;
 
-const AI_BTN_SIZE = 52;
+const AI_BTN_SIZE = 56;
+const AI_BTN_GAP = AI_BTN_SIZE + 16; // space reserved in tab row
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
@@ -52,45 +53,44 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     const idx = getRouteIndex(tab.name);
     const focused = idx !== -1 && state.index === idx;
 
-    if (focused) {
-      return (
-        <Pressable key={tab.name} style={styles.tabItem} onPress={() => pressTab(tab.name)}>
-          <LinearGradient
-            colors={[AppColors.primary, '#8b3cf7']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.activeBox}
-          >
-            <Ionicons name={tab.iconActive as any} size={18} color="#fff" />
-            <Text style={styles.activeLabel}>{tab.label}</Text>
-          </LinearGradient>
-        </Pressable>
-      );
-    }
-
     return (
-      <Pressable key={tab.name} style={styles.tabItem} onPress={() => pressTab(tab.name)}>
-        <Ionicons name={tab.icon as any} size={22} color={AppColors.onSurfaceVariant} />
-        <Text style={styles.inactiveLabel}>{tab.label}</Text>
+      <Pressable
+        key={tab.name}
+        style={styles.tabItem}
+        onPress={() => pressTab(tab.name)}
+      >
+        <View style={[styles.tabInner, focused && styles.tabInnerActive]}>
+          <Ionicons
+            name={(focused ? tab.iconActive : tab.icon) as any}
+            size={20}
+            color={focused ? AppColors.primary : AppColors.onSurfaceVariant}
+          />
+          <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+            {tab.label}
+          </Text>
+        </View>
       </Pressable>
     );
   }
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 8) }]} pointerEvents="box-none">
-      {/* Elevated AI button */}
+    <View
+      style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 12) }]}
+      pointerEvents="box-none"
+    >
+      {/* Elevated circular AI button */}
       <View style={styles.aiBtnWrapper} pointerEvents="box-none">
         <Pressable
           onPress={() => router.push('/checkin')}
-          style={({ pressed }) => [styles.aiBtnPressable, { opacity: pressed ? 0.88 : 1 }]}
+          style={({ pressed }) => [styles.aiBtnPressable, { opacity: pressed ? 0.85 : 1 }]}
         >
           <LinearGradient
-            colors={[AppColors.primary, '#5c17b8']}
+            colors={[AppColors.primary, AppColors.gradientEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.aiBtn}
           >
-            <Ionicons name="sparkles" size={22} color="#fff" />
+            <Ionicons name="sparkles" size={24} color={AppColors.onPrimary} />
           </LinearGradient>
         </Pressable>
       </View>
@@ -98,7 +98,8 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       {/* Tab bar */}
       <View style={styles.tabBar}>
         {LEFT_TABS.map((t) => renderTab(t))}
-        <View style={{ width: AI_BTN_SIZE + 24 }} />
+        {/* Spacer for the floating AI button */}
+        <View style={{ width: AI_BTN_GAP }} />
         {rightTabs.map((t) => renderTab(t))}
       </View>
     </View>
@@ -121,10 +122,11 @@ const styles = StyleSheet.create({
   wrapper: {
     position: 'relative',
     backgroundColor: 'transparent',
+    paddingHorizontal: 16,
   },
   aiBtnWrapper: {
     position: 'absolute',
-    top: -(AI_BTN_SIZE / 2 + 10),
+    top: -(AI_BTN_SIZE / 2 + 8),
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -132,60 +134,57 @@ const styles = StyleSheet.create({
   },
   aiBtnPressable: {
     shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 14,
-    elevation: 16,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 18,
   },
   aiBtn: {
     width: AI_BTN_SIZE,
     height: AI_BTN_SIZE,
-    borderRadius: 16,
+    borderRadius: AI_BTN_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: AppColors.surface,
   },
   tabBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.96)',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    height: 64,
-    paddingHorizontal: 6,
-    shadowColor: '#342c38',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.07,
-    shadowRadius: 12,
-    elevation: 10,
+    backgroundColor: 'rgba(255,255,255,0.98)',
+    borderRadius: 28,
+    height: 68,
+    paddingHorizontal: 4,
+    shadowColor: AppColors.onSurface,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 12,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
     paddingVertical: 6,
   },
-  activeBox: {
-    flexDirection: 'row',
+  tabInner: {
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'center',
+    gap: 4,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    paddingVertical: 7,
+    borderRadius: 16,
   },
-  activeLabel: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 11,
-    color: '#fff',
+  tabInnerActive: {
+    backgroundColor: `${AppColors.primary}14`,
   },
-  inactiveLabel: {
+  tabLabel: {
     fontFamily: 'PlusJakartaSans_500Medium',
     fontSize: 10,
     color: AppColors.onSurfaceVariant,
+  },
+  tabLabelActive: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    color: AppColors.primary,
   },
 });

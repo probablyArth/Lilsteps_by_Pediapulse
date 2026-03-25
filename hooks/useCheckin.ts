@@ -9,10 +9,14 @@ export interface CheckinMessage {
   id: string;
   role: 'ai' | 'user';
   content: string;
+  /** Pre-filled response options parsed from AI message (AI questions with [QUICK_OPTIONS: ...]) */
+  quickOptions?: string[];
 }
 
 // Marker the AI uses to signal it has enough info
 const CHECKIN_COMPLETE_MARKER = '[CHECKIN_COMPLETE]';
+// Marker for quick reply options
+const QUICK_OPTIONS_REGEX = /\[QUICK_OPTIONS:\s*([^\]]+)\]/;
 
 let msgIdCounter = 0;
 function nextMsgId(role: 'ai' | 'user'): string {
@@ -53,10 +57,19 @@ export function useCheckin(child: ChildWithDetails | null) {
     };
   }
 
-  function parseAiResponse(response: string): { clean: string; ready: boolean } {
+  function parseAiResponse(response: string): { clean: string; ready: boolean; quickOptions: string[] } {
     const ready = response.includes(CHECKIN_COMPLETE_MARKER);
-    const clean = response.replace(CHECKIN_COMPLETE_MARKER, '').trim();
-    return { clean: clean || 'I have everything I need. Ready to generate a summary.', ready };
+    // Extract quick options before stripping markers
+    const optionsMatch = response.match(QUICK_OPTIONS_REGEX);
+    const quickOptions = optionsMatch
+      ? optionsMatch[1].split(',').map((o) => o.trim()).filter(Boolean)
+      : [];
+    // Strip both markers from the displayed text
+    const clean = response
+      .replace(CHECKIN_COMPLETE_MARKER, '')
+      .replace(QUICK_OPTIONS_REGEX, '')
+      .trim();
+    return { clean: clean || 'I have everything I need. Ready to generate a summary.', ready, quickOptions };
   }
 
   async function startCheckin(initialComplaint: string) {
@@ -89,7 +102,7 @@ export function useCheckin(child: ChildWithDetails | null) {
       ];
 
       const aiResponse = await chatCompletion(groqMessages);
-      const { clean, ready } = parseAiResponse(aiResponse);
+      const { clean, ready, quickOptions } = parseAiResponse(aiResponse);
 
       // Save messages to DB
       await supabase.from('checkin_messages').insert([
@@ -99,7 +112,7 @@ export function useCheckin(child: ChildWithDetails | null) {
 
       const newMessages: CheckinMessage[] = [
         { id: nextMsgId('user'), role: 'user', content: initialComplaint },
-        { id: nextMsgId('ai'), role: 'ai', content: clean },
+        { id: nextMsgId('ai'), role: 'ai', content: clean, quickOptions },
       ];
 
       setMessages(newMessages);
@@ -150,7 +163,7 @@ export function useCheckin(child: ChildWithDetails | null) {
       ];
 
       const aiResponse = await chatCompletion(groqMessages);
-      const { clean, ready } = parseAiResponse(aiResponse);
+      const { clean, ready, quickOptions } = parseAiResponse(aiResponse);
 
       // Save AI message to DB
       await supabase.from('checkin_messages').insert({
@@ -163,6 +176,7 @@ export function useCheckin(child: ChildWithDetails | null) {
         id: nextMsgId('ai'),
         role: 'ai',
         content: clean,
+        quickOptions,
       };
 
       setMessages([...updatedMessages, aiMsg]);

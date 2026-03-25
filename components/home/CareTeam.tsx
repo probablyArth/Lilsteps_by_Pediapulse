@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     padding: 14,
     alignItems: 'center',
     gap: 8,
-    shadowColor: '#342c38',
+    shadowColor: AppColors.onSurface,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,

@@ -1,315 +1,337 @@
+/**
+ * Book Consultation — Doctor Listing Screen
+ * Reference: screens/book-consultation/
+ *
+ * Flow: booking → describe → slots → confirm → payment
+ */
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppColors } from '@/constants/theme';
-import { useChild } from '@/context/child';
-import { useDoctors, useTimeSlots } from '@/hooks/useDoctors';
-import { useAppointments } from '@/hooks/useAppointments';
 
-type Step = 1 | 2 | 3 | 4 | 'success';
+// ─── Static doctor data ────────────────────────────────────────────────────────
+const DOCTORS = [
+  {
+    id: 'dr-madhav',
+    name: 'Dr. Madhav Sharma',
+    role: 'Senior Pediatrician',
+    specialty: 'General Pediatrics · Child Wellness',
+    experience: '14 years exp.',
+    rating: 4.9,
+    tags: ['Newborn Care', 'Fever & Infections'],
+    color: AppColors.primary,
+  },
+  {
+    id: 'dr-shilpa',
+    name: 'Dr. Shilpa Rao',
+    role: 'Nutritionist',
+    specialty: 'Pediatric Nutrition & Allergy',
+    experience: '9 years exp.',
+    rating: 4.8,
+    tags: ['Food Allergy', 'Weight Management'],
+    color: AppColors.secondary,
+  },
+  {
+    id: 'dr-amit',
+    name: 'Dr. Amit Verma',
+    role: 'Growth Specialist',
+    specialty: 'Child Growth & Development',
+    experience: '11 years exp.',
+    rating: 4.7,
+    tags: ['Growth Delays', 'Developmental Milestones'],
+    color: AppColors.accentBlue,
+  },
+  {
+    id: 'dr-harsh',
+    name: 'Dr. Harsh Vardhan',
+    role: 'Sleep Consultant',
+    specialty: 'Sleep Hygiene & Behavioral Health',
+    experience: '16 years exp.',
+    rating: 5.0,
+    tags: ['Sleep Training', 'Night Terrors'],
+    color: AppColors.tertiary,
+  },
+];
 
-function getNextDays(n: number) {
-  const days = [];
-  const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  for (let i = 0; i < n; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    days.push({
-      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : labels[d.getDay()],
-      sub: `${d.getDate()} ${months[d.getMonth()]}`,
-      isoDate: d.toISOString().split('T')[0],
-    });
-  }
-  return days;
-}
+// ─── Specialty categories ──────────────────────────────────────────────────────
+const SPECIALTIES = [
+  { label: 'General', icon: 'medkit-outline', color: AppColors.primary },
+  { label: 'Nutrition', icon: 'nutrition-outline', color: AppColors.secondary },
+  { label: 'Growth', icon: 'trending-up-outline', color: AppColors.accentBlue },
+  { label: 'Sleep', icon: 'moon-outline', color: AppColors.tertiary },
+] as const;
 
+// ─── Screen ────────────────────────────────────────────────────────────────────
 export default function BookingScreen() {
   const insets = useSafeAreaInsets();
-  const { child } = useChild();
-  const { doctors, loading: loadingDocs } = useDoctors();
-  const { bookAppointment } = useAppointments(child?.id ?? null);
+  const [search, setSearch] = useState('');
+  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
 
-  const [step, setStep] = useState<Step>(1);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState(0);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [booking, setBooking] = useState(false);
-  const days = getNextDays(7);
+  const filtered = DOCTORS.filter((d) => {
+    const q = search.toLowerCase();
+    const matchesSearch =
+      !q ||
+      d.name.toLowerCase().includes(q) ||
+      d.specialty.toLowerCase().includes(q) ||
+      d.tags.some((t) => t.toLowerCase().includes(q));
+    const matchesSpecialty =
+      !activeSpecialty || d.role.toLowerCase().includes(activeSpecialty.toLowerCase()) ||
+      d.specialty.toLowerCase().includes(activeSpecialty.toLowerCase());
+    return matchesSearch && matchesSpecialty;
+  });
 
-  // Auto-select first doctor
-  useEffect(() => {
-    if (doctors.length > 0 && !selectedDoctorId) {
-      setSelectedDoctorId(doctors[0].id);
-    }
-  }, [doctors, selectedDoctorId]);
-
-  const selectedDoctor = doctors.find(d => d.id === selectedDoctorId) ?? doctors[0];
-
-  // Fetch time slots for selected doctor + date
-  const { slots, loading: loadingSlots } = useTimeSlots(
-    selectedDoctorId,
-    days[selectedDay].isoDate
-  );
-
-  // Reset slot when doctor or day changes
-  useEffect(() => {
-    setSelectedSlot(null);
-  }, [selectedDoctorId, selectedDay]);
-
-  function canNext() {
-    if (step === 1) return selectedDoctorId !== null;
-    if (step === 2) return true;
-    if (step === 3) return selectedSlot !== null;
-    return false;
-  }
-
-  async function next() {
-    if (step === 1) setStep(2);
-    else if (step === 2) setStep(3);
-    else if (step === 3) setStep(4);
-    else if (step === 4) {
-      if (!child || !selectedDoctor || !selectedSlot) return;
-      setBooking(true);
-      try {
-        await bookAppointment({
-          child_id: child.id,
-          doctor_id: selectedDoctor.id,
-          date: days[selectedDay].isoDate,
-          time: selectedSlot,
-        });
-        setStep('success');
-      } catch {
-        // booking error
-      } finally {
-        setBooking(false);
-      }
-    }
-  }
-
-  const childName = child?.name ?? 'Child';
-
-  if (step === 'success') {
-    return (
-      <View style={[styles.screen, { paddingTop: insets.top }]}>
-        <View style={styles.successContainer}>
-          <View style={styles.successIcon}>
-            <Ionicons name="checkmark" size={40} color="#16a34a" />
-          </View>
-          <Text style={styles.successTitle}>Appointment Confirmed!</Text>
-          <View style={styles.successCard}>
-            <Row icon="person-outline" label="Doctor" value={selectedDoctor?.name ?? ''} />
-            <Row icon="business-outline" label="Hospital" value={selectedDoctor?.hospital ?? ''} />
-            <Row icon="calendar-outline" label="Date" value={days[selectedDay].label === 'Today' || days[selectedDay].label === 'Tomorrow' ? days[selectedDay].label : `${days[selectedDay].label}, ${days[selectedDay].sub}`} />
-            <Row icon="time-outline" label="Time" value={selectedSlot ?? ''} />
-          </View>
-          <Pressable style={styles.calBtn}>
-            <Ionicons name="calendar-outline" size={16} color={AppColors.primary} />
-            <Text style={styles.calBtnText}>Add to Calendar</Text>
-          </Pressable>
-          <Pressable style={({ pressed }) => [styles.doneBtn, { opacity: pressed ? 0.85 : 1 }]} onPress={() => router.replace('/(tabs)')}>
-            <Text style={styles.doneBtnText}>Done</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
+  function bookDoctor(doctorId: string) {
+    router.push(`/consult/describe?doctorId=${doctorId}`);
   }
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => (step === 1 ? router.back() : setStep((step - 1) as Step))}>
-          <Ionicons name="arrow-back" size={22} color={AppColors.onSurface} />
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color={AppColors.onSurface} />
         </Pressable>
-        <Text style={styles.headerTitle}>Book Appointment</Text>
-        <View style={{ width: 22 }} />
+        <Text style={styles.headerTitle}>Consultations</Text>
+        <View style={{ width: 36 }} />
       </View>
 
-      {/* Step indicator */}
-      <View style={styles.stepRow}>
-        {[1, 2, 3, 4].map((s) => (
-          <View key={s} style={[styles.stepDot, (step as number) >= s && styles.stepDotActive]} />
-        ))}
-      </View>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: 32 + insets.bottom }]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Search */}
+        <View style={styles.searchBar}>
+          <Ionicons name="search-outline" size={18} color={AppColors.onSurfaceVariant} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search pediatricians..."
+            placeholderTextColor={AppColors.onSurfaceVariant}
+            value={search}
+            onChangeText={setSearch}
+            returnKeyType="search"
+          />
+          {search.length > 0 && (
+            <Pressable onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={16} color={AppColors.onSurfaceVariant} />
+            </Pressable>
+          )}
+        </View>
 
-      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: 100 + insets.bottom }]} showsVerticalScrollIndicator={false}>
+        {/* Specialty categories */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Specialty Categories</Text>
+          <Pressable onPress={() => setActiveSpecialty(null)}>
+            <Text style={styles.sectionLink}>
+              {activeSpecialty ? 'Clear' : 'View all'}
+            </Text>
+          </Pressable>
+        </View>
+        <View style={styles.specialtyGrid}>
+          {SPECIALTIES.map((s) => {
+            const isActive = activeSpecialty === s.label;
+            return (
+              <Pressable
+                key={s.label}
+                style={[styles.specialtyCard, isActive && { borderColor: s.color, borderWidth: 1.5 }]}
+                onPress={() => setActiveSpecialty(isActive ? null : s.label)}
+              >
+                <View style={[styles.specialtyIconWrap, { backgroundColor: `${s.color}18` }]}>
+                  <Ionicons name={s.icon as any} size={22} color={s.color} />
+                </View>
+                <Text style={[styles.specialtyLabel, isActive && { color: s.color }]}>{s.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
 
-        {/* Step 1 — Doctor */}
-        {step === 1 && (
-          <View style={styles.stepSection}>
-            <Text style={styles.stepTitle}>Choose a doctor</Text>
-            {loadingDocs ? (
-              <ActivityIndicator size="small" color={AppColors.primary} />
-            ) : (
-              doctors.filter((d) => d.is_available).map((doc) => (
-                <Pressable key={doc.id} style={[styles.doctorRow, selectedDoctorId === doc.id && styles.doctorRowSelected]}
-                  onPress={() => setSelectedDoctorId(doc.id)}>
-                  <View style={styles.docAvatar}><Text style={styles.docAvatarText}>{doc.name.charAt(0)}</Text></View>
-                  <View style={styles.docInfo}>
-                    <Text style={styles.docName}>{doc.name}</Text>
-                    <Text style={styles.docSpec}>{doc.specialisation}</Text>
-                    <Text style={styles.docHosp}>{doc.hospital}</Text>
-                  </View>
-                  {selectedDoctorId === doc.id && <Ionicons name="checkmark-circle" size={22} color={AppColors.primary} />}
-                </Pressable>
-              ))
-            )}
-          </View>
-        )}
-
-        {/* Step 2 — Date */}
-        {step === 2 && (
-          <View style={styles.stepSection}>
-            <Text style={styles.stepTitle}>Pick a date</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateRow}>
-              {days.map((d, i) => (
-                <Pressable key={i} style={[styles.dayChip, selectedDay === i && styles.dayChipActive]} onPress={() => setSelectedDay(i)}>
-                  <Text style={[styles.dayLabel, selectedDay === i && styles.dayLabelActive]}>{d.label}</Text>
-                  <Text style={[styles.dayDate, selectedDay === i && styles.dayDateActive]}>{d.sub}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* Step 3 — Time */}
-        {step === 3 && (
-          <View style={styles.stepSection}>
-            <Text style={styles.stepTitle}>Choose a time</Text>
-            {loadingSlots ? (
-              <ActivityIndicator size="small" color={AppColors.primary} />
-            ) : slots.length === 0 ? (
-              <Text style={styles.noSlotsText}>No available slots for this date. Try another date.</Text>
-            ) : (
-              <View style={styles.slotsGrid}>
-                {slots.map((slot) => (
-                  <Pressable
-                    key={slot.id}
-                    disabled={!slot.is_available}
-                    style={[styles.slotChip, !slot.is_available && styles.slotDisabled, selectedSlot === slot.time && styles.slotSelected]}
-                    onPress={() => setSelectedSlot(slot.time)}
-                  >
-                    <Text style={[styles.slotText, !slot.is_available && styles.slotTextDisabled, selectedSlot === slot.time && styles.slotTextSelected]}>
-                      {slot.time}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* Step 4 — Confirm */}
-        {step === 4 && (
-          <View style={styles.stepSection}>
-            <Text style={styles.stepTitle}>Confirm booking</Text>
-            <View style={styles.confirmCard}>
-              <Text style={styles.confirmFor}>Booking for {childName}</Text>
-              <Row icon="person-outline" label="Doctor" value={selectedDoctor?.name ?? ''} />
-              <Row icon="medical-outline" label="Specialisation" value={selectedDoctor?.specialisation ?? ''} />
-              <Row icon="business-outline" label="Hospital" value={selectedDoctor?.hospital ?? ''} />
-              <Row icon="calendar-outline" label="Date" value={`${days[selectedDay].label}, ${days[selectedDay].sub}`} />
-              <Row icon="time-outline" label="Time" value={selectedSlot ?? ''} />
+        {/* Doctor list */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Available Pediatricians</Text>
+          <Text style={styles.docCount}>{filtered.length} doctors</Text>
+        </View>
+        <View style={styles.doctorList}>
+          {filtered.map((doc) => (
+            <DoctorCard key={doc.id} doc={doc} onBook={() => bookDoctor(doc.id)} />
+          ))}
+          {filtered.length === 0 && (
+            <View style={styles.emptyState}>
+              <Ionicons name="search-outline" size={36} color={AppColors.outlineVariant} />
+              <Text style={styles.emptyText}>No doctors found for "{search}"</Text>
             </View>
-          </View>
-        )}
+          )}
+        </View>
       </ScrollView>
+    </View>
+  );
+}
 
-      {/* Bottom CTA */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        <Pressable style={({ pressed }) => [styles.nextBtn, !canNext() && styles.nextBtnDisabled, { opacity: pressed ? 0.88 : 1 }]}
-          disabled={!canNext() || booking} onPress={next}>
-          <LinearGradient colors={[AppColors.primary, '#8b3cf7']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextBtnGrad}>
-            {booking ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.nextBtnText}>{step === 4 ? 'Confirm Booking' : 'Continue'}</Text>
-                <Ionicons name="arrow-forward" size={18} color="#fff" />
-              </>
-            )}
-          </LinearGradient>
-        </Pressable>
+// ─── Doctor card ───────────────────────────────────────────────────────────────
+function DoctorCard({
+  doc,
+  onBook,
+}: {
+  doc: typeof DOCTORS[0];
+  onBook: () => void;
+}) {
+  return (
+    <View style={styles.doctorCard}>
+      {/* Avatar + rating */}
+      <View style={styles.docAvatarWrap}>
+        <LinearGradient
+          colors={[`${doc.color}30`, `${doc.color}15`]}
+          style={styles.docAvatar}
+        >
+          <Text style={[styles.docAvatarInitial, { color: doc.color }]}>
+            {doc.name.split(' ')[1]?.charAt(0) ?? doc.name.charAt(0)}
+          </Text>
+        </LinearGradient>
+        {/* Rating badge */}
+        <View style={styles.ratingBadge}>
+          <Ionicons name="star" size={10} color={AppColors.starGold} />
+          <Text style={styles.ratingText}>{doc.rating}</Text>
+        </View>
+      </View>
+
+      {/* Info */}
+      <View style={styles.docInfo}>
+        <Text style={[styles.docRole, { color: doc.color }]}>{doc.role.toUpperCase()}</Text>
+        <Text style={styles.docName}>{doc.name}</Text>
+        <Text style={styles.docSpec}>{doc.specialty} · {doc.experience}</Text>
+
+        {/* Tags */}
+        <View style={styles.tagRow}>
+          {doc.tags.map((t) => (
+            <View key={t} style={styles.tag}>
+              <Text style={styles.tagText}>{t}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Actions */}
+        <View style={styles.docActions}>
+          <Pressable
+            style={({ pressed }) => [styles.bookBtn, { opacity: pressed ? 0.85 : 1 }]}
+            onPress={onBook}
+          >
+            <LinearGradient
+              colors={[AppColors.primary, AppColors.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.bookBtnGrad}
+            >
+              <Text style={styles.bookBtnText}>Book Now</Text>
+            </LinearGradient>
+          </Pressable>
+          <Pressable style={styles.chatBtn}>
+            <Ionicons name="chatbubble-outline" size={15} color={AppColors.onSurface} />
+            <Text style={styles.chatBtnText}>Chat</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
 }
-
-function Row({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <View style={rowStyles.row}>
-      <Ionicons name={icon as any} size={16} color={AppColors.onSurfaceVariant} />
-      <Text style={rowStyles.label}>{label}</Text>
-      <Text style={rowStyles.value}>{value}</Text>
-    </View>
-  );
-}
-const rowStyles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: `${AppColors.outlineVariant}20` },
-  label: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant, flex: 1 },
-  value: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurface, textAlign: 'right', flex: 2 },
-});
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.surface },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 14 },
-  headerTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 17, color: AppColors.onSurface },
-  stepRow: { flexDirection: 'row', gap: 6, paddingHorizontal: 24, paddingBottom: 8 },
-  stepDot: { flex: 1, height: 3, borderRadius: 999, backgroundColor: `${AppColors.outlineVariant}40` },
-  stepDotActive: { backgroundColor: AppColors.primary },
-  scroll: { paddingHorizontal: 20, paddingTop: 8, gap: 16 },
-  stepSection: { gap: 16 },
-  stepTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22, color: AppColors.onSurface, letterSpacing: -0.5 },
-  noSlotsText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: AppColors.onSurfaceVariant, textAlign: 'center', paddingVertical: 20 },
 
-  doctorRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 16, padding: 16, borderWidth: 1.5, borderColor: 'transparent',
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingVertical: 14,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderBottomWidth: 1, borderBottomColor: `${AppColors.outlineVariant}20`,
   },
-  doctorRowSelected: { borderColor: AppColors.primary, backgroundColor: `${AppColors.primary}06` },
-  docAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: `${AppColors.primaryContainer}50`, alignItems: 'center', justifyContent: 'center' },
-  docAvatarText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.primary },
-  docInfo: { flex: 1, gap: 2 },
-  docName: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.onSurface },
-  docSpec: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 12, color: AppColors.primary },
-  docHosp: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: AppColors.onSurfaceVariant },
+  backBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: `${AppColors.surfaceContainerHigh}80`,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  headerTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 18, color: AppColors.onSurface, letterSpacing: -0.3 },
 
-  dateRow: { gap: 10 },
-  dayChip: { alignItems: 'center', gap: 4, paddingHorizontal: 18, paddingVertical: 14, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.9)', borderWidth: 1.5, borderColor: 'transparent', minWidth: 80 },
-  dayChipActive: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
-  dayLabel: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurface },
-  dayLabelActive: { color: '#fff' },
-  dayDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: AppColors.onSurfaceVariant },
-  dayDateActive: { color: 'rgba(255,255,255,0.8)' },
+  scroll: { paddingHorizontal: 20, paddingTop: 20, gap: 20 },
 
-  slotsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  slotChip: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.9)', borderWidth: 1.5, borderColor: `${AppColors.outlineVariant}30` },
-  slotDisabled: { backgroundColor: `${AppColors.surfaceContainerHigh}80`, borderColor: 'transparent' },
-  slotSelected: { backgroundColor: AppColors.primary, borderColor: AppColors.primary },
-  slotText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: AppColors.onSurface },
-  slotTextDisabled: { color: `${AppColors.onSurfaceVariant}50` },
-  slotTextSelected: { color: '#fff' },
+  // Search
+  searchBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: AppColors.surfaceContainerLow, borderRadius: 14,
+    paddingHorizontal: 16, paddingVertical: 14,
+  },
+  searchInput: {
+    flex: 1, fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14,
+    color: AppColors.onSurface,
+  },
 
-  confirmCard: { backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16, padding: 18, gap: 2, shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-  confirmFor: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.primary, marginBottom: 8 },
+  // Section header
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sectionTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 18, color: AppColors.onSurface, letterSpacing: -0.3 },
+  sectionLink: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: AppColors.primary },
+  docCount: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant },
 
-  bottomBar: { paddingHorizontal: 20, paddingTop: 12, backgroundColor: 'rgba(255,255,255,0.9)', borderTopWidth: 1, borderTopColor: `${AppColors.outlineVariant}20` },
-  nextBtn: { borderRadius: 999, overflow: 'hidden' },
-  nextBtnDisabled: { opacity: 0.5 },
-  nextBtnGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  nextBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: '#fff' },
+  // Specialty grid
+  specialtyGrid: { flexDirection: 'row', gap: 12 },
+  specialtyCard: {
+    flex: 1, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16,
+    padding: 14, alignItems: 'center', gap: 8,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    borderWidth: 1.5, borderColor: 'transparent',
+  },
+  specialtyIconWrap: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  specialtyLabel: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: AppColors.onSurface },
 
-  successContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 20 },
-  successIcon: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#bbf7d0' },
-  successTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 24, color: AppColors.onSurface, textAlign: 'center' },
-  successCard: { width: '100%', backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16, padding: 18, gap: 2 },
-  calBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999, borderWidth: 1.5, borderColor: `${AppColors.primary}40` },
-  calBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.primary },
-  doneBtn: { width: '100%', backgroundColor: AppColors.primary, borderRadius: 999, paddingVertical: 16, alignItems: 'center' },
-  doneBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: '#fff' },
+  // Doctor list
+  doctorList: { gap: 16 },
+  emptyState: { alignItems: 'center', paddingVertical: 40, gap: 12 },
+  emptyText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 14, color: AppColors.onSurfaceVariant, textAlign: 'center' },
+
+  // Doctor card
+  doctorCard: {
+    backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 20, padding: 18,
+    flexDirection: 'row', gap: 16, alignItems: 'flex-start',
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 16, elevation: 3,
+  },
+  docAvatarWrap: { alignItems: 'center', position: 'relative' },
+  docAvatar: {
+    width: 72, height: 72, borderRadius: 16,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  docAvatarInitial: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 28 },
+  ratingBadge: {
+    position: 'absolute', bottom: -8, right: -8,
+    backgroundColor: AppColors.surfaceContainerLowest, borderRadius: 999, paddingHorizontal: 6, paddingVertical: 3,
+    flexDirection: 'row', alignItems: 'center', gap: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2,
+  },
+  ratingText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.onSurface },
+
+  docInfo: { flex: 1, gap: 4 },
+  docRole: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, letterSpacing: 0.8 },
+  docName: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 15, color: AppColors.onSurface, letterSpacing: -0.2 },
+  docSpec: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant, lineHeight: 18 },
+
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
+  tag: { backgroundColor: AppColors.surfaceContainer, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  tagText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 10, color: AppColors.onSurfaceVariant },
+
+  docActions: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  bookBtn: { borderRadius: 999, overflow: 'hidden', flex: 1 },
+  bookBtnGrad: { paddingVertical: 12, alignItems: 'center' },
+  bookBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onPrimary },
+  chatBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingVertical: 12,
+    backgroundColor: AppColors.surfaceContainerHigh, borderRadius: 999,
+  },
+  chatBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurface },
 });

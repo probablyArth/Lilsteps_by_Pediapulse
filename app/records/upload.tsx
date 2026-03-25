@@ -139,7 +139,7 @@ export default function UploadDocumentScreen() {
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <View style={styles.successContainer}>
           <View style={styles.successIcon}>
-            <Ionicons name="checkmark" size={36} color="#16a34a" />
+            <Ionicons name="checkmark" size={36} color={AppColors.successGreen} />
           </View>
           <Text style={styles.successTitle}>Document Saved</Text>
           <Text style={styles.successSub}>Added to health records.</Text>
@@ -283,12 +283,12 @@ export default function UploadDocumentScreen() {
           onPress={handleSave}
         >
           <LinearGradient
-            colors={canSave ? [AppColors.primary, '#8b3cf7'] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
+            colors={canSave ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.saveGrad}
           >
-            <Ionicons name="cloud-upload-outline" size={18} color={canSave ? '#fff' : AppColors.onSurfaceVariant} />
+            <Ionicons name="cloud-upload-outline" size={18} color={canSave ? AppColors.onPrimary : AppColors.onSurfaceVariant} />
             <Text style={[styles.saveText, !canSave && styles.saveTextDisabled]}>
               {saving ? 'Saving...' : 'Upload Document'}
             </Text>
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 16,
     borderWidth: 1.5, borderColor: `${AppColors.outlineVariant}30`,
     padding: 14,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
   inputSingle: {
     fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, color: AppColors.onSurface, lineHeight: 22,
@@ -365,13 +365,13 @@ const styles = StyleSheet.create({
   saveBtn: { borderRadius: 999, overflow: 'hidden' },
   saveBtnDisabled: { opacity: 0.5 },
   saveGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  saveText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: '#fff' },
+  saveText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onPrimary },
   saveTextDisabled: { color: AppColors.onSurfaceVariant },
 
   successContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   successIcon: {
-    width: 72, height: 72, borderRadius: 36, backgroundColor: '#f0fdf4',
-    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#bbf7d0',
+    width: 72, height: 72, borderRadius: 36, backgroundColor: AppColors.successGreenSurface,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: AppColors.successGreenBright,
   },
   successTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22, color: AppColors.onSurface },
   successSub: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurfaceVariant },

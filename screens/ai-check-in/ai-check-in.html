@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PediaPulse AI Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface": "#342c38",
+              "on-secondary-container": "#7c0091",
+              "on-primary-fixed-variant": "#3b0081",
+              "error-dim": "#a70138",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-tertiary-fixed-variant": "#770033",
+              "surface-variant": "#e8d7ed",
+              "primary-fixed-dim": "#a978ff",
+              "secondary-fixed-dim": "#f9a7ff",
+              "on-primary-container": "#30006a",
+              "on-tertiary": "#ffeff0",
+              "error": "#b41340",
+              "on-error-container": "#510017",
+              "on-error": "#ffefef",
+              "outline": "#7e7381",
+              "secondary": "#9720ab",
+              "tertiary": "#b60051",
+              "background": "#fff3ff",
+              "on-background": "#342c38",
+              "surface-tint": "#751fe7",
+              "surface-container-low": "#fbecfe",
+              "inverse-surface": "#120c16",
+              "inverse-on-surface": "#a599a8",
+              "on-tertiary-container": "#66002b",
+              "on-primary-fixed": "#000000",
+              "surface-container-highest": "#e8d7ed",
+              "secondary-dim": "#89089e",
+              "secondary-fixed": "#fcbcff",
+              "on-tertiary-fixed": "#380014",
+              "tertiary-dim": "#a00047",
+              "tertiary-container": "#ff8fa9",
+              "surface": "#fff3ff",
+              "primary-dim": "#6800d8",
+              "surface-container-high": "#eeddf1",
+              "primary": "#751fe7",
+              "surface-container-lowest": "#ffffff",
+              "inverse-primary": "#a775ff",
+              "primary-container": "#b58bff",
+              "primary-fixed": "#b58bff",
+              "on-secondary": "#ffeefb",
+              "surface-container": "#f3e3f6",
+              "on-surface-variant": "#625865",
+              "secondary-container": "#fcbcff",
+              "outline-variant": "#b5a9b8",
+              "tertiary-fixed": "#ff8fa9",
+              "on-secondary-fixed": "#5d006d",
+              "surface-dim": "#e0cfe5",
+              "surface-bright": "#fff3ff",
+              "tertiary-fixed-dim": "#ff769b",
+              "error-container": "#f74b6d",
+              "on-primary": "#f9efff"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .active-nav-glow {
+            box-shadow: 0 8px 20px -4px rgba(117, 31, 231, 0.4);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm shadow-purple-900/5 px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Close up of a smiling toddler profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWaMAWIchGOQeQqHprRON2IMNG6VWoSo_qGdXDv67zICHOSmYQWkJfDWrks8MZ60r1_t9I0yb5Y5NsP9nIcFfggARLPIdCrb5btBFyO9Xh5qFxWZihyYkt04ELCFDvyBC0HqXPraKHK5IlStiS-QIUzopWv29UnT7sYDgXNSwD53svmxf-kfxFUW-2YVH7RDBNQNGs2fyCQ5lVL7s0dETnPiYJUgt5cVZuC2tT_wjwEmesGwItf7ph0988Yx5_2cwpyQuuT-Kpaco"/>
+</div>
+<h1 class="font-headline text-on-surface font-bold tracking-tight text-xl">LittleSteps AI</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-50/50 transition-colors">
+<span class="material-symbols-outlined text-purple-600">more_vert</span>
+</button>
+</header>
+<main class="pt-24 px-4 max-w-2xl mx-auto space-y-8">
+<!-- Chat Content: Header Info -->
+<div class="text-center space-y-2 mb-8">
+<span class="inline-flex items-center px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label text-xs uppercase tracking-widest">Consultation Session</span>
+<h2 class="text-2xl font-headline font-extrabold text-on-surface tracking-tight">PediaPulse AI</h2>
+<p class="text-on-surface-variant text-sm">Reviewing health symptoms for <span class="text-primary font-bold">Arav</span></p>
+</div>
+<!-- Chat History -->
+<div class="space-y-6">
+<!-- AI Message -->
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary-container flex-shrink-0 flex items-center justify-center text-white shadow-md">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+<div class="glass-card p-5 rounded-t-xl rounded-br-xl shadow-sm border border-white/50 text-on-surface text-base leading-relaxed">
+                    Hello! I'm here to help. Could you tell me more about how Arav has been feeling today?
+                </div>
+</div>
+<!-- User Message -->
+<div class="flex items-end justify-end gap-3 ml-auto max-w-[85%]">
+<div class="bg-primary text-on-primary p-5 rounded-t-xl rounded-bl-xl shadow-lg text-base leading-relaxed">
+                    He has a mild fever of 101°F and a persistent dry cough that started this morning.
+                </div>
+<div class="w-8 h-8 rounded-full bg-surface-container flex-shrink-0 flex items-center justify-center border border-white">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">person</span>
+</div>
+</div>
+<!-- AI Detailed Summary Card -->
+<div class="flex items-end gap-3">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary-container flex-shrink-0 flex items-center justify-center text-white shadow-md">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+<div class="glass-card p-6 rounded-t-xl rounded-br-xl shadow-xl border-2 border-primary-container/30 space-y-4">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="text-sm tracking-wide">AI ASSESSMENT SUMMARY</span>
+</div>
+<p class="text-on-surface font-medium italic">
+                        "I've noted the fever and cough. Let me prepare a report for Dr. Sarah."
+                    </p>
+<div class="bg-surface-container-low rounded-lg p-3 space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="text-on-surface-variant">Symptom Log:</span>
+<span class="text-primary-dim font-bold">In Progress</span>
+</div>
+<div class="h-1.5 w-full bg-white rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/4 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recommendation Component -->
+<div class="bg-surface-container-low/50 rounded-xl p-6 border border-primary-container/20">
+<h3 class="font-headline font-bold text-on-surface mb-4">Recommended Actions</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">thermometer</span>
+<div>
+<p class="text-sm font-bold text-on-surface">Monitor Temp</p>
+<p class="text-xs text-on-surface-variant">Check every 4 hours</p>
+</div>
+</div>
+<div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">water_drop</span>
+<div>
+<p class="text-sm font-bold text-on-surface">Hydration</p>
+<p class="text-xs text-on-surface-variant">Encourage clear fluids</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Call to Action Section -->
+<div class="flex flex-col items-center gap-4 py-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-5 rounded-full font-bold shadow-lg shadow-purple-500/30 hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                Generate Report
+            </button>
+<p class="text-xs text-on-surface-variant font-medium text-center">
+                This report will be sent to Dr. Sarah's dashboard instantly.
+            </p>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-end pb-6 px-4 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl no-border shadow-[0_-8px_32px_rgba(138,63,252,0.08)]">
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-2 hover:text-purple-500 transition-all cursor-pointer">
+<span class="material-symbols-outlined">home</span>
+<span class="font-plus-jakarta text-[11px] font-semibold">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-br from-purple-600 to-purple-400 text-white rounded-2xl p-3 scale-110 -translate-y-2 shadow-lg shadow-purple-500/30">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="font-plus-jakarta text-[11px] font-semibold">Triage</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-2 hover:text-purple-500 transition-all cursor-pointer">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-plus-jakarta text-[11px] font-semibold">Consults</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-2 hover:text-purple-500 transition-all cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-plus-jakarta text-[11px] font-semibold">Health</span>
+</div>
+</nav>
+<!-- Float Input Field Overlay (Simulated) -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl px-4 z-40">
+<div class="bg-surface-container-lowest shadow-2xl rounded-full p-2 flex items-center border border-primary-container/20">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant font-medium px-4" placeholder="Type a message..." type="text"/>
+<button class="bg-primary text-white w-10 h-10 flex items-center justify-center rounded-full shadow-md">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</body></html>

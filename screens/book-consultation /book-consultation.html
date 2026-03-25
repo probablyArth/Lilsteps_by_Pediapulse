@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Consultations - LittleSteps</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-surface": "#120c16",
+              "on-background": "#342c38",
+              "secondary-fixed-dim": "#f9a7ff",
+              "primary-fixed": "#b58bff",
+              "surface": "#fff3ff",
+              "on-primary-fixed-variant": "#3b0081",
+              "surface-container": "#f3e3f6",
+              "on-tertiary-container": "#66002b",
+              "on-error": "#ffefef",
+              "background": "#fff3ff",
+              "inverse-primary": "#a775ff",
+              "surface-container-highest": "#e8d7ed",
+              "tertiary": "#b60051",
+              "on-surface-variant": "#625865",
+              "secondary-dim": "#89089e",
+              "on-secondary-fixed": "#5d006d",
+              "error-container": "#f74b6d",
+              "on-tertiary-fixed-variant": "#770033",
+              "secondary": "#9720ab",
+              "tertiary-fixed-dim": "#ff769b",
+              "surface-container-low": "#fbecfe",
+              "secondary-container": "#fcbcff",
+              "inverse-on-surface": "#a599a8",
+              "surface-container-high": "#eeddf1",
+              "primary-container": "#b58bff",
+              "primary": "#751fe7",
+              "on-secondary-container": "#7c0091",
+              "on-primary-fixed": "#000000",
+              "primary-dim": "#6800d8",
+              "on-surface": "#342c38",
+              "on-primary": "#f9efff",
+              "error": "#b41340",
+              "on-tertiary": "#ffeff0",
+              "on-primary-container": "#30006a",
+              "secondary-fixed": "#fcbcff",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-container": "#ff8fa9",
+              "surface-bright": "#fff3ff",
+              "tertiary-dim": "#a00047",
+              "on-secondary": "#ffeefb",
+              "outline-variant": "#b5a9b8",
+              "primary-fixed-dim": "#a978ff",
+              "outline": "#7e7381",
+              "surface-variant": "#e8d7ed",
+              "surface-tint": "#751fe7",
+              "on-tertiary-fixed": "#380014",
+              "on-error-container": "#510017",
+              "surface-dim": "#e0cfe5",
+              "tertiary-fixed": "#ff8fa9",
+              "error-dim": "#a70138",
+              "on-secondary-fixed-variant": "#8a0b9f"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm dark:shadow-none font-['Plus_Jakarta_Sans'] tracking-tight">
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-purple-600 dark:text-purple-400">menu</span>
+</button>
+<h1 class="text-xl font-bold text-purple-700 dark:text-purple-300">Consultations</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="Parent profile" class="w-full h-full object-cover" data-alt="Close up portrait of a smiling woman profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQb_12ABxbiDXbVWD5TvOIqFzCT-BmXVbWMN9r_iaJvUhFyWEbLnVIeecnOvNpYTjApRnLaLNtnfktM8ZMKS4beBJDKZ8DXF4m7P8PuiXw756br7RQlQ7LCYvk1x1as3s6SA_86WfnfRxebfoGSbp1yHv1AOoXdWs3av7t2tTY8LUuHURvyAy4dCaCvscK-Hu3vV8cVeUUyHes2LsnNtu50DBY3lhN_HHMKiVtsGUxTYi4TMow27KfTEYAfJDnXtPttIWKYbgz9FM"/>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-6 pt-8 pb-32">
+<!-- Search Section -->
+<section class="mb-10">
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full bg-surface-container-low border-none rounded-lg py-5 pl-14 pr-6 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/30 transition-all duration-300" placeholder="Search for pediatricians..." type="text"/>
+</div>
+</section>
+<!-- Specialty Bento Grid -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">Specialty Categories</h2>
+<button class="text-primary font-semibold text-sm">View all</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center gap-3 transition-transform hover:-translate-y-1 cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">stethoscope</span>
+</div>
+<span class="font-bold text-on-surface">General</span>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center gap-3 transition-transform hover:-translate-y-1 cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl">nutrition</span>
+</div>
+<span class="font-bold text-on-surface">Nutrition</span>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center gap-3 transition-transform hover:-translate-y-1 cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-3xl">child_care</span>
+</div>
+<span class="font-bold text-on-surface">Growth</span>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center gap-3 transition-transform hover:-translate-y-1 cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-dim text-3xl">bedtime</span>
+</div>
+<span class="font-bold text-on-surface">Sleep</span>
+</div>
+</div>
+</section>
+<!-- Doctor Profiles -->
+<section class="space-y-8">
+<div class="flex items-center justify-between">
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">Available Pediatricians</h2>
+<div class="flex gap-2">
+<button class="p-2 rounded-full bg-surface-container-high text-on-surface-variant">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</div>
+<!-- Doctor Card 1 -->
+<div class="glass-card p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col md:flex-row gap-6 items-center md:items-start group transition-all duration-300 hover:shadow-[0_20px_50px_rgba(138,63,252,0.1)]">
+<div class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
+<img alt="Dr. Sarah Miller" class="w-full h-full object-cover rounded-lg shadow-md" data-alt="Portrait of a friendly male doctor in clinical setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsKWN_uPP3D46KjzAyCucZERPxLK8EB-A-rOn_xZW6WwTKa5PpOeXuk4WnzgDSEdU8sq8HQjOWZy3NEb1hzaQzj58gQ-_zeooA2-aJWmrP2FWCW5ISAbhvDKInYtH06NWhFDQKIp_0Ihb4FX9aqJs3DnodM6ZlOG-92DqvLuZ1GF71NLo_1TUjd4djo2uUFQVG7nDO8OBf5QDUBodOGZQ6_BfODBg0MwK2v959M8PdKCYvzcXTz4HwlKkDDcT5u2cGeDK7c6dCq-s"/>
+<div class="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold">4.9</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="mb-2">
+<span class="text-primary font-bold text-sm tracking-widest uppercase">Senior Pediatrician</span>
+<h3 class="text-xl font-bold text-on-background mt-1">Dr. Sarah Miller</h3>
+<p class="text-on-surface-variant text-sm">Growth &amp; Development Specialist • 12 years exp.</p>
+</div>
+<div class="flex flex-wrap gap-2 justify-center md:justify-start my-4">
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Lactose Intolerance</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Newborn Care</span>
+</div>
+<div class="flex gap-3 justify-center md:justify-start pt-2">
+<button class="px-6 py-3 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all">Book Now</button>
+<button class="px-6 py-3 rounded-full bg-surface-container-highest text-on-primary-container font-bold hover:bg-surface-container-high active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">chat</span> Chat
+                        </button>
+</div>
+</div>
+</div>
+<!-- Doctor Card 2 -->
+<div class="glass-card p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col md:flex-row gap-6 items-center md:items-start group transition-all duration-300 hover:shadow-[0_20px_50px_rgba(138,63,252,0.1)]">
+<div class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
+<img alt="Dr. James Wilson" class="w-full h-full object-cover rounded-lg shadow-md" data-alt="Portrait of a smiling female doctor with a stethoscope" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8KVWvLPlhJVPMwdi6A_bbljaRMgCGuBZJe_RSq3miAu1Ft2Z6X7aN_GecoIRFHSyTfZ3Ip6r56owChSQaMARyJxix1HWNRvDVXZVEtv2n_A_ToT77dZaCyM6wDDht4biXu4Vj6GSyITeu46Oj_MVQu5bO9tLnCcLvcEY5lCE0KU31_U01BJfwEIAj7NvGcRr6bMjLE88BCNhOAeLKAugqEozSTral-ZNQuMMPrb3nvzqbP7fBdl126UWmdfBLEMa3yg8DTqz3cdg"/>
+<div class="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold">4.8</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="mb-2">
+<span class="text-secondary font-bold text-sm tracking-widest uppercase">Nutritionist</span>
+<h3 class="text-xl font-bold text-on-background mt-1">Dr. Elena Rodriguez</h3>
+<p class="text-on-surface-variant text-sm">Pediatric Nutrition &amp; Allergy • 8 years exp.</p>
+</div>
+<div class="flex flex-wrap gap-2 justify-center md:justify-start my-4">
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Food Allergy</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Weight Management</span>
+</div>
+<div class="flex gap-3 justify-center md:justify-start pt-2">
+<button class="px-6 py-3 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all">Book Now</button>
+<button class="px-6 py-3 rounded-full bg-surface-container-highest text-on-primary-container font-bold hover:bg-surface-container-high active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">chat</span> Chat
+                        </button>
+</div>
+</div>
+</div>
+<!-- Doctor Card 3 -->
+<div class="glass-card p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col md:flex-row gap-6 items-center md:items-start group transition-all duration-300 hover:shadow-[0_20px_50px_rgba(138,63,252,0.1)]">
+<div class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
+<img alt="Dr. Michael Chen" class="w-full h-full object-cover rounded-lg shadow-md" data-alt="Male doctor smiling in medical scrubs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMcgaCRo-1xWe8g2arpiIPdnQEuIokHZkZDFfQpbWI1FPsYEJx_MzRHiXoBMPjYNk5Dep3qnfOhKkZRikupEh7TjuPdViNLcvQ3mtcnU52Vukc4F7bq7ANXGkJbGPb8PqkWQ0S7SsJsVIZAjI_S0myOzfORHL_3x7fQtGKqHDTAOjtu1y4slhh5vkwJtPy7FXuPPoeZURfN5Bt_1_9A_bs9KD6r0TcdknzrsaT_LmlAsCG6CpIznjQOimre8jSByqFNU386_bVCpk"/>
+<div class="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold">5.0</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="mb-2">
+<span class="text-tertiary font-bold text-sm tracking-widest uppercase">Sleep Consultant</span>
+<h3 class="text-xl font-bold text-on-background mt-1">Dr. Marcus Thorne</h3>
+<p class="text-on-surface-variant text-sm">Sleep Hygiene &amp; Behavioral Health • 15 years exp.</p>
+</div>
+<div class="flex flex-wrap gap-2 justify-center md:justify-start my-4">
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Sleep Training</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium">Night Terrors</span>
+</div>
+<div class="flex gap-3 justify-center md:justify-start pt-2">
+<button class="px-6 py-3 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all">Book Now</button>
+<button class="px-6 py-3 rounded-full bg-surface-container-highest text-on-primary-container font-bold hover:bg-surface-container-high active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">chat</span> Chat
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl shadow-[0_-10px_40px_rgba(138,63,252,0.1)] rounded-t-[3rem]">
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[12px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-200 rounded-full px-5 py-2 active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[12px] font-medium">Book</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined mb-1">favorite</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[12px] font-medium">Care</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[12px] font-medium">Profile</span>
+</button>
+</nav>
+</body></html>

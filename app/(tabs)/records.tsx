@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -14,83 +13,57 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AllergyBanner } from '@/components/home/AllergyBanner';
-import { BRACKET_CONFIG } from '@/constants/bracketConfig';
 import { AppColors } from '@/constants/theme';
-import { typography } from '@/styles/global';
 import { useChild } from '@/context/child';
 import { useDocuments, type DocumentRow } from '@/hooks/useDocuments';
 
 const CATEGORIES = [
-  {
-    key: 'prescriptions',
-    label: 'Prescriptions',
-    icon: 'document-text-outline',
-    bg: `${AppColors.primary}15`,
-    color: AppColors.primary,
-  },
-  {
-    key: 'reports',
-    label: 'Reports',
-    icon: 'analytics-outline',
-    bg: `${AppColors.secondary}15`,
-    color: AppColors.secondary,
-  },
-  {
-    key: 'history',
-    label: 'Visit History',
-    icon: 'time-outline',
-    bg: `${AppColors.tertiary}15`,
-    color: AppColors.tertiary,
-  },
-  {
-    key: 'lab',
-    label: 'Lab Tests',
-    icon: 'flask-outline',
-    bg: `${AppColors.primaryContainer}40`,
-    color: AppColors.onPrimaryContainer,
-  },
+  { key: 'prescriptions', label: 'Prescriptions',  icon: 'document-text-outline', color: AppColors.primary,          bg: `${AppColors.primary}12`          },
+  { key: 'reports',       label: 'Reports',         icon: 'analytics-outline',     color: AppColors.secondary,        bg: `${AppColors.secondary}12`        },
+  { key: 'history',       label: 'Visit History',   icon: 'time-outline',          color: AppColors.tertiary,         bg: `${AppColors.tertiary}12`         },
+  { key: 'lab',           label: 'Lab Tests',       icon: 'flask-outline',         color: AppColors.onPrimaryContainer, bg: `${AppColors.primaryContainer}30` },
 ] as const;
 
 const CATEGORY_FILTER_MAP: Record<string, DocumentRow['category'] | null> = {
   prescriptions: 'prescription',
-  reports: 'report',
-  history: 'visit_history',
-  lab: 'lab_test',
+  reports:       'report',
+  history:       'visit_history',
+  lab:           'lab_test',
 };
 
-const DOC_TYPE_ICON: Record<string, string> = {
-  pdf: 'document-text',
-  image: 'image',
+const CATEGORY_PILL_LABEL: Record<DocumentRow['category'], string> = {
+  prescription:  'Prescription',
+  report:        'Report',
+  lab_test:      'Lab Test',
+  visit_history: 'Visit',
+  other:         'Document',
 };
 
-const DOC_TYPE_COLOR: Record<string, string> = {
-  pdf: AppColors.primary,
-  image: AppColors.secondary,
+const CATEGORY_PILL_COLOR: Record<DocumentRow['category'], string> = {
+  prescription:  AppColors.primary,
+  report:        AppColors.secondary,
+  lab_test:      AppColors.tertiary,
+  visit_history: AppColors.accentBlue,
+  other:         AppColors.onSurfaceVariant,
 };
 
 export default function RecordsScreen() {
   const insets = useSafeAreaInsets();
-  const [search, setSearch] = useState('');
+  const [search, setSearch]           = useState('');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
-  const { child, bracket, age } = useChild();
+  const { child } = useChild();
   const { documents, loading: loadingDocs } = useDocuments(child?.id ?? null);
   const childName = child?.name ?? 'Child';
-  const bracketKey = bracket ?? 'TODDLER';
-  const bracketCfg = BRACKET_CONFIG[bracketKey];
-
-  const allergies = child?.allergies.map(a => a.name) ?? [];
-  const conditions = child?.conditions.map(c => c.name) ?? [];
 
   const filteredDocs = useMemo(() => {
     let docs = documents;
     if (activeFilter && CATEGORY_FILTER_MAP[activeFilter]) {
-      docs = docs.filter((d) => d.category === CATEGORY_FILTER_MAP[activeFilter]);
+      docs = docs.filter(d => d.category === CATEGORY_FILTER_MAP[activeFilter]);
     }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      docs = docs.filter((d) =>
+      docs = docs.filter(d =>
         d.title.toLowerCase().includes(q) ||
         (d.doctor_name?.toLowerCase().includes(q) ?? false)
       );
@@ -102,7 +75,10 @@ export default function RecordsScreen() {
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* ── Header ── */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Health Records</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.headerTitle}>Health Records</Text>
+          <Text style={styles.headerSub}>{childName}&apos;s medical history</Text>
+        </View>
         <Pressable style={styles.headerAvatar} onPress={() => router.push('/profile')}>
           <Text style={styles.headerAvatarText}>{childName.charAt(0)}</Text>
         </Pressable>
@@ -113,172 +89,81 @@ export default function RecordsScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ── Child profile card ── */}
-        <LinearGradient
-          colors={[AppColors.primary, '#8b3cf7']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.profileCard}
-        >
-          <View style={styles.profileBlobTR} />
-          <View style={styles.profileBlobBL} />
-
-          <View style={styles.profileTop}>
-            <View style={styles.profileAvatar}>
-              <Text style={styles.profileAvatarText}>{childName.charAt(0)}</Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{childName}</Text>
-              <Text style={styles.profileAge}>{age}</Text>
-              <Text style={styles.profileBracket}>{bracketCfg.greetingSubtext(childName)}</Text>
-            </View>
-          </View>
-
-          <View style={styles.profileStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{child?.weight ?? '—'} kg</Text>
-              <Text style={styles.statLabel}>Weight</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{child?.height ?? '—'} cm</Text>
-              <Text style={styles.statLabel}>Height</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>—</Text>
-              <Text style={styles.statLabel}>Blood Group</Text>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* ── Allergy banner ── */}
-        {allergies.length > 0 && (
-          <AllergyBanner allergies={allergies} />
-        )}
-
-        {/* ── Conditions ── */}
-        {conditions.length > 0 && (
-          <View style={styles.conditionsCard}>
-            <View style={styles.conditionsHeader}>
-              <Ionicons name="medical-outline" size={16} color={AppColors.secondary} />
-              <Text style={styles.conditionsTitle}>Chronic Conditions</Text>
-            </View>
-            <View style={styles.conditionTags}>
-              {conditions.map((c) => (
-                <View key={c} style={styles.conditionTag}>
-                  <Text style={styles.conditionTagText}>{c}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
         {/* ── Search ── */}
         <View style={styles.searchBox}>
           <Ionicons name="search-outline" size={18} color={AppColors.outline} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search for documents..."
-            placeholderTextColor={AppColors.onSurfaceVariant}
+            placeholder="Search records, doctors…"
+            placeholderTextColor={`${AppColors.onSurfaceVariant}60`}
             value={search}
             onChangeText={setSearch}
           />
+          {search.length > 0 && (
+            <Pressable onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={18} color={AppColors.onSurfaceVariant} />
+            </Pressable>
+          )}
         </View>
 
-        {/* ── Categories ── */}
+        {/* ── Category grid ── */}
         <View style={styles.section}>
-          <Text style={[typography.headingMD, styles.sectionTitle]}>Categories</Text>
-          <View style={styles.categoriesGrid}>
-            {CATEGORIES.map((cat) => {
-              const isActive = activeFilter === cat.key;
+          <Text style={styles.sectionTitle}>Categories</Text>
+          <View style={styles.catGrid}>
+            {CATEGORIES.map(cat => {
+              const active = activeFilter === cat.key;
               return (
                 <Pressable
                   key={cat.key}
                   style={({ pressed }) => [
-                    styles.categoryCard,
-                    isActive && styles.categoryCardActive,
-                    { opacity: pressed ? 0.75 : 1 },
+                    styles.catCard,
+                    active && styles.catCardActive,
+                    { opacity: pressed ? 0.78 : 1 },
                   ]}
-                  onPress={() => setActiveFilter(isActive ? null : cat.key)}
+                  onPress={() => setActiveFilter(active ? null : cat.key)}
                 >
-                  <View style={[styles.categoryIcon, { backgroundColor: cat.bg }]}>
+                  <View style={[styles.catIconWrap, { backgroundColor: active ? `${cat.color}22` : cat.bg }]}>
                     <Ionicons name={cat.icon as any} size={22} color={cat.color} />
                   </View>
-                  <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
+                  <Text style={[styles.catLabel, active && { color: cat.color, fontFamily: 'PlusJakartaSans_700Bold' }]}>
                     {cat.label}
                   </Text>
+                  {active && (
+                    <View style={[styles.catActiveDot, { backgroundColor: cat.color }]} />
+                  )}
                 </Pressable>
               );
             })}
           </View>
         </View>
 
-        {/* ── Recent Records ── */}
+        {/* ── Records list ── */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[typography.headingMD, styles.sectionTitle]}>
-              {activeFilter ? CATEGORIES.find(c => c.key === activeFilter)?.label ?? 'Records' : 'Recent Records'}
+          <View style={styles.sectionRow}>
+            <Text style={styles.sectionTitle}>
+              {activeFilter ? CATEGORIES.find(c => c.key === activeFilter)?.label ?? 'Records' : 'All Records'}
             </Text>
             {activeFilter && (
               <Pressable onPress={() => setActiveFilter(null)}>
-                <Text style={styles.seeAll}>Clear Filter</Text>
+                <Text style={styles.clearBtn}>Clear filter</Text>
               </Pressable>
             )}
           </View>
+
           {loadingDocs ? (
-            <ActivityIndicator size="small" color={AppColors.primary} />
-          ) : filteredDocs.length === 0 ? (
-            <View style={styles.emptyCard}>
-              <Ionicons name="document-outline" size={32} color={AppColors.outlineVariant} />
-              <Text style={styles.emptyTitle}>No records yet</Text>
-              <Text style={styles.emptyBody}>
-                {activeFilter ? 'No documents in this category.' : 'Upload documents using the + button below.'}
-              </Text>
-              <Pressable style={styles.emptyBtn} onPress={() => router.push('/records/upload')}>
-                <Text style={styles.emptyBtnText}>Upload Document</Text>
-              </Pressable>
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color={AppColors.primary} />
+              <Text style={styles.loadingText}>Loading records…</Text>
             </View>
+          ) : filteredDocs.length === 0 ? (
+            <EmptyState hasFilter={!!activeFilter || search.length > 0} />
           ) : (
-            filteredDocs.map((doc) => (
-              <View key={doc.id} style={styles.recordCard}>
-                <View style={styles.recordTop}>
-                  <View style={styles.recordIcon}>
-                    <Ionicons
-                      name={(DOC_TYPE_ICON[doc.file_type] ?? 'document') as any}
-                      size={28}
-                      color={DOC_TYPE_COLOR[doc.file_type] ?? AppColors.primary}
-                    />
-                  </View>
-                  <View style={styles.recordInfo}>
-                    <Text style={styles.recordTitle}>{doc.title}</Text>
-                    <Text style={styles.recordDate}>
-                      {new Date(doc.document_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </Text>
-                    {doc.doctor_name && (
-                      <Text style={styles.recordDoctor}>{doc.doctor_name}</Text>
-                    )}
-                  </View>
-                  <View style={styles.recordBadge}>
-                    <Text style={[styles.recordBadgeText, { color: DOC_TYPE_COLOR[doc.file_type] ?? AppColors.primary }]}>
-                      {doc.file_type.toUpperCase()}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.recordActions}>
-                  <Pressable style={styles.recordActionBtn}>
-                    <Ionicons name="eye-outline" size={14} color={AppColors.primary} />
-                    <Text style={styles.recordActionText}>View</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.recordShareBtn}
-                    onPress={() => Share.share({ message: `${doc.title} - ${doc.file_url}` })}
-                  >
-                    <Ionicons name="share-outline" size={14} color={AppColors.onSurfaceVariant} />
-                    <Text style={styles.recordShareText}>Share</Text>
-                  </Pressable>
-                </View>
-              </View>
+            filteredDocs.map(doc => (
+              <RecordCard
+                key={doc.id}
+                doc={doc}
+                onPress={() => router.push(`/records/${doc.id}` as any)}
+              />
             ))
           )}
         </View>
@@ -286,14 +171,14 @@ export default function RecordsScreen() {
 
       {/* ── FAB ── */}
       <Pressable
-        style={[styles.fab, { bottom: 90 + insets.bottom }]}
+        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
         onPress={() => router.push('/records/upload')}
       >
         <LinearGradient
-          colors={[AppColors.primary, AppColors.primaryContainer]}
+          colors={[AppColors.primary, AppColors.gradientEnd]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.fabGradient}
+          style={styles.fabGrad}
         >
           <Ionicons name="add" size={28} color={AppColors.onPrimary} />
         </LinearGradient>
@@ -302,323 +187,291 @@ export default function RecordsScreen() {
   );
 }
 
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function RecordCard({ doc, onPress }: { doc: DocumentRow; onPress: () => void }) {
+  const pillColor = CATEGORY_PILL_COLOR[doc.category] ?? AppColors.primary;
+  const pillLabel = CATEGORY_PILL_LABEL[doc.category] ?? 'Document';
+  const formattedDate = new Date(doc.document_date).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
+  const isPdf = doc.file_type === 'pdf';
+
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.recordCard, { opacity: pressed ? 0.88 : 1 }]}
+      onPress={onPress}
+    >
+      {/* Icon + info */}
+      <View style={styles.recordTop}>
+        <View style={[styles.recordIconWrap, { backgroundColor: `${pillColor}12` }]}>
+          <Ionicons
+            name={isPdf ? 'document-text' : 'image'}
+            size={26}
+            color={pillColor}
+          />
+        </View>
+
+        <View style={styles.recordInfo}>
+          <View style={styles.recordTitleRow}>
+            <Text style={styles.recordTitle} numberOfLines={1}>{doc.title}</Text>
+            <View style={[styles.typeBadge, { backgroundColor: `${pillColor}12` }]}>
+              <Text style={[styles.typeBadgeText, { color: pillColor }]}>
+                {doc.file_type.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.recordMeta}>
+            <Ionicons name="calendar-outline" size={12} color={AppColors.onSurfaceVariant} />
+            <Text style={styles.recordMetaText}>{formattedDate}</Text>
+            {doc.doctor_name && (
+              <>
+                <View style={styles.metaDot} />
+                <Ionicons name="person-outline" size={12} color={AppColors.onSurfaceVariant} />
+                <Text style={styles.recordMetaText} numberOfLines={1}>{doc.doctor_name}</Text>
+              </>
+            )}
+          </View>
+        </View>
+      </View>
+
+      {/* Category pill + actions */}
+      <View style={styles.recordBottom}>
+        <View style={[styles.catPill, { backgroundColor: `${pillColor}10` }]}>
+          <Text style={[styles.catPillText, { color: pillColor }]}>{pillLabel}</Text>
+        </View>
+        <View style={styles.recordActions}>
+          <Pressable style={styles.actionBtn} onPress={onPress}>
+            <Ionicons name="eye-outline" size={14} color={AppColors.primary} />
+            <Text style={styles.actionBtnText}>View</Text>
+          </Pressable>
+          <View style={styles.actionDivider} />
+          <Pressable style={styles.actionBtn} onPress={onPress}>
+            <Ionicons name="arrow-forward" size={14} color={AppColors.onSurfaceVariant} />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Notes snippet */}
+      {doc.notes && (
+        <Text style={styles.recordNotes} numberOfLines={2}>{doc.notes}</Text>
+      )}
+    </Pressable>
+  );
+}
+
+function EmptyState({ hasFilter }: { hasFilter: boolean }) {
+  return (
+    <View style={styles.emptyCard}>
+      <View style={styles.emptyIconWrap}>
+        <Ionicons name="folder-open-outline" size={36} color={AppColors.primary} />
+      </View>
+      <Text style={styles.emptyTitle}>
+        {hasFilter ? 'No matching records' : 'No records yet'}
+      </Text>
+      <Text style={styles.emptyBody}>
+        {hasFilter
+          ? 'Try clearing the filter or search term.'
+          : 'Upload prescriptions, reports, and lab tests to keep everything in one place.'}
+      </Text>
+      {!hasFilter && (
+        <Pressable
+          style={styles.emptyBtn}
+          onPress={() => router.push('/records/upload')}
+        >
+          <LinearGradient
+            colors={[AppColors.primary, AppColors.gradientEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.emptyBtnGrad}
+          >
+            <Ionicons name="cloud-upload-outline" size={16} color={AppColors.onPrimary} />
+            <Text style={styles.emptyBtnText}>Upload First Record</Text>
+          </LinearGradient>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: AppColors.surface,
-  },
+  screen: { flex: 1, backgroundColor: AppColors.surface },
 
   // Header
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 24, paddingTop: 12, paddingBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderBottomWidth: 1, borderBottomColor: `${AppColors.outlineVariant}15`,
   },
+  headerLeft: { gap: 2 },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 18,
-    color: AppColors.primary,
-    letterSpacing: -0.3,
+    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22,
+    color: AppColors.onSurface, letterSpacing: -0.5,
+  },
+  headerSub: {
+    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13,
+    color: AppColors.onSurfaceVariant,
   },
   headerAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38, height: 38, borderRadius: 19,
     backgroundColor: `${AppColors.primaryContainer}55`,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: `${AppColors.primaryContainer}80`,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: `${AppColors.primaryContainer}80`,
   },
   headerAvatarText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 14,
-    color: AppColors.primary,
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.primary,
   },
 
   // Scroll
-  scroll: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    gap: 20,
-  },
-
-  // Profile card
-  profileCard: {
-    borderRadius: 20,
-    padding: 20,
-    overflow: 'hidden',
-    gap: 20,
-    shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  profileBlobTR: {
-    position: 'absolute',
-    top: -30,
-    right: -30,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  profileBlobBL: {
-    position: 'absolute',
-    bottom: -20,
-    left: 40,
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(0,0,0,0.06)',
-  },
-  profileTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  profileAvatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  profileAvatarText: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 26,
-    color: '#fff',
-  },
-  profileInfo: {
-    flex: 1,
-    gap: 3,
-  },
-  profileName: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 22,
-    color: '#fff',
-    letterSpacing: -0.5,
-  },
-  profileAge: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  profileBracket: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.65)',
-    lineHeight: 16,
-  },
-  profileStats: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 8,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 2,
-  },
-  statValue: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 17,
-    color: '#fff',
-    letterSpacing: -0.3,
-  },
-  statLabel: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.65)',
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    marginVertical: 4,
-  },
-
-  // Conditions
-  conditionsCard: {
-    backgroundColor: `${AppColors.secondary}0f`,
-    borderRadius: 14,
-    padding: 14,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: `${AppColors.secondary}25`,
-  },
-  conditionsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  conditionsTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 13,
-    color: AppColors.secondary,
-  },
-  conditionTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  conditionTag: {
-    backgroundColor: `${AppColors.secondary}18`,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  conditionTagText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 12,
-    color: AppColors.secondary,
-  },
+  scroll: { paddingHorizontal: 20, paddingTop: 20, gap: 24 },
 
   // Search
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: AppColors.surfaceContainerLow,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16, paddingHorizontal: 16, paddingVertical: 13,
+    borderWidth: 1, borderColor: `${AppColors.outlineVariant}20`,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
   searchInput: {
-    flex: 1,
-    fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 14,
-    color: AppColors.onSurface,
+    flex: 1, fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 14, color: AppColors.onSurface,
   },
 
-  // Sections
-  section: {
-    gap: 14,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+  // Section
+  section: { gap: 14 },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: {
-    marginBottom: 0,
+    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 17,
+    color: AppColors.onSurface, letterSpacing: -0.3,
   },
-  seeAll: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 13,
-    color: AppColors.primary,
+  clearBtn: {
+    fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: AppColors.primary,
   },
 
-  // Categories
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  categoryCard: {
+  // Category grid
+  catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  catCard: {
     width: '47%',
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderRadius: 16,
-    padding: 18,
-    gap: 14,
-    shadowColor: '#342c38',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16, padding: 16, gap: 12,
+    borderWidth: 1, borderColor: `${AppColors.outlineVariant}15`,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
   },
-  categoryIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+  catCardActive: {
+    borderColor: AppColors.primary,
+    backgroundColor: `${AppColors.primary}06`,
   },
-  categoryLabel: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 14,
+  catIconWrap: {
+    width: 46, height: 46, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  catLabel: {
+    fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13,
     color: AppColors.onSurfaceVariant,
   },
-  categoryCardActive: {
-    borderWidth: 2,
-    borderColor: AppColors.primary,
-    backgroundColor: `${AppColors.primary}08`,
+  catActiveDot: {
+    position: 'absolute', top: 12, right: 12,
+    width: 8, height: 8, borderRadius: 4,
   },
-  categoryLabelActive: {
-    color: AppColors.primary,
-    fontFamily: 'PlusJakartaSans_700Bold',
+
+  // Loading
+  loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'center', paddingVertical: 20 },
+  loadingText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 14, color: AppColors.onSurfaceVariant },
+
+  // Record card
+  recordCard: {
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 20, padding: 18, gap: 14,
+    borderWidth: 1, borderColor: `${AppColors.outlineVariant}15`,
+    shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07, shadowRadius: 12, elevation: 3,
+  },
+  recordTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+  recordIconWrap: {
+    width: 50, height: 50, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  recordInfo: { flex: 1, gap: 6 },
+  recordTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  recordTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15,
+    color: AppColors.onSurface, flex: 1,
+  },
+  typeBadge: {
+    borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3,
+  },
+  typeBadgeText: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 9, letterSpacing: 0.8,
+  },
+  recordMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
+  recordMetaText: {
+    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant,
+  },
+  metaDot: {
+    width: 3, height: 3, borderRadius: 2,
+    backgroundColor: AppColors.outlineVariant,
+  },
+
+  recordBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  catPill: {
+    borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4,
+  },
+  catPillText: {
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, letterSpacing: 0.3,
+  },
+  recordActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 4, paddingHorizontal: 6 },
+  actionBtnText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.primary },
+  actionDivider: { width: 1, height: 14, backgroundColor: `${AppColors.outlineVariant}40` },
+  recordNotes: {
+    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12,
+    color: AppColors.onSurfaceVariant, lineHeight: 18,
+    paddingTop: 4, borderTopWidth: 1, borderTopColor: `${AppColors.outlineVariant}15`,
   },
 
   // Empty state
   emptyCard: {
-    borderWidth: 1.5, borderStyle: 'dashed', borderColor: `${AppColors.outlineVariant}50`,
-    borderRadius: 16, padding: 28, alignItems: 'center', gap: 8,
+    borderRadius: 20, padding: 28, alignItems: 'center', gap: 12,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderWidth: 1, borderColor: `${AppColors.outlineVariant}15`,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
-  emptyTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onSurface },
-  emptyBody: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: AppColors.onSurfaceVariant, textAlign: 'center' },
-  emptyBtn: {
-    marginTop: 4, backgroundColor: `${AppColors.primary}10`, borderRadius: 999,
-    paddingHorizontal: 20, paddingVertical: 10,
+  emptyIconWrap: {
+    width: 72, height: 72, borderRadius: 20,
+    backgroundColor: `${AppColors.primary}10`,
+    alignItems: 'center', justifyContent: 'center',
   },
-  emptyBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.primary },
-
-  // Record cards
-  recordCard: {
-    backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 18,
-    gap: 14, shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
+  emptyTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 17, color: AppColors.onSurface,
   },
-  recordTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
-  recordIcon: {
-    width: 52, height: 52, borderRadius: 14,
-    backgroundColor: AppColors.surfaceContainer, alignItems: 'center', justifyContent: 'center',
+  emptyBody: {
+    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13,
+    color: AppColors.onSurfaceVariant, textAlign: 'center', lineHeight: 20,
   },
-  recordInfo: { flex: 1, gap: 3 },
-  recordTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.onSurface },
-  recordDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant },
-  recordDoctor: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 12, color: AppColors.onSurfaceVariant },
-  recordBadge: {
-    backgroundColor: AppColors.surfaceContainer, borderRadius: 999,
-    paddingHorizontal: 10, paddingVertical: 4,
+  emptyBtn: { marginTop: 4, borderRadius: 999, overflow: 'hidden' },
+  emptyBtnGrad: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: 24, paddingVertical: 14,
   },
-  recordBadgeText: {
-    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase',
+  emptyBtnText: {
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.onPrimary,
   },
-  recordActions: { flexDirection: 'row', gap: 10 },
-  recordActionBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: `${AppColors.primary}08`, borderRadius: 999, paddingVertical: 12,
-  },
-  recordActionText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.primary },
-  recordShareBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: AppColors.surfaceContainerHigh, borderRadius: 999, paddingVertical: 12,
-  },
-  recordShareText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurfaceVariant },
 
   // FAB
   fab: {
-    position: 'absolute',
-    right: 24,
-    shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 12,
+    position: 'absolute', right: 24, zIndex: 50,
+    shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4, shadowRadius: 16, elevation: 12,
   },
-  fabGradient: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    alignItems: 'center',
-    justifyContent: 'center',
+  fabGrad: {
+    width: 58, height: 58, borderRadius: 29,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
 });

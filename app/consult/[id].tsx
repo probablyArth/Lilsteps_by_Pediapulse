@@ -76,7 +76,7 @@ export default function ConsultDetailScreen() {
         {aiSummary && (
           <View style={styles.summaryCard}>
             <LinearGradient
-              colors={[AppColors.primary, '#8b3cf7']}
+              colors={[AppColors.primary, AppColors.gradientEnd]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.summaryHeader}
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     borderRadius: 16, overflow: 'hidden',
     backgroundColor: 'rgba(255,255,255,0.92)',
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3,
   },
   summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 18, paddingVertical: 14 },
   summaryHeaderText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: '#fff' },
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   outcomeCard: {
     flexDirection: 'row', gap: 12, alignItems: 'flex-start',
     backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 14, padding: 16,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   outcomeText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurface, flex: 1, lineHeight: 20 },
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: 14, alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 14, padding: 16,
     borderLeftWidth: 3, borderLeftColor: AppColors.primary,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   rxIcon: {
     width: 36, height: 36, borderRadius: 10,

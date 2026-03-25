@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medical Record Detail - LittleSteps</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffefef",
+              "secondary": "#9720ab",
+              "on-secondary": "#ffeefb",
+              "surface-container": "#f3e3f6",
+              "on-primary-container": "#30006a",
+              "surface-container-high": "#eeddf1",
+              "on-secondary-fixed-variant": "#8a0b9f",
+              "on-secondary-fixed": "#5d006d",
+              "surface-container-highest": "#e8d7ed",
+              "on-surface-variant": "#625865",
+              "error-dim": "#a70138",
+              "secondary-fixed": "#fcbcff",
+              "error-container": "#f74b6d",
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#f9efff",
+              "tertiary-fixed": "#ff8fa9",
+              "tertiary": "#b60051",
+              "tertiary-dim": "#a00047",
+              "inverse-surface": "#120c16",
+              "primary-dim": "#6800d8",
+              "on-error-container": "#510017",
+              "on-background": "#342c38",
+              "on-tertiary-fixed": "#380014",
+              "on-primary-fixed-variant": "#3b0081",
+              "inverse-primary": "#a775ff",
+              "inverse-on-surface": "#a599a8",
+              "on-secondary-container": "#7c0091",
+              "tertiary-container": "#ff8fa9",
+              "primary-container": "#b58bff",
+              "on-tertiary-container": "#66002b",
+              "secondary-fixed-dim": "#f9a7ff",
+              "on-tertiary": "#ffeff0",
+              "outline": "#7e7381",
+              "outline-variant": "#b5a9b8",
+              "on-tertiary-fixed-variant": "#770033",
+              "on-primary-fixed": "#000000",
+              "secondary-dim": "#89089e",
+              "primary-fixed-dim": "#a978ff",
+              "background": "#fff3ff",
+              "tertiary-fixed-dim": "#ff769b",
+              "primary-fixed": "#b58bff",
+              "surface-container-low": "#fbecfe",
+              "primary": "#751fe7",
+              "surface-dim": "#e0cfe5",
+              "secondary-container": "#fcbcff",
+              "error": "#b41340",
+              "surface": "#fff3ff",
+              "surface-tint": "#751fe7",
+              "surface-bright": "#fff3ff",
+              "on-surface": "#342c38"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm flex items-center justify-between px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-purple-50 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-purple-600">arrow_back</span>
+</button>
+<h1 class="font-headline text-on-surface font-semibold tracking-tight text-lg">Medical Record</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-purple-50 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-purple-600">share</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-4xl mx-auto space-y-6">
+<!-- Header Section -->
+<section class="space-y-2">
+<div class="inline-flex items-center px-3 py-1 bg-primary-container text-on-primary-container rounded-full text-xs font-bold tracking-wider mb-2">
+            PEDIATRIC CHECKUP
+        </div>
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface leading-tight">12-Month Wellness Examination</h2>
+<div class="flex flex-wrap gap-4 pt-1 text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="text-sm font-medium">Oct 12, 2023</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">person</span>
+<span class="text-sm font-medium">Dr. Sarah Miller</span>
+</div>
+</div>
+</section>
+<!-- Redesigned Top Section: Quick Summary & Download -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Quick Summary Box -->
+<div class="md:col-span-7">
+<div class="glass-card rounded-2xl p-6 border border-white/40 shadow-sm h-full flex flex-col justify-between">
+<div>
+<h3 class="text-xs font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">summarize</span>
+                        Quick Summary
+                    </h3>
+<div class="space-y-3">
+<p class="text-on-surface leading-relaxed text-sm">
+                            Routine annual check-up confirming healthy growth. All developmental milestones achieved for the 12-month mark.
+                        </p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-lg text-[10px] font-bold uppercase tracking-wider italic">Stable Growth</span>
+<span class="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-wider italic">Vitals Normal</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/10">
+<p class="text-[11px] text-on-surface-variant font-medium">Last updated Oct 12, 2023 • 2:45 PM</p>
+</div>
+</div>
+</div>
+<!-- Functional Download Action -->
+<div class="md:col-span-5">
+<div class="bg-primary/5 rounded-2xl p-6 border border-primary/10 h-full flex flex-col items-center justify-center text-center space-y-4">
+<div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-primary mb-2">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">picture_as_pdf</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Official Medical Report</h4>
+<p class="text-xs text-on-surface-variant">Wellness_Report_10_23.pdf (1.2 MB)</p>
+</div>
+<button class="w-full py-3.5 px-6 rounded-xl bg-primary text-white font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all hover:bg-primary-dim">
+<span class="material-symbols-outlined text-xl">download</span>
+                    Download PDF
+                </button>
+</div>
+</div>
+<!-- Vitals & Actions Row -->
+<div class="md:col-span-4">
+<div class="glass-card rounded-2xl p-6 border border-white/40">
+<h3 class="text-[10px] font-bold uppercase tracking-widest text-primary mb-4">Patient Vitals</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+<span class="text-on-surface-variant text-sm">Weight</span>
+<span class="font-bold">22.4 lbs</span>
+</div>
+<div class="flex justify-between items-center pb-2 border-b border-outline-variant/10">
+<span class="text-on-surface-variant text-sm">Height</span>
+<span class="font-bold">29.1 in</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Head Circ.</span>
+<span class="font-bold">18.2 in</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Clinical Findings (Takes remaining space in row/grid) -->
+<div class="md:col-span-8">
+<div class="glass-card rounded-2xl p-6 border border-white/40 h-full">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container text-sm">assignment</span>
+</div>
+<h3 class="text-lg font-bold tracking-tight">Clinical Findings</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<h4 class="font-bold text-primary text-[10px] uppercase tracking-widest">Observations</h4>
+<p class="text-on-surface leading-relaxed text-sm">
+                            The patient is meeting all major developmental milestones. Lungs are clear and heart sounds are normal.
+                        </p>
+</div>
+<div class="space-y-2">
+<h4 class="font-bold text-primary text-[10px] uppercase tracking-widest">Immunizations</h4>
+<div class="space-y-2">
+<div class="flex items-center gap-2 p-2 rounded-lg bg-white/50 border border-outline-variant/5">
+<span class="material-symbols-outlined text-green-500 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[11px] font-medium">MMR - Dose 1</span>
+</div>
+<div class="flex items-center gap-2 p-2 rounded-lg bg-white/50 border border-outline-variant/5">
+<span class="material-symbols-outlined text-green-500 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[11px] font-medium">Varicella - Dose 1</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Next Steps -->
+<div class="md:col-span-12">
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-dim p-8 text-white shadow-xl">
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="max-w-xl">
+<h3 class="text-xl font-bold mb-2">Next Steps &amp; Recommendations</h3>
+<ul class="space-y-2 opacity-90">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed text-lg">info</span>
+<span class="text-xs leading-relaxed">Transition from formula to whole milk (approx. 16-24 oz daily).</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary-fixed text-lg">event</span>
+<span class="text-xs leading-relaxed">Schedule 15-month wellness check for January 15, 2024.</span>
+</li>
+</ul>
+</div>
+<button class="px-8 py-3.5 bg-white text-primary font-bold rounded-xl shadow-lg hover:bg-purple-50 transition-colors whitespace-nowrap active:scale-95">
+                        Book Next Visit
+                    </button>
+</div>
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 backdrop-blur-2xl border-t border-purple-100/20 shadow-[0_-8px_32px_rgba(52,44,56,0.06)] z-50">
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:bg-purple-50/50 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label text-[11px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:bg-purple-50/50 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label text-[11px] font-medium tracking-wide">Health</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-purple-100 text-purple-700 rounded-2xl px-5 py-2 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-label text-[11px] font-medium tracking-wide">Records</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:bg-purple-50/50 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label text-[11px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

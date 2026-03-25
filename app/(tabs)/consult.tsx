@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   // Appointment card
   appointmentCard: {
     backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 18, padding: 18,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3,
     gap: 14, borderLeftWidth: 3, borderLeftColor: AppColors.primary,
   },
   apptTop: { flexDirection: 'row', gap: 14 },
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   doctorCard: {
     width: 148, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16,
     padding: 16, gap: 6, alignItems: 'center',
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1,
   },
   doctorAvatar: {
     width: 56, height: 56, borderRadius: 28,
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   historyCard: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 14, padding: 16,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   historyLeft: { flex: 1, gap: 3 },
   historyDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: AppColors.outlineVariant },

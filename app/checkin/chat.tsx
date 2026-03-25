@@ -49,8 +49,8 @@ export default function CheckinChatScreen() {
     return () => clearTimeout(timer);
   }, [checkin.messages, checkin.loading]);
 
-  async function sendReply() {
-    const text = inputText.trim();
+  async function sendReply(overrideText?: string) {
+    const text = (overrideText ?? inputText).trim();
     if (!text || checkin.loading) return;
     setInputText('');
     try {
@@ -81,16 +81,25 @@ export default function CheckinChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
-      {/* Header + progress */}
+      {/* Header + consultation banner */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} disabled={generatingSummary}>
-          <Ionicons name="arrow-back" size={22} color={AppColors.onSurface} />
-        </Pressable>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>AI Check-in</Text>
-          <Text style={styles.headerSub}>{childName}</Text>
+        <View style={styles.headerTopRow}>
+          <Pressable onPress={() => router.back()} disabled={generatingSummary}>
+            <Ionicons name="arrow-back" size={22} color={AppColors.onSurface} />
+          </Pressable>
+          <View style={{ width: 22 }} />
         </View>
-        <View style={{ width: 22 }} />
+
+        <View style={styles.consultBanner}>
+          <View style={styles.sessionPill}>
+            <Text style={styles.sessionPillText}>CONSULTATION SESSION</Text>
+          </View>
+          <Text style={styles.consultTitle}>LilSteps AI</Text>
+          <Text style={styles.consultSub}>
+            Reviewing health symptoms for{' '}
+            <Text style={styles.consultChildName}>{childName}</Text>
+          </Text>
+        </View>
       </View>
 
       {/* Progress bar */}
@@ -105,19 +114,25 @@ export default function CheckinChatScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {checkin.messages.map((msg) =>
-          msg.role === 'ai' ? (
-            <AiBubble key={msg.id} text={msg.content} />
+        {checkin.messages.map((msg, index) => {
+          const isLastAi = msg.role === 'ai' && index === checkin.messages.length - 1;
+          return msg.role === 'ai' ? (
+            <AiBubble
+              key={msg.id}
+              text={msg.content}
+              quickOptions={isLastAi && !checkin.loading && !checkin.aiReady ? msg.quickOptions : undefined}
+              onOptionTap={sendReply}
+            />
           ) : (
             <UserBubble key={msg.id} text={msg.content} />
-          )
-        )}
+          );
+        })}
 
         {/* AI typing indicator */}
         {checkin.loading && (
           <View style={styles.aiBubbleRow}>
             <View style={styles.aiAvatar}>
-              <Ionicons name="sparkles" size={14} color="#fff" />
+              <Ionicons name="sparkles" size={14} color={AppColors.onPrimary} />
             </View>
             <View style={styles.typingBubble}>
               <View style={styles.typingDots}>
@@ -145,12 +160,12 @@ export default function CheckinChatScreen() {
               onPress={handleGenerateSummary}
             >
               <LinearGradient
-                colors={[AppColors.primary, '#8b3cf7']}
+                colors={[AppColors.primary, AppColors.gradientEnd]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.generateGrad}
               >
-                <Ionicons name="sparkles" size={16} color="#fff" />
+                <Ionicons name="sparkles" size={16} color={AppColors.onPrimary} />
                 <Text style={styles.generateBtnText}>Yes, generate summary</Text>
               </LinearGradient>
             </Pressable>
@@ -187,7 +202,7 @@ export default function CheckinChatScreen() {
             disabled={!inputText.trim() || checkin.loading}
           >
             <LinearGradient
-              colors={inputText.trim() && !checkin.loading ? [AppColors.primary, '#8b3cf7'] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
+              colors={inputText.trim() && !checkin.loading ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.sendGrad}
@@ -195,7 +210,7 @@ export default function CheckinChatScreen() {
               <Ionicons
                 name="arrow-up"
                 size={18}
-                color={inputText.trim() && !checkin.loading ? '#fff' : AppColors.onSurfaceVariant}
+                color={inputText.trim() && !checkin.loading ? AppColors.onPrimary : AppColors.onSurfaceVariant}
               />
             </LinearGradient>
           </Pressable>
@@ -205,15 +220,38 @@ export default function CheckinChatScreen() {
   );
 }
 
-function AiBubble({ text }: { text: string }) {
+function AiBubble({
+  text,
+  quickOptions,
+  onOptionTap,
+}: {
+  text: string;
+  quickOptions?: string[];
+  onOptionTap?: (option: string) => void;
+}) {
   return (
-    <View style={styles.aiBubbleRow}>
-      <LinearGradient colors={[AppColors.primary, '#8b3cf7']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.aiAvatar}>
-        <Ionicons name="sparkles" size={14} color="#fff" />
-      </LinearGradient>
-      <View style={styles.aiBubble}>
-        <Text style={styles.aiBubbleText}>{text}</Text>
+    <View style={styles.aiBubbleContainer}>
+      <View style={styles.aiBubbleRow}>
+        <LinearGradient colors={[AppColors.primary, AppColors.gradientEnd]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.aiAvatar}>
+          <Ionicons name="sparkles" size={14} color={AppColors.onPrimary} />
+        </LinearGradient>
+        <View style={styles.aiBubble}>
+          <Text style={styles.aiBubbleText}>{text}</Text>
+        </View>
       </View>
+      {quickOptions && quickOptions.length > 0 && (
+        <View style={styles.chipsRow}>
+          {quickOptions.map((opt) => (
+            <Pressable
+              key={opt}
+              style={({ pressed }) => [styles.chip, { opacity: pressed ? 0.72 : 1 }]}
+              onPress={() => onOptionTap?.(opt)}
+            >
+              <Text style={styles.chipText}>{opt}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -231,24 +269,58 @@ function UserBubble({ text }: { text: string }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: AppColors.surface },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 24, paddingVertical: 12,
+    backgroundColor: AppColors.surfaceContainerLow,
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    paddingBottom: 20,
+    gap: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: `${AppColors.outlineVariant}20`,
   },
-  headerCenter: { alignItems: 'center', gap: 2 },
-  headerTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onSurface },
-  headerSub: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: AppColors.onSurfaceVariant },
+  headerTopRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  },
+  consultBanner: { alignItems: 'center', gap: 6 },
+  sessionPill: {
+    backgroundColor: `${AppColors.outlineVariant}25`,
+    borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4,
+  },
+  sessionPillText: {
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10,
+    color: AppColors.onSurfaceVariant, letterSpacing: 1.2,
+  },
+  consultTitle: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22,
+    color: AppColors.onSurface, letterSpacing: -0.5,
+  },
+  consultSub: {
+    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14,
+    color: AppColors.onSurfaceVariant,
+  },
+  consultChildName: {
+    fontFamily: 'PlusJakartaSans_700Bold', color: AppColors.primary,
+  },
 
   progressTrack: { height: 3, backgroundColor: `${AppColors.outlineVariant}30`, marginHorizontal: 0 },
   progressFill: { height: 3, backgroundColor: AppColors.primary, borderRadius: 999 },
 
   scroll: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
 
+  aiBubbleContainer: { gap: 8 },
   aiBubbleRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end', maxWidth: '88%' },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingLeft: 40 },
+  chip: {
+    paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: `${AppColors.primary}12`,
+    borderWidth: 1, borderColor: `${AppColors.primary}30`,
+  },
+  chipText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.primary },
   aiAvatar: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   aiBubble: {
     backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 18, borderBottomLeftRadius: 4,
     padding: 14, flex: 1,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
   },
   aiBubbleText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurface, lineHeight: 21 },
 
@@ -257,7 +329,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.primary, borderRadius: 18, borderBottomRightRadius: 4,
     padding: 14, maxWidth: '80%',
   },
-  userBubbleText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 14, color: '#fff', lineHeight: 21 },
+  userBubbleText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 14, color: AppColors.onPrimary, lineHeight: 21 },
 
   typingBubble: {
     backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 18, borderBottomLeftRadius: 4,
@@ -268,13 +340,13 @@ const styles = StyleSheet.create({
   dot1: {}, dot2: {}, dot3: {},
 
   errorSection: { alignItems: 'center', paddingVertical: 8 },
-  errorText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: '#dc2626', textAlign: 'center' },
+  errorText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.errorRed, textAlign: 'center' },
 
   generateSection: { marginTop: 8, gap: 12, alignItems: 'center' },
   generateHint: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: AppColors.onSurfaceVariant, textAlign: 'center', lineHeight: 19 },
   generateBtn: { borderRadius: 999, overflow: 'hidden', alignSelf: 'stretch' },
   generateGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  generateBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: '#fff' },
+  generateBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onPrimary },
 
   loadingSection: { alignItems: 'center', gap: 10, paddingVertical: 16 },
   loadingText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant },

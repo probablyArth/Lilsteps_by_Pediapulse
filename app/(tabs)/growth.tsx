@@ -140,6 +140,7 @@ function GrowthChart({ tab, measurements, dob }: { tab: ChartTab; measurements: 
           x={PAD.left - 4}
           y={PAD.top + PLOT_H - scale(v, minY, maxY, PLOT_H) + 4}
           fontSize={9}
+          fontFamily="PlusJakartaSans_400Regular"
           fill={AppColors.onSurfaceVariant}
           textAnchor="end"
         >
@@ -154,6 +155,7 @@ function GrowthChart({ tab, measurements, dob }: { tab: ChartTab; measurements: 
           x={PAD.left + scale(m, 0, 36, PLOT_W)}
           y={CHART_H - 6}
           fontSize={9}
+          fontFamily="PlusJakartaSans_400Regular"
           fill={AppColors.onSurfaceVariant}
           textAnchor="middle"
         >
@@ -177,7 +179,7 @@ function GrowthChart({ tab, measurements, dob }: { tab: ChartTab; measurements: 
       {childPoints.map(([m, v], i) => {
         const x = PAD.left + scale(m, 0, 36, PLOT_W);
         const y = PAD.top + PLOT_H - scale(v, minY, maxY, PLOT_H);
-        return <Circle key={i} cx={x} cy={y} r={4} fill={AppColors.primary} stroke="#fff" strokeWidth={2} />;
+        return <Circle key={i} cx={x} cy={y} r={4} fill={AppColors.primary} stroke={AppColors.surfaceContainerLowest} strokeWidth={2} />;
       })}
     </Svg>
   );
@@ -194,13 +196,13 @@ function MeasurementRow({ entry, prev }: { entry: GrowthRow; prev?: GrowthRow })
       <Text style={styles.historyDate}>{dateStr}</Text>
       <View style={styles.historyMetric}>
         <Text style={styles.historyValue}>{entry.weight ?? '—'} kg</Text>
-        {wTrend === 'up' && <Ionicons name="arrow-up" size={11} color="#16a34a" />}
-        {wTrend === 'down' && <Ionicons name="arrow-down" size={11} color="#dc2626" />}
+        {wTrend === 'up' && <Ionicons name="arrow-up" size={11} color={AppColors.successGreen} />}
+        {wTrend === 'down' && <Ionicons name="arrow-down" size={11} color={AppColors.errorRed} />}
       </View>
       <View style={styles.historyMetric}>
         <Text style={styles.historyValue}>{entry.height ?? '—'} cm</Text>
-        {hTrend === 'up' && <Ionicons name="arrow-up" size={11} color="#16a34a" />}
-        {hTrend === 'down' && <Ionicons name="arrow-down" size={11} color="#dc2626" />}
+        {hTrend === 'up' && <Ionicons name="arrow-up" size={11} color={AppColors.successGreen} />}
+        {hTrend === 'down' && <Ionicons name="arrow-down" size={11} color={AppColors.errorRed} />}
       </View>
     </View>
   );
@@ -415,7 +417,7 @@ export default function GrowthScreen() {
 
         {/* Log button */}
         <Pressable style={({ pressed }) => [styles.logBtn, { opacity: pressed ? 0.85 : 1 }]} onPress={() => setShowSheet(true)}>
-          <Ionicons name="add-circle-outline" size={20} color="#fff" />
+          <Ionicons name="add-circle-outline" size={20} color={AppColors.onPrimary} />
           <Text style={styles.logBtnText}>Log New Measurement</Text>
         </Pressable>
       </ScrollView>
@@ -445,7 +447,7 @@ const styles = StyleSheet.create({
   metricsRow: { flexDirection: 'row', gap: 12 },
   metricCard: {
     flex: 1, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16, padding: 14, gap: 4,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
   bmiCard: { flex: 0.7 },
   metricLabel: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.onSurfaceVariant },
@@ -457,14 +459,14 @@ const styles = StyleSheet.create({
 
   chartSection: {
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 20, padding: 16,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
     gap: 12,
   },
   tabRow: { flexDirection: 'row', gap: 8 },
   tabChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999, backgroundColor: AppColors.surfaceContainerLow },
   tabChipActive: { backgroundColor: AppColors.primary },
   tabChipText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: AppColors.onSurfaceVariant },
-  tabChipTextActive: { color: '#fff' },
+  tabChipTextActive: { color: AppColors.onPrimary },
 
   percentileBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -503,7 +505,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.primary, borderRadius: 999, paddingVertical: 16,
     shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
-  logBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: '#fff' },
+  logBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onPrimary },
 
   // Sheet
   sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
@@ -525,5 +527,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: 'center',
     shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
-  saveBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: '#fff' },
+  saveBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onPrimary },
 });

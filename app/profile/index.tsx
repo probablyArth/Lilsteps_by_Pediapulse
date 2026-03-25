@@ -58,7 +58,7 @@ export default function ProfileScreen() {
       >
         {/* Profile card */}
         <LinearGradient
-          colors={[AppColors.primary, '#8b3cf7']}
+          colors={[AppColors.primary, AppColors.gradientEnd]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.profileCard}
@@ -134,7 +134,7 @@ export default function ProfileScreen() {
             <View style={styles.tagRow}>
               {allergies.map((a) => (
                 <View key={a} style={styles.allergyTag}>
-                  <Ionicons name="warning-outline" size={12} color="#d97706" />
+                  <Ionicons name="warning-outline" size={12} color={AppColors.warningAmber} />
                   <Text style={styles.allergyTagText}>{a}</Text>
                 </View>
               ))}
@@ -179,7 +179,7 @@ export default function ProfileScreen() {
           style={({ pressed }) => [styles.signOutBtn, { opacity: pressed ? 0.8 : 1 }]}
           onPress={handleSignOut}
         >
-          <Ionicons name="log-out-outline" size={18} color="#ef4444" />
+          <Ionicons name="log-out-outline" size={18} color={AppColors.errorRed} />
           <Text style={styles.signOutText}>Sign Out</Text>
         </Pressable>
       </ScrollView>
@@ -209,8 +209,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)', marginBottom: 8,
   },
-  profileAvatarText: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 28, color: '#fff' },
-  profileName: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 24, color: '#fff', letterSpacing: -0.5 },
+  profileAvatarText: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 28, color: AppColors.onPrimary },
+  profileName: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 24, color: AppColors.onPrimary, letterSpacing: -0.5 },
   profileAge: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14, color: 'rgba(255,255,255,0.8)' },
   profileBracket: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.65)', textAlign: 'center' },
 
@@ -219,13 +219,13 @@ const styles = StyleSheet.create({
     borderRadius: 14, paddingVertical: 14, paddingHorizontal: 24, marginTop: 12,
   },
   statItem: { flex: 1, alignItems: 'center', gap: 2 },
-  statValue: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 17, color: '#fff' },
+  statValue: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 17, color: AppColors.onPrimary },
   statLabel: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.65)' },
   statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 4 },
 
   infoCard: {
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16, padding: 16, gap: 14,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   infoText: { gap: 2 },
@@ -255,10 +255,10 @@ const styles = StyleSheet.create({
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   allergyTag: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: '#fef3c7', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5,
-    borderWidth: 1, borderColor: '#fde68a',
+    backgroundColor: AppColors.warningAmberSurface, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5,
+    borderWidth: 1, borderColor: AppColors.warningAmberBorder,
   },
-  allergyTagText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: '#92400e' },
+  allergyTagText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.warningAmber },
   conditionTag: {
     backgroundColor: `${AppColors.secondary}18`, borderRadius: 999,
     paddingHorizontal: 12, paddingVertical: 5,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   menuRow: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 14, padding: 16,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   menuIcon: {
     width: 40, height: 40, borderRadius: 12,
@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
 
   signOutBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    borderWidth: 1.5, borderColor: '#fca5a5', borderRadius: 999,
+    borderWidth: 1.5, borderColor: `${AppColors.errorRed}60`, borderRadius: 999,
     paddingVertical: 14, marginTop: 8,
   },
-  signOutText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: '#ef4444' },
+  signOutText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.errorRed },
 });

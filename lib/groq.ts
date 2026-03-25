@@ -58,7 +58,19 @@ RULES:
 6. When you have enough information to prepare a summary, end your FINAL message with EXACTLY this marker on its own line:
    [CHECKIN_COMPLETE]
 7. Keep responses concise (2–3 sentences max per question).
-8. If the parent mentions a known allergy or condition from the profile, acknowledge it.`;
+8. If the parent mentions a known allergy or condition from the profile, acknowledge it.
+9. For questions where the parent can answer from a limited set of choices, append EXACTLY this line AFTER your question (on its own line):
+   [QUICK_OPTIONS: Option 1, Option 2, Option 3, Option 4]
+   Use this for:
+   - Yes/No/Not sure questions → [QUICK_OPTIONS: Yes, No, Not sure]
+   - Duration → [QUICK_OPTIONS: Just started, Since yesterday, 2-3 days, A week or more]
+   - Severity → [QUICK_OPTIONS: Mild, Moderate, Severe]
+   - Fever temperature → [QUICK_OPTIONS: Below 100°F, 100-101°F, 101-103°F, Above 103°F]
+   - Eating/drinking → [QUICK_OPTIONS: Eating normally, Eating less, Refusing to eat]
+   - Cough type → [QUICK_OPTIONS: Dry cough, Wet/phlegmy, Barking cough, No cough]
+   - Energy level → [QUICK_OPTIONS: Active as usual, A bit tired, Very tired, Lethargic]
+   - Sleep impact → [QUICK_OPTIONS: Sleeping normally, Waking up often, Can't sleep]
+   Do NOT include [QUICK_OPTIONS] for free-text questions like "Tell me more about..." or the first open-ended question.`;
 }
 
 export function buildSummaryPrompt(child: ChildContext): string {

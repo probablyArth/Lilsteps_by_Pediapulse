@@ -31,9 +31,9 @@ const CATEGORIES: Category[] = [
 
 const SEVERITY_LABELS = ['', 'Mild', 'Moderate', 'Concerning', 'Urgent'];
 
-const SEVERITY_COLORS = ['transparent', '#22c55e', '#f59e0b', '#f97316', '#ef4444'];
+const SEVERITY_COLORS = ['transparent', AppColors.successGreenBright, AppColors.starGold, AppColors.orange, AppColors.errorRed];
 function severityColor(level: number) {
-  return { backgroundColor: SEVERITY_COLORS[level] ?? '#22c55e', borderColor: 'transparent' as const };
+  return { backgroundColor: SEVERITY_COLORS[level] ?? AppColors.successGreenBright, borderColor: 'transparent' as const };
 }
 
 function formatNow(): string {
@@ -84,7 +84,7 @@ export default function HealthLogScreen() {
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <View style={styles.successContainer}>
           <View style={styles.successIcon}>
-            <Ionicons name="checkmark" size={36} color="#16a34a" />
+            <Ionicons name="checkmark" size={36} color={AppColors.successGreen} />
           </View>
           <Text style={styles.successTitle}>Note Saved</Text>
           <Text style={styles.successSub}>Added to {childName}&apos;s health log.</Text>
@@ -192,12 +192,12 @@ export default function HealthLogScreen() {
           onPress={handleSave}
         >
           <LinearGradient
-            colors={canSave ? [AppColors.primary, '#8b3cf7'] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
+            colors={canSave ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.saveGrad}
           >
-            <Ionicons name="checkmark" size={18} color={canSave ? '#fff' : AppColors.onSurfaceVariant} />
+            <Ionicons name="checkmark" size={18} color={canSave ? AppColors.onPrimary : AppColors.onSurfaceVariant} />
             <Text style={[styles.saveText, !canSave && styles.saveTextDisabled]}>Save Note</Text>
           </LinearGradient>
         </Pressable>
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 16,
     borderWidth: 1.5, borderColor: `${AppColors.outlineVariant}30`,
     padding: 14, minHeight: 130,
-    shadowColor: '#342c38', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
   input: {
     fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15,
@@ -271,13 +271,13 @@ const styles = StyleSheet.create({
   saveBtn: { borderRadius: 999, overflow: 'hidden' },
   saveBtnDisabled: { opacity: 0.5 },
   saveGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  saveText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: '#fff' },
+  saveText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onPrimary },
   saveTextDisabled: { color: AppColors.onSurfaceVariant },
 
   successContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   successIcon: {
-    width: 72, height: 72, borderRadius: 36, backgroundColor: '#f0fdf4',
-    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#bbf7d0',
+    width: 72, height: 72, borderRadius: 36, backgroundColor: AppColors.successGreenSurface,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: AppColors.successGreenBright,
   },
   successTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22, color: AppColors.onSurface },
   successSub: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurfaceVariant },
