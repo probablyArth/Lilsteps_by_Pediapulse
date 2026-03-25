@@ -30,7 +30,7 @@ export function HomeHeader({
           `${AppColors.surface}B0`,
           `${AppColors.surface}60`,
           `${AppColors.surface}20`,
-          'transparent',
+          `${AppColors.surface}00`,
         ]}
         locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
         style={StyleSheet.absoluteFill}
@@ -47,6 +47,7 @@ export function HomeHeader({
               size="sm"
               color="accent"
               variant="soft"
+              className="border-0"
             >
               <Avatar.Fallback>
                 {avatarInitial}

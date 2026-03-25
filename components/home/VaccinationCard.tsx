@@ -14,8 +14,8 @@ interface VaccinationCardProps {
 export function VaccinationCard({ nextVaccine, nextDate, onViewSchedule }: VaccinationCardProps) {
   return (
     <PressableFeedback onPress={onViewSchedule}>
-      <Card style={styles.card}>
-        <View style={styles.content}>
+      <Card style={styles.card} className="p-0 border-0 shadow-none">
+        <Card.Body style={styles.content}>
           <View style={styles.iconContainer}>
             <LinearGradient
               colors={[`${AppColors.primary}20`, `${AppColors.primaryContainer}40`]}
@@ -44,7 +44,7 @@ export function VaccinationCard({ nextVaccine, nextDate, onViewSchedule }: Vacci
               <Ionicons name="arrow-forward" size={14} color={AppColors.primary} />
             </View>
           </View>
-        </View>
+        </Card.Body>
       </Card>
     </PressableFeedback>
   );
@@ -55,8 +55,6 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surfaceContainerLowest,
     borderRadius: 18,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: `${AppColors.primaryContainer}30`,
   },
   content: {
     padding: 14,

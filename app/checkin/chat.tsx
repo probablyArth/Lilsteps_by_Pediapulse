@@ -191,14 +191,14 @@ export default function CheckinChatScreen() {
             placeholderTextColor={`${AppColors.onSurfaceVariant}60`}
             value={inputText}
             onChangeText={setInputText}
-            onSubmitEditing={sendReply}
+            onSubmitEditing={() => sendReply()}
             returnKeyType="send"
             blurOnSubmit={false}
             editable={!checkin.loading}
           />
           <Pressable
             style={({ pressed }) => [styles.sendBtn, { opacity: pressed ? 0.8 : 1 }]}
-            onPress={sendReply}
+            onPress={() => sendReply()}
             disabled={!inputText.trim() || checkin.loading}
           >
             <LinearGradient

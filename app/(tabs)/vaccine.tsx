@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Card } from 'heroui-native';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { memo } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
+import { TabScreenLayout } from '@/components/TabScreenLayout';
 import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
 import { useVaccinations, type VaccinationRow } from '@/hooks/useVaccinations';
@@ -22,7 +23,6 @@ const BRACKET_LABEL: Record<string, string> = {
 };
 
 export default function VaccineScreen() {
-  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const { bracket, child } = useChild();
   const { vaccinations, loading, markDone } = useVaccinations(child?.id ?? null);
@@ -33,8 +33,7 @@ export default function VaccineScreen() {
   const total = vaccinations.length;
   const progressPct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   
-  // Calculate progress bar width in pixels (screen - padding - card padding)
-  const progressBarWidth = screenWidth - 40 - 40; // 20px padding each side + 20px card padding each side
+  const progressBarWidth = screenWidth - 40 - 40;
   const progressFillWidth = Math.max((progressPct / 100) * progressBarWidth, 8);
   const thumbPosition = Math.max((progressPct / 100) * progressBarWidth - 8, 0);
 
@@ -51,46 +50,25 @@ export default function VaccineScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.screen, { paddingTop: insets.top, alignItems: 'center', justifyContent: 'center' }]}>
+      <View style={styles.loadingScreen}>
         <ActivityIndicator size="large" color={AppColors.primary} />
       </View>
     );
   }
 
-  return (
-    <View style={styles.screen}>
-      {/* Floating header with gradient fade */}
-      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
-        <LinearGradient
-          colors={[
-            AppColors.surface,
-            AppColors.surface,
-            `${AppColors.surface}E8`,
-            `${AppColors.surface}B0`,
-            `${AppColors.surface}60`,
-            `${AppColors.surface}20`,
-            'transparent',
-          ]}
-          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          pointerEvents="none"
-        />
-        <View style={styles.headerContent} pointerEvents="box-none">
-          <Text style={styles.headerTitle}>Vaccination</Text>
-          <Pressable style={styles.headerIcon}>
-            <Ionicons name="notifications-outline" size={22} color={AppColors.onSurface} />
-          </Pressable>
-        </View>
-      </View>
+  const headerContent = (
+    <>
+      <Text style={styles.headerTitle}>Vaccination</Text>
+      <Pressable style={styles.headerIcon}>
+        <Ionicons name="notifications-outline" size={22} color={AppColors.onSurface} />
+      </Pressable>
+    </>
+  );
 
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 70, paddingBottom: 110 + insets.bottom }]}
-        showsVerticalScrollIndicator={false}
-      >
+  return (
+    <TabScreenLayout headerContent={headerContent}>
         {/* Hero progress section */}
-        <Card style={styles.heroCard}>
+        <Card style={styles.heroCard} className="border-0 shadow-none">
           <Card.Body style={styles.heroCardBody}>
             <View style={styles.heroBlob} />
             <View style={styles.heroHeader}>
@@ -210,8 +188,7 @@ export default function VaccineScreen() {
             </View>
           </Card.Body>
         </Card>
-      </ScrollView>
-    </View>
+    </TabScreenLayout>
   );
 }
 
@@ -334,23 +311,13 @@ function VaccineCard({
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.surface },
-
-  headerWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  headerContent: {
-    flexDirection: 'row',
+  loadingScreen: { 
+    flex: 1, 
+    backgroundColor: AppColors.surface,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 40,
+    justifyContent: 'center',
   },
+
   headerTitle: { 
     fontFamily: 'PlusJakartaSans_700Bold', 
     fontSize: 22, 
@@ -363,13 +330,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  scroll: { paddingHorizontal: 20, gap: 20 },
-
   heroCard: {
     backgroundColor: AppColors.surfaceContainerLowest,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: `${AppColors.outlineVariant}15`,
     overflow: 'hidden',
   },
   heroCardBody: {
@@ -528,11 +491,10 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: AppColors.surfaceContainerLowest, 
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: `${AppColors.outlineVariant}15`,
   },
   bentoCardWarning: {
-    borderColor: `${AppColors.tertiary}20`,
+    borderWidth: 1,
+    borderColor: `${AppColors.tertiary}30`,
   },
   bentoCardBody: {
     padding: 16, 

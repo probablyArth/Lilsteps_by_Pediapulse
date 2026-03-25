@@ -28,7 +28,7 @@ export function CareTeam({ providers, onAddProvider }: CareTeamProps) {
       >
         {providers.map((p) => (
           <PressableFeedback key={p.id}>
-            <Card style={styles.card} className="p-0">
+            <Card style={styles.card} className="p-0 border-0 shadow-none">
               <Card.Header style={styles.cardHeader}>
                 <View style={styles.avatarContainer}>
                   <View style={styles.avatarRing}>
@@ -80,8 +80,6 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surfaceContainerLowest,
     borderRadius: 20,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: `${AppColors.outlineVariant}12`,
   },
   cardHeader: {
     paddingTop: 16,

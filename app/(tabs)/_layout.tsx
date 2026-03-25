@@ -87,7 +87,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       {/* Gradient fade: transparent at top → solid at bottom */}
       <LinearGradient
         colors={[
-          'transparent',
+          `${AppColors.surface}00`,
           `${AppColors.surface}20`,
           `${AppColors.surface}60`,
           `${AppColors.surface}B0`,
@@ -123,7 +123,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       <View style={styles.tabBarContainer}>
         <BlurView
           intensity={Platform.OS === 'ios' ? 80 : 0}
-          tint="systemChromeMaterialLight"
+          tint="light"
           style={styles.blurView}
         >
           <View style={styles.tabBarInner}>
@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 12,
+    borderWidth: 0,
   },
   fadeGradient: {
     position: 'absolute',
@@ -163,6 +164,7 @@ const styles = StyleSheet.create({
     left: -12,
     right: -12,
     bottom: 0,
+    borderWidth: 0,
   },
   aiButtonWrapper: {
     position: 'absolute',
@@ -190,18 +192,21 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     borderRadius: 24,
     overflow: 'hidden',
+    borderWidth: 0,
   },
   blurView: {
     borderRadius: 24,
     overflow: 'hidden',
-    backgroundColor: Platform.OS === 'android' ? 'rgba(255,255,255,0.97)' : 'transparent',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(255,255,255,0.97)' : undefined,
+    borderWidth: 0,
   },
   tabBarInner: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 60,
     paddingHorizontal: 4,
-    backgroundColor: Platform.OS === 'ios' ? 'rgba(255,255,255,0.7)' : 'transparent',
+    backgroundColor: Platform.OS === 'ios' ? 'rgba(255,243,255,0.85)' : 'transparent',
+    borderWidth: 0,
   },
   tabItem: {
     flex: 1,

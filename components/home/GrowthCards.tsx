@@ -82,8 +82,8 @@ export function GrowthCards({ data, onWeightPress, onHeightPress }: GrowthCardsP
   return (
     <View style={styles.grid}>
       <PressableFeedback onPress={onWeightPress} style={styles.cardWrapper}>
-        <Card style={styles.card}>
-          <View style={styles.cardContent}>
+        <Card style={styles.card} className="p-0 border-0 shadow-none">
+          <Card.Body style={styles.cardContent}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardLabel}>Weight</Text>
               <View style={styles.iconContainer}>
@@ -95,13 +95,13 @@ export function GrowthCards({ data, onWeightPress, onHeightPress }: GrowthCardsP
               <Text style={styles.unit}>kg</Text>
             </View>
             <MiniBarChart bars={WEIGHT_BARS} color={AppColors.primary} />
-          </View>
+          </Card.Body>
         </Card>
       </PressableFeedback>
 
       <PressableFeedback onPress={onHeightPress} style={styles.cardWrapper}>
-        <Card style={styles.card}>
-          <View style={styles.cardContent}>
+        <Card style={styles.card} className="p-0 border-0 shadow-none">
+          <Card.Body style={styles.cardContent}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardLabel}>Height</Text>
               <View style={styles.iconContainer}>
@@ -113,7 +113,7 @@ export function GrowthCards({ data, onWeightPress, onHeightPress }: GrowthCardsP
               <Text style={styles.unit}>cm</Text>
             </View>
             <MiniBarChart bars={HEIGHT_BARS} color={AppColors.primary} />
-          </View>
+          </Card.Body>
         </Card>
       </PressableFeedback>
     </View>
@@ -132,8 +132,6 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surfaceContainerLowest,
     borderRadius: 20,
     aspectRatio: 1,
-    borderWidth: 1,
-    borderColor: `${AppColors.outlineVariant}15`,
     overflow: 'hidden',
   },
   cardContent: {

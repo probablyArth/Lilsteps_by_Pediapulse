@@ -3,5 +3,21 @@
 
 @import 'heroui-native/styles';
 
-/* Path to the heroui-native lib inside node_modules relative to global.css */
 @source './node_modules/heroui-native/lib';
+
+@layer theme {
+  @variant light {
+    --accent: oklch(0.47 0.26 293);
+    --accent-foreground: oklch(0.98 0 0);
+  }
+
+  @variant dark {
+    --accent: oklch(0.55 0.24 293);
+    --accent-foreground: oklch(0.98 0 0);
+  }
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+}

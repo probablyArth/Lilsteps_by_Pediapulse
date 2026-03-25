@@ -1,8 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
 import { GradientBackground } from '@/components/gradient-background';
 import { GradientButton } from '@/components/gradient-button';
@@ -78,14 +78,14 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
-          <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+          <View style={styles.header}>
             <Pressable onPress={() => step === 'otp' ? setStep('email') : router.back()} style={styles.backButton}>
-              <Text style={styles.backArrow}>{'\u2190'}</Text>
+              <Ionicons name="arrow-back" size={20} color={AppColors.onSurface} />
             </Pressable>
-          </Animated.View>
+          </View>
 
           {/* Title */}
-          <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.titleSection}>
+          <View style={styles.titleSection}>
             <Text style={typography.headingXL}>
               {step === 'email' ? 'Welcome\nBack' : 'Enter\nCode'}
             </Text>
@@ -94,10 +94,10 @@ export default function LoginScreen() {
                 ? 'Sign in with your email to continue'
                 : `We sent a 6-digit code to ${email}`}
             </Text>
-          </Animated.View>
+          </View>
 
           {/* Form */}
-          <Animated.View entering={FadeInUp.delay(400).duration(600)} style={styles.form}>
+          <View style={styles.form}>
             {step === 'email' ? (
               <View style={styles.fields}>
                 <TextInputField
@@ -145,15 +145,15 @@ export default function LoginScreen() {
                 <Text style={styles.resendText}>Didn&apos;t receive it? Resend code</Text>
               </Pressable>
             )}
-          </Animated.View>
+          </View>
 
           {/* Footer */}
-          <Animated.View entering={FadeIn.delay(600).duration(500)} style={styles.footer}>
-            <Text style={typography.bodySM}>Don&apos;t have an account?</Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don&apos;t have an account?</Text>
             <Pressable onPress={() => router.push('/(auth)/signup')}>
               <Text style={styles.linkText}>Sign Up</Text>
             </Pressable>
-          </Animated.View>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -180,11 +180,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: `${AppColors.outlineVariant}26`,
-  },
-  backArrow: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 20,
-    color: AppColors.onSurface,
   },
   titleSection: {
     marginTop: 24,
@@ -226,6 +221,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 32,
+    gap: 4,
+  },
+  footerText: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 14,
+    color: AppColors.onSurfaceVariant,
   },
   linkText: {
     fontFamily: 'PlusJakartaSans_700Bold',

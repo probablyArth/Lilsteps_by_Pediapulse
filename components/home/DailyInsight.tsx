@@ -123,7 +123,7 @@ export function DailyInsight({ bracket, onViewAll }: DailyInsightProps) {
 function InsightCardView({ item }: { item: InsightCard }) {
   return (
     <PressableFeedback>
-      <Card style={styles.card} className="p-0">
+      <Card style={styles.card} className="p-0 border-0 shadow-none">
         <Card.Header style={styles.cardHeader}>
           <View style={styles.emojiWrap}>
             <Text style={styles.emoji}>{item.emoji}</Text>
@@ -181,8 +181,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${AppColors.primaryContainer}18`,
     borderRadius: 20,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: `${AppColors.primary}10`,
   },
   cardHeader: {
     padding: 16,

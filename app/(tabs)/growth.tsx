@@ -15,14 +15,13 @@ import { useState } from 'react';
 import {
   Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path, Polygon, Text as SvgText } from 'react-native-svg';
 
+import { TabScreenLayout } from '@/components/TabScreenLayout';
 import { AppColors } from '@/constants/theme';
 import { typography } from '@/styles/global';
 import { useChild } from '@/context/child';
@@ -295,7 +294,6 @@ function LogSheet({ visible, onClose, onSave }: { visible: boolean; onClose: () 
 }
 
 export default function GrowthScreen() {
-  const insets = useSafeAreaInsets();
   const [chartTab, setChartTab] = useState<ChartTab>('weight');
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('All');
   const [showSheet, setShowSheet] = useState(false);
@@ -325,44 +323,23 @@ export default function GrowthScreen() {
     }
   }
 
-  return (
-    <View style={styles.screen}>
-      {/* Floating header with gradient fade */}
-      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
-        <LinearGradient
-          colors={[
-            AppColors.surface,
-            AppColors.surface,
-            `${AppColors.surface}E8`,
-            `${AppColors.surface}B0`,
-            `${AppColors.surface}60`,
-            `${AppColors.surface}20`,
-            'transparent',
-          ]}
-          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          pointerEvents="none"
-        />
-        <View style={styles.headerContent} pointerEvents="box-none">
-          <Text style={styles.headerTitle}>Growth</Text>
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={() => setShowSheet(true)}
-          >
-            <Ionicons name="add" size={18} color={AppColors.primary} />
-            <Button.Label style={{ color: AppColors.primary, fontFamily: 'PlusJakartaSans_700Bold' }}>Log</Button.Label>
-          </Button>
-        </View>
-      </View>
-
-      <ScrollView 
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 70, paddingBottom: 110 + insets.bottom }]} 
-        showsVerticalScrollIndicator={false}
+  const headerContent = (
+    <>
+      <Text style={styles.headerTitle}>Growth</Text>
+      <Button
+        variant="ghost"
+        size="sm"
+        onPress={() => setShowSheet(true)}
       >
+        <Ionicons name="add" size={18} color={AppColors.primary} />
+        <Button.Label style={{ color: AppColors.primary, fontFamily: 'PlusJakartaSans_700Bold' }}>Log</Button.Label>
+      </Button>
+    </>
+  );
 
+  return (
+    <>
+      <TabScreenLayout headerContent={headerContent}>
         {/* Current measurements */}
         <View style={styles.metricsRow}>
           <Card style={styles.metricCard}>
@@ -481,41 +458,24 @@ export default function GrowthScreen() {
             <Text style={styles.logBtnText}>Log New Measurement</Text>
           </LinearGradient>
         </Pressable>
-      </ScrollView>
+      </TabScreenLayout>
 
       <LogSheet
         visible={showSheet}
         onClose={() => setShowSheet(false)}
         onSave={handleSaveMeasurement}
       />
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: AppColors.surface },
-  headerWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 40,
-  },
   headerTitle: { 
     fontFamily: 'PlusJakartaSans_700Bold', 
     fontSize: 22, 
     color: AppColors.onSurface, 
     letterSpacing: -0.3,
   },
-  scroll: { paddingHorizontal: 20, gap: 20 },
 
   emptyText: { 
     fontFamily: 'PlusJakartaSans_400Regular', 
