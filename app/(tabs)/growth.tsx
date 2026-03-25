@@ -9,6 +9,8 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Button, Card, Input, Tabs, TextField } from 'heroui-native';
 import { useState } from 'react';
 import {
   Modal,
@@ -16,7 +18,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -231,49 +232,63 @@ function LogSheet({ visible, onClose, onSave }: { visible: boolean; onClose: () 
         <View style={styles.sheetHandle} />
         <Text style={styles.sheetTitle}>Log Measurement</Text>
 
-        <View style={styles.sheetFields}>
-          <View style={styles.sheetField}>
-            <Text style={styles.fieldLabel}>Weight (kg)</Text>
-            <TextInput
-              style={styles.fieldInput}
-              value={weight}
-              onChangeText={setWeight}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 12.4"
-              placeholderTextColor={AppColors.outlineVariant}
-            />
+        <View style={styles.sheetContent}>
+          <View style={styles.sheetFields}>
+            <View style={styles.sheetField}>
+              <Text style={styles.fieldLabel}>Weight (kg)</Text>
+              <TextField>
+                <Input
+                  value={weight}
+                  onChangeText={setWeight}
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 12.4"
+                  variant="secondary"
+                  className="bg-white border border-gray-200 rounded-xl"
+                />
+              </TextField>
+            </View>
+            <View style={styles.sheetField}>
+              <Text style={styles.fieldLabel}>Height (cm)</Text>
+              <TextField>
+                <Input
+                  value={height}
+                  onChangeText={setHeight}
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 84"
+                  variant="secondary"
+                  className="bg-white border border-gray-200 rounded-xl"
+                />
+              </TextField>
+            </View>
           </View>
-          <View style={styles.sheetField}>
-            <Text style={styles.fieldLabel}>Height (cm)</Text>
-            <TextInput
-              style={styles.fieldInput}
-              value={height}
-              onChangeText={setHeight}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 84"
-              placeholderTextColor={AppColors.outlineVariant}
-            />
+
+          <View style={styles.sheetFieldFull}>
+            <Text style={styles.fieldLabel}>Note (optional)</Text>
+            <TextField>
+              <Input
+                value={note}
+                onChangeText={setNote}
+                placeholder="Any observations..."
+                multiline
+                numberOfLines={4}
+                variant="secondary"
+                className="bg-white border border-gray-200 rounded-xl"
+                style={{ minHeight: 100, textAlignVertical: 'top', paddingTop: 12 }}
+              />
+            </TextField>
           </View>
-        </View>
 
-        <View style={[styles.sheetField, { marginHorizontal: 20 }]}>
-          <Text style={styles.fieldLabel}>Note (optional)</Text>
-          <TextInput
-            style={[styles.fieldInput, { height: 72, textAlignVertical: 'top' }]}
-            value={note}
-            onChangeText={setNote}
-            placeholder="Any observations..."
-            placeholderTextColor={AppColors.outlineVariant}
-            multiline
-          />
+          <Pressable style={styles.saveBtn} onPress={handleSave}>
+            <LinearGradient
+              colors={[AppColors.primary, AppColors.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.saveBtnGradient}
+            >
+              <Text style={styles.saveBtnText}>Save Measurement</Text>
+            </LinearGradient>
+          </Pressable>
         </View>
-
-        <Pressable
-          style={({ pressed }) => [styles.saveBtn, { opacity: pressed ? 0.85 : 1 }]}
-          onPress={handleSave}
-        >
-          <Text style={styles.saveBtnText}>Save Measurement</Text>
-        </Pressable>
       </View>
     </Modal>
   );
@@ -311,90 +326,127 @@ export default function GrowthScreen() {
   }
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Growth</Text>
-        <Pressable onPress={() => setShowSheet(true)}>
-          <Text style={styles.updateLink}>+ Log</Text>
-        </Pressable>
+    <View style={styles.screen}>
+      {/* Floating header with gradient fade */}
+      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
+        <LinearGradient
+          colors={[
+            AppColors.surface,
+            AppColors.surface,
+            `${AppColors.surface}E8`,
+            `${AppColors.surface}B0`,
+            `${AppColors.surface}60`,
+            `${AppColors.surface}20`,
+            'transparent',
+          ]}
+          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+        />
+        <View style={styles.headerContent} pointerEvents="box-none">
+          <Text style={styles.headerTitle}>Growth</Text>
+          <Button
+            variant="ghost"
+            size="sm"
+            onPress={() => setShowSheet(true)}
+          >
+            <Ionicons name="add" size={18} color={AppColors.primary} />
+            <Button.Label style={{ color: AppColors.primary, fontFamily: 'PlusJakartaSans_700Bold' }}>Log</Button.Label>
+          </Button>
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 70, paddingBottom: 110 + insets.bottom }]} 
+        showsVerticalScrollIndicator={false}
+      >
 
         {/* Current measurements */}
         <View style={styles.metricsRow}>
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>Weight</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{latest?.weight ?? child?.weight ?? '—'}</Text>
-              <Text style={styles.metricUnit}>kg</Text>
-            </View>
-            <Text style={styles.metricDate}>As of {latestDateStr}</Text>
-          </View>
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>{isNewborn ? 'Length' : 'Height'}</Text>
-            <View style={styles.metricValueRow}>
-              <Text style={styles.metricValue}>{latest?.height ?? child?.height ?? '—'}</Text>
-              <Text style={styles.metricUnit}>cm</Text>
-            </View>
-            <Text style={styles.metricDate}>As of {latestDateStr}</Text>
-            {isNewborn && <Text style={styles.newbornNote}>Measured lying down</Text>}
-          </View>
+          <Card style={styles.metricCard}>
+            <Card.Body style={styles.metricCardBody}>
+              <Text style={styles.metricLabel}>Weight</Text>
+              <View style={styles.metricValueRow}>
+                <Text style={styles.metricValue}>{latest?.weight ?? child?.weight ?? '—'}</Text>
+                <Text style={styles.metricUnit}>kg</Text>
+              </View>
+              <Text style={styles.metricDate}>As of {latestDateStr}</Text>
+            </Card.Body>
+          </Card>
+          <Card style={styles.metricCard}>
+            <Card.Body style={styles.metricCardBody}>
+              <Text style={styles.metricLabel}>{isNewborn ? 'Length' : 'Height'}</Text>
+              <View style={styles.metricValueRow}>
+                <Text style={styles.metricValue}>{latest?.height ?? child?.height ?? '—'}</Text>
+                <Text style={styles.metricUnit}>cm</Text>
+              </View>
+              <Text style={styles.metricDate}>As of {latestDateStr}</Text>
+              {isNewborn && <Text style={styles.newbornNote}>Measured lying down</Text>}
+            </Card.Body>
+          </Card>
           {showBMI && bmi && (
-            <View style={[styles.metricCard, styles.bmiCard]}>
-              <Text style={styles.metricLabel}>BMI</Text>
-              <Text style={[styles.metricValue, { fontSize: 26 }]}>{bmi}</Text>
-              <Text style={styles.metricDate}>Healthy range</Text>
-            </View>
+            <Card style={[styles.metricCard, { flex: 0.7 }]}>
+              <Card.Body style={styles.metricCardBody}>
+                <Text style={styles.metricLabel}>BMI</Text>
+                <Text style={[styles.metricValue, { fontSize: 26 }]}>{bmi}</Text>
+                <Text style={styles.metricDate}>Healthy range</Text>
+              </Card.Body>
+            </Card>
           )}
         </View>
 
-        {/* Chart section */}
-        <View style={styles.chartSection}>
-          {/* Tab switcher */}
-          <View style={styles.tabRow}>
-            {(['weight', 'height'] as ChartTab[]).map((t) => (
-              <Pressable key={t} onPress={() => setChartTab(t)}
-                style={[styles.tabChip, chartTab === t && styles.tabChipActive]}>
-                <Text style={[styles.tabChipText, chartTab === t && styles.tabChipTextActive]}>
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+        <Card style={styles.chartCard}>
+          <Card.Body style={styles.chartCardBody}>
+            <Tabs 
+              value={chartTab} 
+              onValueChange={(v) => setChartTab(v as ChartTab)}
+              style={styles.tabs}
+            >
+              <Tabs.List style={styles.tabsList}>
+                <Tabs.Indicator style={styles.tabIndicator} />
+                <Tabs.Trigger value="weight" style={styles.tabTrigger}>
+                  <Tabs.Label style={[styles.tabLabel, chartTab === 'weight' && styles.tabLabelActive]}>Weight</Tabs.Label>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="height" style={styles.tabTrigger}>
+                  <Tabs.Label style={[styles.tabLabel, chartTab === 'height' && styles.tabLabelActive]}>Height</Tabs.Label>
+                </Tabs.Trigger>
+              </Tabs.List>
+            </Tabs>
 
-          {/* Percentile badge */}
-          <View style={styles.percentileBadge}>
-            <Ionicons name="information-circle-outline" size={14} color={AppColors.primary} />
-            <Text style={styles.percentileText}>{childName} is at the {PERCENTILE_LABELS[chartTab]}</Text>
-          </View>
+            <View style={styles.percentileBadge}>
+              <Ionicons name="information-circle-outline" size={13} color={AppColors.primary} />
+              <Text style={styles.percentileText}>{childName} is at the {PERCENTILE_LABELS[chartTab]}</Text>
+            </View>
 
-          {/* Chart */}
-          <View style={styles.chartContainer}>
-            <GrowthChart tab={chartTab} measurements={measurements} dob={dob} />
-            <View style={styles.chartLegend}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: AppColors.primary }]} />
-                <Text style={styles.legendText}>{childName}</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: `${AppColors.primary}30` }]} />
-                <Text style={styles.legendText}>WHO bands</Text>
+            <View style={styles.chartContainer}>
+              <GrowthChart tab={chartTab} measurements={measurements} dob={dob} />
+              <View style={styles.chartLegend}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: AppColors.primary }]} />
+                  <Text style={styles.legendText}>{childName}</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: `${AppColors.primary}30` }]} />
+                  <Text style={styles.legendText}>WHO bands</Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          {/* Time filter */}
-          <View style={styles.filterRow}>
-            {(['3M', '6M', '1Y', 'All'] as TimeFilter[]).map((f) => (
-              <Pressable key={f} onPress={() => setTimeFilter(f)}
-                style={[styles.filterChip, timeFilter === f && styles.filterChipActive]}>
-                <Text style={[styles.filterText, timeFilter === f && styles.filterTextActive]}>{f}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
+            <View style={styles.filterRow}>
+              {(['3M', '6M', '1Y', 'All'] as TimeFilter[]).map((f) => (
+                <Pressable
+                  key={f}
+                  onPress={() => setTimeFilter(f)}
+                  style={[styles.filterChip, timeFilter === f && styles.filterChipActive]}
+                >
+                  <Text style={[styles.filterText, timeFilter === f && styles.filterTextActive]}>{f}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </Card.Body>
+        </Card>
 
         {/* History */}
         <View style={styles.section}>
@@ -415,10 +467,19 @@ export default function GrowthScreen() {
           )}
         </View>
 
-        {/* Log button */}
-        <Pressable style={({ pressed }) => [styles.logBtn, { opacity: pressed ? 0.85 : 1 }]} onPress={() => setShowSheet(true)}>
-          <Ionicons name="add-circle-outline" size={20} color={AppColors.onPrimary} />
-          <Text style={styles.logBtnText}>Log New Measurement</Text>
+        <Pressable 
+          style={styles.logBtn} 
+          onPress={() => setShowSheet(true)}
+        >
+          <LinearGradient
+            colors={[AppColors.primary, AppColors.gradientEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.logBtnGradient}
+          >
+            <Ionicons name="add-circle-outline" size={18} color={AppColors.onPrimary} />
+            <Text style={styles.logBtnText}>Log New Measurement</Text>
+          </LinearGradient>
         </Pressable>
       </ScrollView>
 
@@ -433,99 +494,281 @@ export default function GrowthScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.surface },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 24, paddingVertical: 14,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+  headerWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
-  headerTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22, color: AppColors.onSurface, letterSpacing: -0.5 },
-  updateLink: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.primary },
-  scroll: { paddingHorizontal: 20, paddingTop: 20, gap: 24 },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 40,
+  },
+  headerTitle: { 
+    fontFamily: 'PlusJakartaSans_700Bold', 
+    fontSize: 22, 
+    color: AppColors.onSurface, 
+    letterSpacing: -0.3,
+  },
+  scroll: { paddingHorizontal: 20, gap: 20 },
 
-  emptyText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: AppColors.onSurfaceVariant, textAlign: 'center', paddingVertical: 20 },
+  emptyText: { 
+    fontFamily: 'PlusJakartaSans_400Regular', 
+    fontSize: 14, 
+    color: AppColors.onSurfaceVariant, 
+    textAlign: 'center', 
+    paddingVertical: 24,
+    lineHeight: 20,
+  },
 
-  metricsRow: { flexDirection: 'row', gap: 12 },
+  metricsRow: { flexDirection: 'row', gap: 10 },
   metricCard: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16, padding: 14, gap: 4,
-    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    flex: 1,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
   },
-  bmiCard: { flex: 0.7 },
-  metricLabel: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.onSurfaceVariant },
-  metricValueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  metricValue: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 30, color: AppColors.onSurface, letterSpacing: -1 },
-  metricUnit: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.onSurfaceVariant },
-  metricDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 10, color: AppColors.outlineVariant },
-  newbornNote: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 9, color: AppColors.primary, marginTop: 2 },
+  metricCardBody: {
+    padding: 12, 
+    gap: 2,
+  },
+  metricLabel: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 12, 
+    color: AppColors.onSurfaceVariant,
+    letterSpacing: 0.2,
+  },
+  metricValueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
+  metricValue: { 
+    fontFamily: 'PlusJakartaSans_800ExtraBold', 
+    fontSize: 32, 
+    color: AppColors.onSurface, 
+    letterSpacing: -1.5,
+  },
+  metricUnit: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 13, 
+    color: AppColors.onSurfaceVariant,
+  },
+  metricDate: { 
+    fontFamily: 'PlusJakartaSans_400Regular', 
+    fontSize: 11, 
+    color: AppColors.outlineVariant,
+    marginTop: 2,
+  },
+  newbornNote: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 10, 
+    color: AppColors.primary, 
+    marginTop: 4,
+  },
 
-  chartSection: {
-    backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 20, padding: 16,
-    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+  chartCard: {
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
+  },
+  chartCardBody: {
+    padding: 14,
     gap: 12,
   },
-  tabRow: { flexDirection: 'row', gap: 8 },
-  tabChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999, backgroundColor: AppColors.surfaceContainerLow },
-  tabChipActive: { backgroundColor: AppColors.primary },
-  tabChipText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: AppColors.onSurfaceVariant },
-  tabChipTextActive: { color: AppColors.onPrimary },
+  tabs: {
+    alignSelf: 'flex-start',
+  },
+  tabsList: {
+    backgroundColor: AppColors.surfaceContainerLow,
+    borderRadius: 10,
+    padding: 3,
+  },
+  tabIndicator: {
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 8,
+  },
+  tabTrigger: {
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+  },
+  tabLabel: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 14,
+    color: AppColors.onSurfaceVariant,
+  },
+  tabLabelActive: {
+    color: AppColors.primary,
+    fontFamily: 'PlusJakartaSans_700Bold',
+  },
 
   percentileBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: `${AppColors.primary}0f`, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, alignSelf: 'flex-start',
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 6,
+    backgroundColor: `${AppColors.primary}0c`, 
+    borderRadius: 8, 
+    paddingHorizontal: 10, 
+    paddingVertical: 6, 
+    alignSelf: 'flex-start',
   },
-  percentileText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.primary },
+  percentileText: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 12, 
+    color: AppColors.primary,
+    lineHeight: 16,
+  },
 
   chartContainer: { alignItems: 'center', gap: 8 },
   chartLegend: { flexDirection: 'row', gap: 16 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: AppColors.onSurfaceVariant },
+  legendText: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 11, 
+    color: AppColors.onSurfaceVariant,
+  },
 
-  filterRow: { flexDirection: 'row', gap: 8 },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 5, borderRadius: 999, backgroundColor: AppColors.surfaceContainerLow },
-  filterChipActive: { backgroundColor: `${AppColors.primary}15` },
-  filterText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: AppColors.onSurfaceVariant },
-  filterTextActive: { color: AppColors.primary },
+  filterRow: { flexDirection: 'row', gap: 6 },
+  filterChip: { 
+    paddingHorizontal: 14, 
+    paddingVertical: 6, 
+    borderRadius: 8, 
+    backgroundColor: AppColors.surfaceContainerLow,
+  },
+  filterChipActive: { 
+    backgroundColor: `${AppColors.primary}12`,
+  },
+  filterText: { 
+    fontFamily: 'PlusJakartaSans_600SemiBold', 
+    fontSize: 12, 
+    color: AppColors.onSurfaceVariant,
+  },
+  filterTextActive: { 
+    color: AppColors.primary,
+  },
 
   section: {},
   historyHeader: {
-    flexDirection: 'row', paddingBottom: 8,
-    borderBottomWidth: 1, borderBottomColor: `${AppColors.outlineVariant}30`, marginBottom: 4,
+    flexDirection: 'row', 
+    paddingBottom: 10,
+    borderBottomWidth: 1, 
+    borderBottomColor: `${AppColors.outlineVariant}25`, 
+    marginBottom: 4,
   },
-  historyHeaderCell: { flex: 1, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, color: AppColors.outlineVariant, textTransform: 'uppercase', letterSpacing: 0.8 },
+  historyHeaderCell: { 
+    flex: 1, 
+    fontFamily: 'PlusJakartaSans_600SemiBold', 
+    fontSize: 11, 
+    color: AppColors.outlineVariant, 
+    textTransform: 'uppercase', 
+    letterSpacing: 0.5,
+  },
   historyRow: {
-    flexDirection: 'row', alignItems: 'center', paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: `${AppColors.outlineVariant}20`,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingVertical: 14,
+    borderBottomWidth: 1, 
+    borderBottomColor: `${AppColors.outlineVariant}15`,
   },
-  historyDate: { flex: 1, fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant },
-  historyMetric: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  historyValue: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.onSurface },
+  historyDate: { 
+    flex: 1, 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 14, 
+    color: AppColors.onSurfaceVariant,
+  },
+  historyMetric: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 4,
+  },
+  historyValue: { 
+    fontFamily: 'PlusJakartaSans_600SemiBold', 
+    fontSize: 15, 
+    color: AppColors.onSurface,
+  },
 
   logBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: AppColors.primary, borderRadius: 999, paddingVertical: 16,
-    shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
+    borderRadius: 999,
+    overflow: 'hidden',
   },
-  logBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onPrimary },
+  logBtnGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+  },
+  logBtnText: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 15,
+    color: AppColors.onPrimary,
+  },
 
   // Sheet
-  sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
+  sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
-    backgroundColor: AppColors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    paddingTop: 12, paddingBottom: 36, gap: 16,
+    backgroundColor: AppColors.surface, 
+    borderTopLeftRadius: 28, 
+    borderTopRightRadius: 28,
+    paddingTop: 12, 
+    paddingBottom: 48,
   },
-  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: AppColors.outlineVariant, alignSelf: 'center', marginBottom: 4 },
-  sheetTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 20, color: AppColors.onSurface, paddingHorizontal: 20 },
-  sheetFields: { flexDirection: 'row', gap: 12, paddingHorizontal: 20 },
-  sheetField: { flex: 1, gap: 6 },
-  fieldLabel: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: AppColors.onSurfaceVariant },
-  fieldInput: {
-    backgroundColor: AppColors.surfaceContainerLow, borderRadius: 12, padding: 14,
-    fontFamily: 'PlusJakartaSans_500Medium', fontSize: 15, color: AppColors.onSurface,
+  sheetHandle: { 
+    width: 36, 
+    height: 4, 
+    borderRadius: 2, 
+    backgroundColor: AppColors.outlineVariant, 
+    alignSelf: 'center', 
+    marginBottom: 16,
+  },
+  sheetTitle: { 
+    fontFamily: 'PlusJakartaSans_700Bold', 
+    fontSize: 20, 
+    color: AppColors.onSurface, 
+    paddingHorizontal: 20,
+    letterSpacing: -0.3,
+    marginBottom: 20,
+  },
+  sheetContent: {
+    paddingHorizontal: 20,
+    gap: 20,
+  },
+  sheetFields: { 
+    flexDirection: 'row', 
+    gap: 12, 
+  },
+  sheetField: { 
+    flex: 1, 
+  },
+  sheetFieldFull: {
+    width: '100%',
+  },
+  fieldLabel: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 14,
+    color: AppColors.onSurface,
+    marginBottom: 8,
   },
   saveBtn: {
-    marginHorizontal: 20, backgroundColor: AppColors.primary, borderRadius: 999,
-    paddingVertical: 16, alignItems: 'center',
-    shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginTop: 8,
   },
-  saveBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onPrimary },
+  saveBtnGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveBtnText: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 16,
+    color: AppColors.onPrimary,
+  },
 });

@@ -1,3 +1,5 @@
+import '../global.css';
+
 import { useFonts } from 'expo-font';
 import {
   PlusJakartaSans_400Regular,
@@ -10,6 +12,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { HeroUINativeProvider } from 'heroui-native';
 
 import { AuthProvider } from '@/context/auth';
 import { ChildProvider } from '@/context/child';
@@ -36,45 +40,49 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <ChildProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen
-            name="(auth)"
-            options={{ animation: 'slide_from_bottom' }}
-          />
-          <Stack.Screen
-            name="(onboarding)"
-            options={{ animation: 'slide_from_right' }}
-          />
-          <Stack.Screen
-            name="(tabs)"
-            options={{ animation: 'fade' }}
-          />
-          <Stack.Screen
-            name="checkin"
-            options={{ animation: 'slide_from_bottom' }}
-          />
-          <Stack.Screen
-            name="consult"
-            options={{ animation: 'slide_from_right' }}
-          />
-          <Stack.Screen
-            name="health-log"
-            options={{ animation: 'slide_from_bottom' }}
-          />
-          <Stack.Screen
-            name="records"
-            options={{ animation: 'slide_from_bottom' }}
-          />
-          <Stack.Screen
-            name="profile"
-            options={{ animation: 'slide_from_right' }}
-          />
-        </Stack>
-        <StatusBar style="dark" />
-      </ChildProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <HeroUINativeProvider>
+        <AuthProvider>
+          <ChildProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen
+                name="(auth)"
+                options={{ animation: 'slide_from_bottom' }}
+              />
+              <Stack.Screen
+                name="(onboarding)"
+                options={{ animation: 'slide_from_right' }}
+              />
+              <Stack.Screen
+                name="(tabs)"
+                options={{ animation: 'fade' }}
+              />
+              <Stack.Screen
+                name="checkin"
+                options={{ animation: 'slide_from_bottom' }}
+              />
+              <Stack.Screen
+                name="consult"
+                options={{ animation: 'slide_from_right' }}
+              />
+              <Stack.Screen
+                name="health-log"
+                options={{ animation: 'slide_from_bottom' }}
+              />
+              <Stack.Screen
+                name="records"
+                options={{ animation: 'slide_from_bottom' }}
+              />
+              <Stack.Screen
+                name="profile"
+                options={{ animation: 'slide_from_right' }}
+              />
+            </Stack>
+            <StatusBar style="dark" />
+          </ChildProvider>
+        </AuthProvider>
+      </HeroUINativeProvider>
+    </GestureHandlerRootView>
   );
 }

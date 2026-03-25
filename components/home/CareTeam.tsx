@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Card, PressableFeedback } from 'heroui-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppColors } from '@/constants/theme';
 import { typography } from '@/styles/global';
@@ -26,25 +27,37 @@ export function CareTeam({ providers, onAddProvider }: CareTeamProps) {
         contentContainerStyle={styles.scroll}
       >
         {providers.map((p) => (
-          <View key={p.id} style={styles.card}>
-            <View style={styles.avatarRing}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{p.initial}</Text>
-              </View>
-            </View>
-            <Text style={styles.name}>{p.name}</Text>
-            <Text style={styles.role}>{p.role}</Text>
-          </View>
+          <PressableFeedback key={p.id}>
+            <Card style={styles.card} className="p-0">
+              <Card.Header style={styles.cardHeader}>
+                <View style={styles.avatarContainer}>
+                  <View style={styles.avatarRing}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>{p.initial}</Text>
+                    </View>
+                  </View>
+                </View>
+              </Card.Header>
+              <Card.Body style={styles.cardBody}>
+                <Card.Title style={styles.name} numberOfLines={2}>
+                  {p.name}
+                </Card.Title>
+                <Card.Description style={styles.role} numberOfLines={2}>
+                  {p.role}
+                </Card.Description>
+              </Card.Body>
+            </Card>
+          </PressableFeedback>
         ))}
 
-        {/* Add provider slot */}
-        <Pressable
-          style={({ pressed }) => [styles.addCard, { opacity: pressed ? 0.7 : 1 }]}
-          onPress={onAddProvider}
-        >
-          <Ionicons name="person-add-outline" size={26} color={AppColors.onSurfaceVariant} />
-          <Text style={styles.addLabel}>Add Provider</Text>
-        </Pressable>
+        <PressableFeedback onPress={onAddProvider}>
+          <View style={styles.addCard}>
+            <View style={styles.addIconCircle}>
+              <Ionicons name="add" size={22} color={AppColors.primary} />
+            </View>
+            <Text style={styles.addLabel}>Add{'\n'}Provider</Text>
+          </View>
+        </PressableFeedback>
       </ScrollView>
     </View>
   );
@@ -52,78 +65,102 @@ export function CareTeam({ providers, onAddProvider }: CareTeamProps) {
 
 const styles = StyleSheet.create({
   section: {
-    gap: 14,
+    gap: 16,
   },
   heading: {
     paddingHorizontal: 0,
   },
   scroll: {
     gap: 12,
-    paddingRight: 4,
+    paddingRight: 8,
   },
   card: {
-    width: 110,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderRadius: 14,
-    padding: 14,
-    alignItems: 'center',
-    gap: 8,
-    shadowColor: AppColors.onSurface,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    width: 120,
+    height: 170,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 20,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: `${AppColors.outlineVariant}15`,
+    borderColor: `${AppColors.outlineVariant}12`,
+  },
+  cardHeader: {
+    paddingTop: 16,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    alignItems: 'center',
   },
   avatarRing: {
-    padding: 3,
-    borderRadius: 36,
-    backgroundColor: AppColors.surfaceContainer,
+    padding: 4,
+    borderRadius: 40,
+    backgroundColor: `${AppColors.primaryContainer}25`,
   },
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: `${AppColors.primaryContainer}60`,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${AppColors.primaryContainer}50`,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: `${AppColors.primary}20`,
   },
   avatarText: {
     fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 18,
+    fontSize: 20,
     color: AppColors.primary,
   },
+  cardBody: {
+    paddingHorizontal: 10,
+    paddingTop: 12,
+    paddingBottom: 16,
+    alignItems: 'center',
+    gap: 4,
+  },
   name: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: 13,
     color: AppColors.onSurface,
     textAlign: 'center',
+    lineHeight: 16,
   },
   role: {
     fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 10,
+    fontSize: 9,
     color: AppColors.onSurfaceVariant,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
     textAlign: 'center',
+    lineHeight: 12,
   },
   addCard: {
-    width: 110,
-    backgroundColor: `${AppColors.surfaceContainer}70`,
-    borderRadius: 14,
-    padding: 14,
+    width: 120,
+    height: 170,
+    backgroundColor: `${AppColors.surfaceContainer}30`,
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: `${AppColors.outlineVariant}50`,
+    borderColor: `${AppColors.outlineVariant}35`,
+  },
+  addIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: `${AppColors.primaryContainer}35`,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addLabel: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: 11,
     color: AppColors.onSurfaceVariant,
     textAlign: 'center',
+    lineHeight: 14,
   },
 });

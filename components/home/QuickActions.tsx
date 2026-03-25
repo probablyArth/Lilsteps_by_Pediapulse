@@ -1,5 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from 'react-native';
+import { Button, PressableFeedback } from 'heroui-native';
 
 import { AppColors } from '@/constants/theme';
 
@@ -11,10 +12,10 @@ interface QuickActionsProps {
 }
 
 const ACTIONS = [
-  { key: 'book', label: 'Book', icon: 'calendar-outline' },
-  { key: 'growth', label: 'Growth', icon: 'trending-up-outline' },
-  { key: 'vaccines', label: 'Vaccines', icon: 'shield-checkmark-outline' },
-  { key: 'records', label: 'Records', icon: 'folder-outline' },
+  { key: 'book', label: 'Book', iconFamily: 'Feather', iconName: 'calendar' },
+  { key: 'growth', label: 'Growth', iconFamily: 'Feather', iconName: 'trending-up' },
+  { key: 'vaccines', label: 'Vaccines', iconFamily: 'MaterialCommunityIcons', iconName: 'shield-check-outline' },
+  { key: 'records', label: 'Records', iconFamily: 'Feather', iconName: 'folder' },
 ] as const;
 
 export function QuickActions({ onBook, onGrowth, onVaccines, onRecords }: QuickActionsProps) {
@@ -25,19 +26,33 @@ export function QuickActions({ onBook, onGrowth, onVaccines, onRecords }: QuickA
     records: onRecords ?? (() => {}),
   };
 
+  const renderIcon = (family: string, name: string) => {
+    if (family === 'MaterialCommunityIcons') {
+      return <MaterialCommunityIcons name={name as any} size={24} color={AppColors.primary} />;
+    }
+    return <Feather name={name as any} size={22} color={AppColors.primary} />;
+  };
+
   return (
     <View style={styles.row}>
       {ACTIONS.map((action) => (
-        <Pressable
+        <PressableFeedback
           key={action.key}
-          style={({ pressed }) => [styles.item, { opacity: pressed ? 0.7 : 1 }]}
+          style={styles.item}
           onPress={handlers[action.key]}
         >
-          <View style={styles.iconBox}>
-            <Ionicons name={action.icon as any} size={22} color={AppColors.primary} />
+          <View pointerEvents="none">
+            <Button
+              isIconOnly
+              variant="secondary"
+              size="lg"
+              style={styles.iconBox}
+            >
+              {renderIcon(action.iconFamily, action.iconName)}
+            </Button>
           </View>
           <Text style={styles.label}>{action.label}</Text>
-        </Pressable>
+        </PressableFeedback>
       ))}
     </View>
   );
@@ -58,8 +73,6 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 16,
     backgroundColor: AppColors.surfaceContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: AppColors.onSurface,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
@@ -68,9 +81,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 10,
+    fontSize: 12,
     color: AppColors.onSurfaceVariant,
-    letterSpacing: 0.8,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
 });

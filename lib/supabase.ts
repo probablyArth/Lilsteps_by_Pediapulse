@@ -1,7 +1,7 @@
-import 'react-native-url-polyfill/auto';
-import { createClient } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import { createClient } from "@supabase/supabase-js";
+import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
+import "react-native-url-polyfill/auto";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
@@ -13,25 +13,39 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
  */
 const CHUNK_SIZE = 1800; // conservative, under 2048
 
+const getWebStorage = (): Storage | null => {
+  if (Platform.OS !== "web") return null;
+  if (typeof globalThis === "undefined") return null;
+
+  try {
+    if (!("localStorage" in globalThis)) return null;
+    return globalThis.localStorage;
+  } catch {
+    // localStorage can throw in SSR or locked-down contexts
+    return null;
+  }
+};
+
 const ExpoSecureStoreAdapter = {
   getItem: async (key: string): Promise<string | null> => {
-    if (Platform.OS === 'web') {
-      return localStorage.getItem(key);
+    const webStorage = getWebStorage();
+    if (webStorage) {
+      return webStorage.getItem(key);
     }
     try {
       const raw = await SecureStore.getItemAsync(key);
       if (raw === null) return null;
 
       // Check if value was chunked
-      if (raw.startsWith('__chunked__:')) {
-        const count = parseInt(raw.split(':')[1], 10);
+      if (raw.startsWith("__chunked__:")) {
+        const count = parseInt(raw.split(":")[1], 10);
         const chunks: string[] = [];
         for (let i = 0; i < count; i++) {
           const chunk = await SecureStore.getItemAsync(`${key}_chunk_${i}`);
           if (chunk === null) return null; // corrupted, treat as missing
           chunks.push(chunk);
         }
-        return chunks.join('');
+        return chunks.join("");
       }
       return raw;
     } catch {
@@ -40,8 +54,9 @@ const ExpoSecureStoreAdapter = {
   },
 
   setItem: async (key: string, value: string): Promise<void> => {
-    if (Platform.OS === 'web') {
-      localStorage.setItem(key, value);
+    const webStorage = getWebStorage();
+    if (webStorage) {
+      webStorage.setItem(key, value);
       return;
     }
     try {
@@ -50,12 +65,12 @@ const ExpoSecureStoreAdapter = {
         return;
       }
       // Chunk the value
-      const chunks = value.match(new RegExp(`.{1,${CHUNK_SIZE}}`, 'g')) ?? [];
+      const chunks = value.match(new RegExp(`.{1,${CHUNK_SIZE}}`, "g")) ?? [];
       await SecureStore.setItemAsync(key, `__chunked__:${chunks.length}`);
       await Promise.all(
         chunks.map((chunk, i) =>
-          SecureStore.setItemAsync(`${key}_chunk_${i}`, chunk)
-        )
+          SecureStore.setItemAsync(`${key}_chunk_${i}`, chunk),
+        ),
       );
     } catch {
       // Silent fail — better than crashing; session won't persist
@@ -63,18 +78,19 @@ const ExpoSecureStoreAdapter = {
   },
 
   removeItem: async (key: string): Promise<void> => {
-    if (Platform.OS === 'web') {
-      localStorage.removeItem(key);
+    const webStorage = getWebStorage();
+    if (webStorage) {
+      webStorage.removeItem(key);
       return;
     }
     try {
       const raw = await SecureStore.getItemAsync(key);
-      if (raw?.startsWith('__chunked__:')) {
-        const count = parseInt(raw.split(':')[1], 10);
+      if (raw?.startsWith("__chunked__:")) {
+        const count = parseInt(raw.split(":")[1], 10);
         await Promise.all(
           Array.from({ length: count }, (_, i) =>
-            SecureStore.deleteItemAsync(`${key}_chunk_${i}`)
-          )
+            SecureStore.deleteItemAsync(`${key}_chunk_${i}`),
+          ),
         );
       }
       await SecureStore.deleteItemAsync(key);

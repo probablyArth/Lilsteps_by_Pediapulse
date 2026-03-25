@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Card } from 'heroui-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppColors } from '@/constants/theme';
@@ -22,6 +23,7 @@ const BRACKET_LABEL: Record<string, string> = {
 
 export default function VaccineScreen() {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
   const { bracket, child } = useChild();
   const { vaccinations, loading, markDone } = useVaccinations(child?.id ?? null);
 
@@ -30,6 +32,11 @@ export default function VaccineScreen() {
   const doneCount = vaccinations.filter((v) => v.status === 'done').length;
   const total = vaccinations.length;
   const progressPct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+  
+  // Calculate progress bar width in pixels (screen - padding - card padding)
+  const progressBarWidth = screenWidth - 40 - 40; // 20px padding each side + 20px card padding each side
+  const progressFillWidth = Math.max((progressPct / 100) * progressBarWidth, 8);
+  const thumbPosition = Math.max((progressPct / 100) * progressBarWidth - 8, 0);
 
   const nextDue = vaccinations.find((v) => v.status === 'due_soon');
   const nextUpcoming = vaccinations.find((v) => v.status === 'upcoming');
@@ -51,81 +58,130 @@ export default function VaccineScreen() {
   }
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Vaccination</Text>
-        <Pressable style={styles.headerIcon}>
-          <Ionicons name="notifications-outline" size={22} color={AppColors.onSurface} />
-        </Pressable>
+    <View style={styles.screen}>
+      {/* Floating header with gradient fade */}
+      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
+        <LinearGradient
+          colors={[
+            AppColors.surface,
+            AppColors.surface,
+            `${AppColors.surface}E8`,
+            `${AppColors.surface}B0`,
+            `${AppColors.surface}60`,
+            `${AppColors.surface}20`,
+            'transparent',
+          ]}
+          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+        />
+        <View style={styles.headerContent} pointerEvents="box-none">
+          <Text style={styles.headerTitle}>Vaccination</Text>
+          <Pressable style={styles.headerIcon}>
+            <Ionicons name="notifications-outline" size={22} color={AppColors.onSurface} />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 110 + insets.bottom }]}
+        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 70, paddingBottom: 110 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero progress section */}
-        <View style={styles.heroSection}>
-          <View style={styles.heroTop}>
-            <View>
+        <Card style={styles.heroCard}>
+          <Card.Body style={styles.heroCardBody}>
+            <View style={styles.heroBlob} />
+            <View style={styles.heroHeader}>
               <Text style={styles.bracketLabel}>{bracketLabel}</Text>
-              <Text style={styles.heroTitle}>Vaccination Progress</Text>
+              <View style={styles.heroTitleRow}>
+                <Text style={styles.heroTitle}>Vaccination{'\n'}Progress</Text>
+                <LinearGradient
+                  colors={[AppColors.primary, AppColors.gradientEnd]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.progressBadge}
+                >
+                  <Text style={styles.progressBadgeCount}>{doneCount}/{total}</Text>
+                  <Text style={styles.progressBadgeLabel}>Given</Text>
+                </LinearGradient>
+              </View>
             </View>
-            <LinearGradient
-              colors={[AppColors.primary, AppColors.primaryContainer]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.progressBadge}
-            >
-              <Text style={styles.progressBadgeCount}>{doneCount}/{total}</Text>
-              <Text style={styles.progressBadgeLabel}>Given</Text>
-            </LinearGradient>
-          </View>
 
-          {/* Progress bar */}
-          <View style={styles.progressTrack}>
-            <LinearGradient
-              colors={[AppColors.primary, AppColors.primaryContainer]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.progressFill, { width: `${progressPct}%` }]}
-            />
-          </View>
-          <Text style={styles.progressSubtext}>{progressPct}% complete · {total - doneCount} remaining</Text>
-        </View>
+            <View style={styles.progressBarContainer}>
+              <View style={styles.progressTrack}>
+                <LinearGradient
+                  colors={[AppColors.primary, AppColors.gradientEnd]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.progressFill, { width: progressFillWidth }]}
+                />
+              </View>
+              <View style={[styles.progressThumb, { left: thumbPosition }]} />
+            </View>
+            
+            <View style={styles.progressStats}>
+              <View style={styles.progressStat}>
+                <View style={[styles.progressStatDot, { backgroundColor: AppColors.primary }]} />
+                <Text style={styles.progressStatText}>{progressPct}% complete</Text>
+              </View>
+              <View style={styles.progressStat}>
+                <View style={[styles.progressStatDot, { backgroundColor: AppColors.surfaceContainerHigh }]} />
+                <Text style={styles.progressStatText}>{total - doneCount} remaining</Text>
+              </View>
+            </View>
+          </Card.Body>
+        </Card>
 
         {/* Upload certificate */}
-        <Pressable style={({ pressed }) => [styles.uploadCard, { opacity: pressed ? 0.85 : 1 }]}>
+        <Pressable style={({ pressed }) => [styles.uploadCard, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+          <LinearGradient
+            colors={[`${AppColors.primary}08`, `${AppColors.primary}03`]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.uploadGradient}
+          />
           <View style={styles.uploadIcon}>
-            <Ionicons name="cloud-upload-outline" size={26} color={AppColors.primary} />
+            <Ionicons name="cloud-upload-outline" size={24} color={AppColors.primary} />
           </View>
           <View style={styles.uploadText}>
             <Text style={styles.uploadTitle}>Upload Vaccination Certificate</Text>
             <Text style={styles.uploadSub}>Keep your records digital and safe</Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={`${AppColors.onSurfaceVariant}60`} />
+          <View style={styles.uploadArrow}>
+            <Ionicons name="chevron-forward" size={16} color={AppColors.primary} />
+          </View>
         </Pressable>
 
         {/* Bento stats */}
         <View style={styles.bentoRow}>
-          <View style={styles.bentoCard}>
-            <Ionicons name="calendar-outline" size={26} color={AppColors.primary} />
-            <View style={styles.bentoText}>
-              <Text style={styles.bentoLabel}>Next Dose</Text>
-              <Text style={styles.bentoValue} numberOfLines={2}>
-                {nextDue?.vaccine_name ?? nextUpcoming?.vaccine_name ?? 'All done!'}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.bentoCard}>
-            <Ionicons name="warning-outline" size={26} color={AppColors.tertiary} />
-            <View style={styles.bentoText}>
-              <Text style={styles.bentoLabel}>Upcoming</Text>
-              <Text style={[styles.bentoValue, { color: nextDue ? AppColors.tertiary : AppColors.onSurface }]}>
-                {nextDue ? 'Due Soon' : nextUpcoming ? new Date(nextUpcoming.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'None'}
-              </Text>
-            </View>
-          </View>
+          <Card style={styles.bentoCard}>
+            <Card.Body style={styles.bentoCardBody}>
+              <View style={styles.bentoIconWrap}>
+                <Ionicons name="calendar-outline" size={22} color={AppColors.primary} />
+              </View>
+              <View style={styles.bentoText}>
+                <Text style={styles.bentoLabel}>Next Dose</Text>
+                <Text style={styles.bentoValue} numberOfLines={2}>
+                  {nextDue?.vaccine_name ?? nextUpcoming?.vaccine_name ?? 'All done!'}
+                </Text>
+              </View>
+            </Card.Body>
+          </Card>
+          <Card style={[styles.bentoCard, nextDue && styles.bentoCardWarning]}>
+            <Card.Body style={styles.bentoCardBody}>
+              <View style={[styles.bentoIconWrap, nextDue && styles.bentoIconWarning]}>
+                <Ionicons name="alert-circle-outline" size={22} color={nextDue ? AppColors.tertiary : AppColors.onSurfaceVariant} />
+              </View>
+              <View style={styles.bentoText}>
+                <Text style={styles.bentoLabel}>Status</Text>
+                <Text style={[styles.bentoValue, nextDue && { color: AppColors.tertiary }]}>
+                  {nextDue ? 'Due Soon' : nextUpcoming ? new Date(nextUpcoming.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'On Track'}
+                </Text>
+              </View>
+            </Card.Body>
+          </Card>
         </View>
 
         {/* Vaccination list */}
@@ -143,15 +199,17 @@ export default function VaccineScreen() {
         </View>
 
         {/* Doctor's note */}
-        <View style={styles.doctorNote}>
-          <Ionicons name="information-circle-outline" size={20} color={AppColors.tertiary} />
-          <View style={styles.doctorNoteText}>
-            <Text style={styles.doctorNoteTitle}>Doctor&apos;s Note</Text>
-            <Text style={styles.doctorNoteBody}>
-              Minor fever after DTP/Pentavalent is common. Apply a cold compress on the injection site if swelling occurs. Contact your pediatrician if fever exceeds 101°F.
-            </Text>
-          </View>
-        </View>
+        <Card style={styles.doctorNote}>
+          <Card.Body style={styles.doctorNoteBody}>
+            <Ionicons name="information-circle-outline" size={20} color={AppColors.tertiary} />
+            <View style={styles.doctorNoteText}>
+              <Text style={styles.doctorNoteTitle}>Doctor&apos;s Note</Text>
+              <Text style={styles.doctorNoteBodyText}>
+                Minor fever after DTP/Pentavalent is common. Apply a cold compress on the injection site if swelling occurs. Contact your pediatrician if fever exceeds 101°F.
+              </Text>
+            </View>
+          </Card.Body>
+        </Card>
       </ScrollView>
     </View>
   );
@@ -173,183 +231,359 @@ function VaccineCard({
       ? new Date(vaccine.administered_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       : '';
     return (
-      <View style={styles.cardDone}>
-        <View style={styles.cardLeft}>
-          <View style={styles.iconDone}>
-            <Ionicons name="checkmark-circle" size={22} color={AppColors.successGreen} />
+      <Card style={styles.cardDone}>
+        <Card.Body style={styles.cardDoneBody}>
+          <View style={styles.cardLeft}>
+            <View style={styles.iconDone}>
+              <Ionicons name="checkmark-circle" size={22} color={AppColors.successGreen} />
+            </View>
+            <View style={styles.cardInfo}>
+              <Text style={styles.cardName}>{displayName}</Text>
+              <Text style={styles.cardDate}>{dateStr}{givenStr ? ` · Given ${givenStr}` : ''}</Text>
+            </View>
           </View>
-          <View style={styles.cardInfo}>
-            <Text style={styles.cardName}>{displayName}</Text>
-            <Text style={styles.cardDate}>{dateStr}{givenStr ? ` · Given ${givenStr}` : ''}</Text>
+          <View style={styles.badgeDone}>
+            <Text style={styles.badgeDoneText}>Given</Text>
           </View>
-        </View>
-        <View style={styles.badgeDone}>
-          <Text style={styles.badgeDoneText}>Given</Text>
-        </View>
-      </View>
+        </Card.Body>
+      </Card>
     );
   }
 
   if (status === 'due_soon') {
     return (
-      <View style={styles.cardDueSoon}>
-        <View style={styles.cardDueSoonBlob} />
-        <View style={styles.cardDueSoonTop}>
-          <View style={styles.cardLeft}>
-            <View style={styles.iconDueSoon}>
-              <Ionicons name="medical" size={20} color={AppColors.primary} />
+      <Card style={styles.cardDueSoon}>
+        <Card.Body style={styles.cardDueSoonBody}>
+          <View style={styles.cardDueSoonBlob} />
+          <View style={styles.cardDueSoonTop}>
+            <View style={styles.cardLeft}>
+              <View style={styles.iconDueSoon}>
+                <Ionicons name="medical" size={20} color={AppColors.primary} />
+              </View>
+              <View style={styles.cardInfo}>
+                <Text style={[styles.cardName, { fontFamily: 'PlusJakartaSans_800ExtraBold' }]}>{displayName}</Text>
+                <Text style={styles.cardDate}>{dateStr}</Text>
+              </View>
             </View>
-            <View style={styles.cardInfo}>
-              <Text style={[styles.cardName, { fontFamily: 'PlusJakartaSans_800ExtraBold' }]}>{displayName}</Text>
-              <Text style={styles.cardDate}>{dateStr}</Text>
+            <View style={styles.badgeDueSoon}>
+              <Text style={styles.badgeDueSoonText}>Due Now</Text>
             </View>
           </View>
-          <View style={styles.badgeDueSoon}>
-            <Text style={styles.badgeDueSoonText}>Due Now</Text>
-          </View>
-        </View>
-        <View style={styles.cardActions}>
-          <Pressable
-            style={({ pressed }) => [styles.actionPrimary, { opacity: pressed ? 0.88 : 1 }]}
-            onPress={onMarkGiven}
-          >
-            <LinearGradient
-              colors={[AppColors.primary, AppColors.primaryContainer]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.actionPrimaryGrad}
+          <View style={styles.cardActions}>
+            <Pressable
+              style={({ pressed }) => [styles.actionPrimary, { opacity: pressed ? 0.88 : 1 }]}
+              onPress={onMarkGiven}
             >
-              <Text style={styles.actionPrimaryText}>Mark as Given</Text>
-            </LinearGradient>
-          </Pressable>
-          <Pressable style={({ pressed }) => [styles.actionSecondary, { opacity: pressed ? 0.75 : 1 }]}>
-            <Text style={styles.actionSecondaryText}>Not Sure</Text>
-          </Pressable>
-        </View>
-      </View>
+              <LinearGradient
+                colors={[AppColors.primary, AppColors.gradientEnd]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.actionPrimaryGrad}
+              >
+                <Text style={styles.actionPrimaryText}>Mark as Given</Text>
+              </LinearGradient>
+            </Pressable>
+            <Pressable style={({ pressed }) => [styles.actionSecondary, { opacity: pressed ? 0.75 : 1 }]}>
+              <Text style={styles.actionSecondaryText}>Not Sure</Text>
+            </Pressable>
+          </View>
+        </Card.Body>
+      </Card>
     );
   }
 
   if (status === 'overdue') {
     return (
-      <View style={styles.cardOverdue}>
-        <View style={styles.cardLeft}>
-          <View style={styles.iconOverdue}>
-            <Ionicons name="calendar-clear-outline" size={20} color={AppColors.errorRed} />
+      <Card style={styles.cardOverdue}>
+        <Card.Body style={styles.cardOverdueBody}>
+          <View style={styles.cardLeft}>
+            <View style={styles.iconOverdue}>
+              <Ionicons name="calendar-clear-outline" size={20} color={AppColors.errorRed} />
+            </View>
+            <View style={styles.cardInfo}>
+              <Text style={styles.cardName}>{displayName}</Text>
+              <Text style={styles.cardDate}>{dateStr}</Text>
+            </View>
           </View>
-          <View style={styles.cardInfo}>
-            <Text style={styles.cardName}>{displayName}</Text>
-            <Text style={styles.cardDate}>{dateStr}</Text>
+          <View style={styles.badgeOverdue}>
+            <Text style={styles.badgeOverdueText}>Overdue</Text>
           </View>
-        </View>
-        <View style={styles.badgeOverdue}>
-          <Text style={styles.badgeOverdueText}>Overdue</Text>
-        </View>
-      </View>
+        </Card.Body>
+      </Card>
     );
   }
 
-  // upcoming
   return (
-    <View style={[styles.cardUpcoming]}>
-      <View style={styles.cardLeft}>
-        <View style={styles.iconUpcoming}>
-          <Ionicons name="time-outline" size={20} color={AppColors.onSurfaceVariant} />
+    <Card style={styles.cardUpcoming}>
+      <Card.Body style={styles.cardUpcomingBody}>
+        <View style={styles.cardLeft}>
+          <View style={styles.iconUpcoming}>
+            <Ionicons name="time-outline" size={20} color={AppColors.onSurfaceVariant} />
+          </View>
+          <View style={styles.cardInfo}>
+            <Text style={[styles.cardName, { color: `${AppColors.onSurface}90` }]}>{displayName}</Text>
+            <Text style={styles.cardDate}>{dateStr}</Text>
+          </View>
         </View>
-        <View style={styles.cardInfo}>
-          <Text style={[styles.cardName, { color: `${AppColors.onSurface}90` }]}>{displayName}</Text>
-          <Text style={styles.cardDate}>{dateStr}</Text>
+        <View style={styles.badgeUpcoming}>
+          <Text style={styles.badgeUpcomingText}>Upcoming</Text>
         </View>
-      </View>
-      <View style={styles.badgeUpcoming}>
-        <Text style={styles.badgeUpcomingText}>Upcoming</Text>
-      </View>
-    </View>
+      </Card.Body>
+    </Card>
   );
 }
-
-const CARD_BASE: ViewStyle = {
-  backgroundColor: 'rgba(255,255,255,0.9)',
-  borderRadius: 16,
-  padding: 16,
-  shadowColor: AppColors.onSurface,
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.05,
-  shadowRadius: 6,
-  elevation: 2,
-};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.surface },
 
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 24, paddingVertical: 14,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+  headerWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
-  headerTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22, color: AppColors.onSurface, letterSpacing: -0.5 },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 40,
+  },
+  headerTitle: { 
+    fontFamily: 'PlusJakartaSans_700Bold', 
+    fontSize: 22, 
+    color: AppColors.onSurface, 
+    letterSpacing: -0.3,
+  },
   headerIcon: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: `${AppColors.primary}12`,
     alignItems: 'center', justifyContent: 'center',
   },
 
-  scroll: { paddingHorizontal: 20, paddingTop: 20, gap: 20 },
+  scroll: { paddingHorizontal: 20, gap: 20 },
 
-  // Hero
-  heroSection: { gap: 12 },
-  heroTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  bracketLabel: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, color: AppColors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 },
-  heroTitle: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 26, color: AppColors.onSurface, letterSpacing: -0.5 },
-  progressBadge: { borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8, alignItems: 'center', flexDirection: 'row', gap: 6 },
-  progressBadgeCount: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16, color: AppColors.onPrimary },
-  progressBadgeLabel: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 11, color: 'rgba(255,255,255,0.85)' },
-  progressTrack: { height: 12, backgroundColor: `${AppColors.surfaceContainerHigh}80`, borderRadius: 999, overflow: 'hidden' },
-  progressFill: { height: 12, borderRadius: 999 },
-  progressSubtext: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 12, color: AppColors.onSurfaceVariant },
+  heroCard: {
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
+    overflow: 'hidden',
+  },
+  heroCardBody: {
+    padding: 20,
+    gap: 20,
+  },
+  heroBlob: {
+    position: 'absolute',
+    top: -60,
+    right: -60,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: `${AppColors.primary}06`,
+  },
+  heroHeader: {
+    gap: 6,
+  },
+  heroTitleRow: { 
+    flexDirection: 'row', 
+    alignItems: 'flex-end', 
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  bracketLabel: { 
+    fontFamily: 'PlusJakartaSans_700Bold', 
+    fontSize: 11, 
+    color: AppColors.onSurfaceVariant, 
+    textTransform: 'uppercase', 
+    letterSpacing: 0.5,
+  },
+  heroTitle: { 
+    flex: 1,
+    fontFamily: 'PlusJakartaSans_800ExtraBold', 
+    fontSize: 28, 
+    color: AppColors.onSurface, 
+    letterSpacing: -0.8,
+    lineHeight: 32,
+  },
+  progressBadge: { 
+    borderRadius: 999, 
+    paddingHorizontal: 14, 
+    paddingVertical: 10, 
+    alignItems: 'center', 
+    flexDirection: 'row', 
+    gap: 5,
+    marginBottom: 6,
+  },
+  progressBadgeCount: { 
+    fontFamily: 'PlusJakartaSans_800ExtraBold', 
+    fontSize: 17, 
+    color: AppColors.onPrimary,
+  },
+  progressBadgeLabel: { 
+    fontFamily: 'PlusJakartaSans_600SemiBold', 
+    fontSize: 12, 
+    color: 'rgba(255,255,255,0.9)',
+  },
+  progressBarContainer: {
+    position: 'relative',
+    paddingVertical: 6,
+  },
+  progressTrack: { 
+    height: 8, 
+    backgroundColor: `${AppColors.surfaceContainerHigh}`, 
+    borderRadius: 999, 
+    overflow: 'hidden',
+  },
+  progressFill: { 
+    height: 8, 
+    borderRadius: 999,
+    minWidth: 8,
+  },
+  progressThumb: {
+    position: 'absolute',
+    top: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderWidth: 3,
+    borderColor: AppColors.primary,
+    marginLeft: -8,
+  },
+  progressStats: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  progressStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressStatDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  progressStatText: { 
+    fontFamily: 'PlusJakartaSans_600SemiBold', 
+    fontSize: 13, 
+    color: AppColors.onSurfaceVariant,
+  },
+  progressSubtext: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 12, 
+    color: AppColors.onSurfaceVariant,
+  },
 
-  // Upload
   uploadCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: 16,
-    borderWidth: 1.5, borderStyle: 'dashed', borderColor: `${AppColors.primary}35`,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 14,
+    backgroundColor: AppColors.surfaceContainerLowest, 
+    borderRadius: 16,
+    borderWidth: 1.5, 
+    borderStyle: 'dashed', 
+    borderColor: `${AppColors.primary}25`,
     padding: 16,
+    overflow: 'hidden',
+  },
+  uploadGradient: {
+    ...StyleSheet.absoluteFillObject,
   },
   uploadIcon: {
-    width: 48, height: 48, borderRadius: 24,
+    width: 44, 
+    height: 44, 
+    borderRadius: 12,
     backgroundColor: `${AppColors.primary}10`,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center', 
+    justifyContent: 'center',
   },
-  uploadText: { flex: 1, gap: 2 },
-  uploadTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.onSurface },
-  uploadSub: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant },
+  uploadText: { flex: 1, gap: 4 },
+  uploadTitle: { 
+    fontFamily: 'PlusJakartaSans_700Bold', 
+    fontSize: 15, 
+    color: AppColors.onSurface,
+    letterSpacing: -0.2,
+  },
+  uploadSub: { 
+    fontFamily: 'PlusJakartaSans_500Medium', 
+    fontSize: 13, 
+    color: AppColors.onSurfaceVariant,
+  },
+  uploadArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: `${AppColors.primary}08`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-  // Bento
   bentoRow: { flexDirection: 'row', gap: 12 },
   bentoCard: {
-    flex: 1, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 16,
-    padding: 16, gap: 12,
-    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
+    flex: 1, 
+    backgroundColor: AppColors.surfaceContainerLowest, 
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
   },
-  bentoText: { gap: 2 },
-  bentoLabel: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.6 },
-  bentoValue: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onSurface },
+  bentoCardWarning: {
+    borderColor: `${AppColors.tertiary}20`,
+  },
+  bentoCardBody: {
+    padding: 16, 
+    gap: 14,
+  },
+  bentoIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: `${AppColors.primary}10`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bentoIconWarning: {
+    backgroundColor: `${AppColors.tertiary}12`,
+  },
+  bentoText: { gap: 4 },
+  bentoLabel: { 
+    fontFamily: 'PlusJakartaSans_600SemiBold', 
+    fontSize: 11, 
+    color: AppColors.onSurfaceVariant, 
+    textTransform: 'uppercase', 
+    letterSpacing: 0.5,
+  },
+  bentoValue: { 
+    fontFamily: 'PlusJakartaSans_700Bold', 
+    fontSize: 16, 
+    color: AppColors.onSurface,
+    letterSpacing: -0.2,
+  },
 
-  // List
   listSection: { gap: 12 },
   listTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 18, color: AppColors.onSurface },
   list: { gap: 10 },
 
-  // Shared card elements
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
   cardInfo: { flex: 1, gap: 2 },
   cardName: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: AppColors.onSurface },
   cardDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant },
 
-  // Done card
   cardDone: {
-    ...CARD_BASE,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
+  },
+  cardDoneBody: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    padding: 16,
   },
   iconDone: {
     width: 44, height: 44, borderRadius: 22,
@@ -358,13 +592,16 @@ const styles = StyleSheet.create({
   badgeDone: { backgroundColor: AppColors.successGreenSurface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   badgeDoneText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.successGreenDark, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  // Due soon card
   cardDueSoon: {
     backgroundColor: AppColors.surfaceContainerLowest,
-    borderRadius: 16, padding: 16,
-    borderWidth: 1.5, borderColor: `${AppColors.primary}18`,
-    shadowColor: AppColors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 4,
-    gap: 14, overflow: 'hidden',
+    borderRadius: 16,
+    borderWidth: 1.5, 
+    borderColor: `${AppColors.primary}18`,
+    overflow: 'hidden',
+  },
+  cardDueSoonBody: {
+    padding: 16,
+    gap: 14,
   },
   cardDueSoonBlob: {
     position: 'absolute', top: -40, right: -40,
@@ -389,11 +626,19 @@ const styles = StyleSheet.create({
   },
   actionSecondaryText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurfaceVariant },
 
-  // Overdue card
   cardOverdue: {
-    ...CARD_BASE,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderLeftWidth: 3, borderLeftColor: AppColors.errorRed,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
+    borderLeftWidth: 3, 
+    borderLeftColor: AppColors.errorRed,
+  },
+  cardOverdueBody: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    padding: 16,
   },
   iconOverdue: {
     width: 44, height: 44, borderRadius: 22,
@@ -402,11 +647,18 @@ const styles = StyleSheet.create({
   badgeOverdue: { backgroundColor: AppColors.errorRedSurface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   badgeOverdueText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.errorRed, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  // Upcoming card
   cardUpcoming: {
-    ...CARD_BASE,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}15`,
     opacity: 0.72,
+  },
+  cardUpcomingBody: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    padding: 16,
   },
   iconUpcoming: {
     width: 44, height: 44, borderRadius: 22,
@@ -415,14 +667,19 @@ const styles = StyleSheet.create({
   badgeUpcoming: { backgroundColor: AppColors.surfaceContainerHigh, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   badgeUpcomingText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10, color: AppColors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  // Doctor's note
   doctorNote: {
-    flexDirection: 'row', gap: 12, alignItems: 'flex-start',
-    backgroundColor: `${AppColors.tertiaryContainer}20`,
-    borderRadius: 16, padding: 16,
-    borderWidth: 1, borderColor: `${AppColors.tertiary}15`,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1, 
+    borderColor: `${AppColors.tertiary}15`,
+  },
+  doctorNoteBody: {
+    flexDirection: 'row', 
+    gap: 12, 
+    alignItems: 'flex-start',
+    padding: 16,
   },
   doctorNoteText: { flex: 1, gap: 4 },
   doctorNoteTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: AppColors.onSurface },
-  doctorNoteBody: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant, lineHeight: 18 },
+  doctorNoteBodyText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: AppColors.onSurfaceVariant, lineHeight: 18 },
 });

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Card, PressableFeedback } from 'heroui-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppColors } from '@/constants/theme';
 
@@ -94,17 +95,15 @@ export function DailyInsight({ bracket, onViewAll }: DailyInsightProps) {
 
   return (
     <View style={styles.section}>
-      {/* Header row */}
       <View style={styles.header}>
         <Text style={styles.heading}>Daily Insight</Text>
         {onViewAll && (
-          <Pressable onPress={onViewAll} hitSlop={8}>
+          <PressableFeedback onPress={onViewAll}>
             <Text style={styles.viewAll}>View all</Text>
-          </Pressable>
+          </PressableFeedback>
         )}
       </View>
 
-      {/* Horizontal scroll */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -123,32 +122,33 @@ export function DailyInsight({ bracket, onViewAll }: DailyInsightProps) {
 
 function InsightCardView({ item }: { item: InsightCard }) {
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, { opacity: pressed ? 0.88 : 1 }]}
-    >
-      {/* Emoji illustration area */}
-      <View style={styles.emojiWrap}>
-        <Text style={styles.emoji}>{item.emoji}</Text>
-      </View>
+    <PressableFeedback>
+      <Card style={styles.card} className="p-0">
+        <Card.Header style={styles.cardHeader}>
+          <View style={styles.emojiWrap}>
+            <Text style={styles.emoji}>{item.emoji}</Text>
+          </View>
+          <View style={[styles.tagPill, { backgroundColor: `${item.tagColor}15` }]}>
+            <Ionicons name="bookmark-outline" size={10} color={item.tagColor} />
+            <Text style={[styles.tagText, { color: item.tagColor }]}>{item.tag}</Text>
+          </View>
+        </Card.Header>
 
-      {/* Tag pill */}
-      <View style={[styles.tagPill, { backgroundColor: `${item.tagColor}15` }]}>
-        <Ionicons name="bookmark-outline" size={10} color={item.tagColor} />
-        <Text style={[styles.tagText, { color: item.tagColor }]}>{item.tag}</Text>
-      </View>
+        <Card.Body style={styles.cardBody}>
+          <Card.Title style={styles.title} numberOfLines={2}>
+            {item.title}
+          </Card.Title>
+          <Card.Description style={styles.body} numberOfLines={3}>
+            {item.body}
+          </Card.Description>
+        </Card.Body>
 
-      {/* Title */}
-      <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-
-      {/* Body */}
-      <Text style={styles.body} numberOfLines={3}>{item.body}</Text>
-
-      {/* Read more arrow */}
-      <View style={styles.readMore}>
-        <Text style={styles.readMoreText}>Read more</Text>
-        <Ionicons name="arrow-forward" size={12} color={AppColors.primary} />
-      </View>
-    </Pressable>
+        <Card.Footer style={styles.cardFooter}>
+          <Text style={styles.readMoreText}>Read more</Text>
+          <Ionicons name="arrow-forward" size={12} color={AppColors.primary} />
+        </Card.Footer>
+      </Card>
+    </PressableFeedback>
   );
 }
 
@@ -180,15 +180,14 @@ const styles = StyleSheet.create({
     width: 228,
     backgroundColor: `${AppColors.primaryContainer}18`,
     borderRadius: 20,
-    padding: 16,
-    gap: 10,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: `${AppColors.primary}10`,
-    shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+  },
+  cardHeader: {
+    padding: 16,
+    paddingBottom: 10,
+    gap: 10,
   },
   emojiWrap: {
     width: 52,
@@ -215,6 +214,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 0.3,
   },
+  cardBody: {
+    paddingHorizontal: 16,
+    gap: 6,
+    flex: 1,
+  },
   title: {
     fontFamily: 'PlusJakartaSans_800ExtraBold',
     fontSize: 14,
@@ -227,13 +231,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: AppColors.onSurfaceVariant,
     lineHeight: 18,
-    flex: 1,
   },
-  readMore: {
+  cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 2,
+    padding: 16,
+    paddingTop: 12,
   },
   readMoreText: {
     fontFamily: 'PlusJakartaSans_700Bold',

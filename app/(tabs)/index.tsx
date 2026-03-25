@@ -35,10 +35,8 @@ export default function HomeScreen() {
 
   const allergies = child?.allergies.map(a => a.name) ?? [];
 
-  // Find next upcoming vaccination
   const nextVaccine = vaccinations.find(v => v.status === 'due_soon' || v.status === 'upcoming');
 
-  // Map doctors to care providers
   const careProviders: CareProvider[] = doctors.slice(0, 3).map((doc) => ({
     id: doc.id,
     name: doc.name,
@@ -46,21 +44,20 @@ export default function HomeScreen() {
     initial: doc.name.charAt(0),
   }));
 
+  const headerHeight = insets.top + 56;
+
   return (
     <View style={styles.screen}>
-      <HomeHeader
-        childName={childName}
-        avatarInitial={childName.charAt(0)}
-        hasUnread={false}
-        paddingTop={insets.top}
-        onNotifications={() => router.push('/profile')}
-      />
-
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 100 + insets.bottom }]}
+        contentContainerStyle={[
+          styles.scroll, 
+          { 
+            paddingTop: headerHeight,
+            paddingBottom: 100 + insets.bottom 
+          }
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Greeting */}
         <View style={styles.section}>
           <Text style={styles.greeting}>
             {getGreeting()}, {parentName || 'there'}.{'\n'}
@@ -71,7 +68,6 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {/* Quick actions — 4-column grid */}
         <QuickActions
           onBook={() => router.push('/consult/booking')}
           onGrowth={() => router.navigate('/(tabs)/growth')}
@@ -79,34 +75,36 @@ export default function HomeScreen() {
           onRecords={() => router.navigate('/(tabs)/records')}
         />
 
-        {/* Allergy banner — only if allergies exist */}
         {allergies.length > 0 && (
           <AllergyBanner allergies={allergies} />
         )}
 
-        {/* Primary AI check-in CTA */}
         <PrimaryCtaCard
           title={bracketCfg.ctaTitle}
           subtitle="Log symptoms or daily wellness"
           onPress={() => router.push('/checkin')}
         />
 
-        {/* Growth — weight & height with mini charts */}
         <GrowthCards data={{ weight: child?.weight ?? 0, height: child?.height ?? 0 }} />
 
-        {/* Next vaccination */}
         <VaccinationCard
           nextVaccine={nextVaccine?.vaccine_name ?? 'All caught up!'}
           nextDate={nextVaccine?.scheduled_date ? new Date(nextVaccine.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
           onViewSchedule={() => router.navigate('/(tabs)/vaccine')}
         />
 
-        {/* Care team horizontal scroll */}
         <CareTeam providers={careProviders} onAddProvider={() => router.push('/consult/booking')} />
 
-        {/* Daily insights horizontal scroll */}
         <DailyInsight bracket={bracketKey} />
       </ScrollView>
+
+      <HomeHeader
+        childName={childName}
+        avatarInitial={childName.charAt(0)}
+        hasUnread={false}
+        paddingTop={insets.top}
+        onNotifications={() => router.push('/profile')}
+      />
     </View>
   );
 }
@@ -122,20 +120,19 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   section: {
-    gap: 8,
+    gap: 4,
   },
   greeting: {
     fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 28,
+    fontSize: 32,
     color: AppColors.onSurface,
     letterSpacing: -0.5,
-    lineHeight: 36,
+    lineHeight: 40,
   },
   greetingSub: {
     fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 15,
+    fontSize: 16,
     color: AppColors.onSurfaceVariant,
-    lineHeight: 22,
-    opacity: 0.8,
+    lineHeight: 24,
   },
 });
