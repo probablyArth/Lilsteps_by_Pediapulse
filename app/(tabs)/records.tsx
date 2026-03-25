@@ -333,11 +333,13 @@ const styles = StyleSheet.create({
   },
   tabsList: {
     flexDirection: 'row',
-    gap: 2,
+    gap: 0,
     backgroundColor: 'transparent',
   },
   tabTrigger: {
     padding: 0,
+    margin: 0,
+    marginRight: 2,
     backgroundColor: 'transparent',
   },
   tabPill: {
