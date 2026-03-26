@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { Card } from 'heroui-native';
 import { useState } from 'react';
 import {
   Dimensions,
@@ -17,9 +18,8 @@ import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
 
 const { width: SCREEN_W } = Dimensions.get('window');
-const TILE_SIZE = (SCREEN_W - 48 - 12) / 2; // 2 cols, 24px sides, 12px gap
+const TILE_SIZE = (SCREEN_W - 40 - 12) / 2;
 
-// Symptom tiles — same set but bracket-filtered
 interface SymptomTile {
   key: string;
   label: string;
@@ -66,6 +66,8 @@ function getFeverLevel(temp: number) {
   return FEVER_LEVELS.find((l) => temp <= l.max) ?? FEVER_LEVELS[3];
 }
 
+const HEADER_HEIGHT = 70;
+
 export default function CheckinEntryScreen() {
   const insets = useSafeAreaInsets();
   const { child, bracket } = useChild();
@@ -105,32 +107,42 @@ export default function CheckinEntryScreen() {
   }
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={20} color={AppColors.onSurface} />
-        </Pressable>
-        <View style={styles.headerCenter}>
-          <LinearGradient
-            colors={[AppColors.primary, AppColors.gradientEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.headerBadge}
-          >
-            <Ionicons name="sparkles" size={13} color={AppColors.onPrimary} />
-          </LinearGradient>
+    <View style={styles.root}>
+      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
+        <LinearGradient
+          colors={[
+            AppColors.surface,
+            AppColors.surface,
+            `${AppColors.surface}E8`,
+            `${AppColors.surface}B0`,
+            `${AppColors.surface}60`,
+            `${AppColors.surface}20`,
+            `${AppColors.surface}00`,
+          ]}
+          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+        />
+        <View style={styles.header} pointerEvents="box-none">
+          <Pressable style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={AppColors.onSurface} />
+          </Pressable>
           <Text style={styles.headerTitle}>LilSteps AI</Text>
+          <View style={styles.statusDot} />
+          <View style={styles.headerSpacer} />
         </View>
-        <View style={{ width: 36 }} />
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 24 + insets.bottom }]}
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingTop: insets.top + HEADER_HEIGHT, paddingBottom: 120 + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.aiBadge}>
             <Ionicons name="sparkles" size={13} color={AppColors.primary} />
@@ -142,130 +154,140 @@ export default function CheckinEntryScreen() {
           </Text>
         </View>
 
-        {/* Bento grid */}
         <View style={styles.grid}>
           {tiles.map((tile) => {
             const active = selected.has(tile.key);
             return (
               <Pressable
                 key={tile.key}
-                style={({ pressed }) => [
-                  styles.tile,
-                  active && styles.tileActive,
-                  { opacity: pressed ? 0.85 : 1 },
-                ]}
+                style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
                 onPress={() => toggleTile(tile.key)}
               >
-                {/* Active checkmark badge */}
-                {active && (
-                  <View style={styles.checkBadge}>
-                    <Ionicons name="checkmark" size={12} color={AppColors.onPrimary} />
-                  </View>
-                )}
-
-                {/* Icon */}
-                <View style={[styles.tileIcon, active && styles.tileIconActive]}>
-                  <Ionicons
-                    name={tile.icon as any}
-                    size={22}
-                    color={active ? AppColors.onPrimary : AppColors.primary}
-                  />
-                </View>
-
-                {/* Text */}
-                <View style={styles.tileText}>
-                  <Text style={[styles.tileLabel, active && styles.tileLabelActive]}>
-                    {tile.label}
-                  </Text>
-                  <Text style={styles.tileSub} numberOfLines={1}>{tile.sub}</Text>
-                </View>
+                <Card style={[styles.tile, active && styles.tileActive]}>
+                  <Card.Body style={styles.tileBody}>
+                    {active && (
+                      <View style={styles.checkBadge}>
+                        <Ionicons name="checkmark" size={12} color={AppColors.onPrimary} />
+                      </View>
+                    )}
+                    <View style={[styles.tileIcon, active && styles.tileIconActive]}>
+                      <Ionicons
+                        name={tile.icon as any}
+                        size={22}
+                        color={active ? AppColors.onPrimary : AppColors.primary}
+                      />
+                    </View>
+                    <View style={styles.tileText}>
+                      <Text style={[styles.tileLabel, active && styles.tileLabelActive]}>
+                        {tile.label}
+                      </Text>
+                      <Text style={styles.tileSub} numberOfLines={1}>{tile.sub}</Text>
+                    </View>
+                  </Card.Body>
+                </Card>
               </Pressable>
             );
           })}
         </View>
 
-        {/* Contextual: Temperature input when Fever is selected */}
         {hasFever && (
-          <View style={styles.tempCard}>
-            <View style={styles.tempCardHeader}>
-              <Text style={styles.tempCardTitle}>Enter Temperature</Text>
-              {/* °C / °F toggle */}
-              <View style={styles.unitToggle}>
-                <Pressable
-                  style={[styles.unitBtn, tempUnit === 'C' && styles.unitBtnActive]}
-                  onPress={() => setTempUnit('C')}
-                >
-                  <Text style={[styles.unitBtnText, tempUnit === 'C' && styles.unitBtnTextActive]}>°C</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.unitBtn, tempUnit === 'F' && styles.unitBtnActive]}
-                  onPress={() => setTempUnit('F')}
-                >
-                  <Text style={[styles.unitBtnText, tempUnit === 'F' && styles.unitBtnTextActive]}>°F</Text>
-                </Pressable>
-              </View>
-            </View>
-
-            <View style={styles.tempRow}>
-              <TextInput
-                style={styles.tempInput}
-                value={tempStr}
-                onChangeText={setTempStr}
-                keyboardType="decimal-pad"
-                placeholder={tempUnit === 'C' ? '38.5' : '101.3'}
-                placeholderTextColor={`${AppColors.primary}50`}
-              />
-              {feverLevel && (
-                <View style={styles.tempSeverity}>
-                  <Text style={[styles.tempSeverityLabel, { color: feverLevel.color }]}>
-                    {feverLevel.label}
-                  </Text>
-                  <View style={styles.tempBar}>
-                    <View
-                      style={[
-                        styles.tempBarFill,
-                        {
-                          width: `${Math.round(feverBarWidth * 100)}%` as any,
-                          backgroundColor: feverLevel.color,
-                        },
-                      ]}
-                    />
-                  </View>
+          <Card style={styles.tempCard}>
+            <Card.Body style={styles.tempCardBody}>
+              <View style={styles.tempCardHeader}>
+                <Text style={styles.tempCardTitle}>Enter Temperature</Text>
+                <View style={styles.unitToggle}>
+                  <Pressable
+                    style={[styles.unitBtn, tempUnit === 'C' && styles.unitBtnActive]}
+                    onPress={() => setTempUnit('C')}
+                  >
+                    <Text style={[styles.unitBtnText, tempUnit === 'C' && styles.unitBtnTextActive]}>°C</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.unitBtn, tempUnit === 'F' && styles.unitBtnActive]}
+                    onPress={() => setTempUnit('F')}
+                  >
+                    <Text style={[styles.unitBtnText, tempUnit === 'F' && styles.unitBtnTextActive]}>°F</Text>
+                  </Pressable>
                 </View>
-              )}
-            </View>
-          </View>
+              </View>
+
+              <View style={styles.tempRow}>
+                <TextInput
+                  style={styles.tempInput}
+                  value={tempStr}
+                  onChangeText={setTempStr}
+                  keyboardType="decimal-pad"
+                  placeholder={tempUnit === 'C' ? '38.5' : '101.3'}
+                  placeholderTextColor={`${AppColors.primary}50`}
+                />
+                {feverLevel && (
+                  <View style={styles.tempSeverity}>
+                    <Text style={[styles.tempSeverityLabel, { color: feverLevel.color }]}>
+                      {feverLevel.label}
+                    </Text>
+                    <View style={styles.tempBar}>
+                      <View
+                        style={[
+                          styles.tempBarFill,
+                          {
+                            width: `${Math.round(feverBarWidth * 100)}%` as any,
+                            backgroundColor: feverLevel.color,
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                )}
+              </View>
+            </Card.Body>
+          </Card>
         )}
 
-        {/* Disclaimer */}
         <Text style={styles.disclaimer}>
           LilSteps AI provides guidance, not diagnosis. In an emergency, contact local medical services immediately.
         </Text>
       </ScrollView>
 
-      {/* Bottom CTA */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        <Pressable
-          style={({ pressed }) => [styles.ctaBtn, !canContinue && styles.ctaBtnDisabled, { opacity: pressed ? 0.9 : 1 }]}
-          disabled={!canContinue}
-          onPress={() => router.push({ pathname: '/checkin/chat', params: { complaint: buildComplaint() } })}
-        >
-          <LinearGradient
-            colors={canContinue ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.ctaGrad}
+      <View style={[styles.footerWrapper, { paddingBottom: insets.bottom }]} pointerEvents="box-none">
+        <LinearGradient
+          colors={[
+            `${AppColors.surface}00`,
+            `${AppColors.surface}20`,
+            `${AppColors.surface}60`,
+            `${AppColors.surface}B0`,
+            `${AppColors.surface}E8`,
+            AppColors.surface,
+            AppColors.surface,
+          ]}
+          locations={[0, 0.1, 0.22, 0.35, 0.5, 0.65, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+        />
+        <View style={styles.footer}>
+          <Pressable
+            style={({ pressed }) => [styles.ctaBtn, { opacity: pressed && canContinue ? 0.9 : 1 }]}
+            disabled={!canContinue}
+            onPress={() => router.push({ pathname: '/checkin/chat', params: { complaint: buildComplaint() } })}
           >
-            <Ionicons
-              name="analytics-outline"
-              size={20}
-              color={canContinue ? AppColors.onPrimary : AppColors.onSurfaceVariant}
-            />
-            <Text style={[styles.ctaText, !canContinue && styles.ctaTextDisabled]}>
-              Analyze with AI
-            </Text>
-          </LinearGradient>
-        </Pressable>
+            <LinearGradient
+              colors={canContinue ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.ctaGrad}
+            >
+              <Ionicons
+                name="analytics-outline"
+                size={20}
+                color={canContinue ? AppColors.onPrimary : AppColors.onSurfaceVariant}
+              />
+              <Text style={[styles.ctaText, !canContinue && styles.ctaTextDisabled]}>
+                Analyze with AI
+              </Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -274,71 +296,67 @@ export default function CheckinEntryScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: AppColors.surface },
 
+  headerWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingVertical: 12,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderBottomWidth: 1, borderBottomColor: `${AppColors.outlineVariant}15`,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 8, paddingTop: 8, paddingBottom: 20,
+    gap: 6,
   },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: `${AppColors.surfaceContainerHigh}80`,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  headerBadge: {
-    width: 28, height: 28, borderRadius: 8,
+    width: 44, height: 44,
     alignItems: 'center', justifyContent: 'center',
   },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 17,
-    color: AppColors.primary, letterSpacing: -0.2,
+    fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 17,
+    color: AppColors.onSurface,
   },
+  statusDot: {
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: AppColors.successGreen,
+  },
+  headerSpacer: { flex: 1 },
 
-  scroll: { paddingHorizontal: 20, paddingTop: 20, gap: 24 },
+  scroll: { paddingHorizontal: 20, gap: 24 },
 
-  // Hero
   hero: { gap: 10 },
   aiBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     alignSelf: 'flex-start',
-    backgroundColor: `${AppColors.primary}15`,
+    backgroundColor: `${AppColors.primary}12`,
     borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6,
   },
   aiBadgeText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: AppColors.primary },
   heroTitle: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 28,
-    color: AppColors.onSurface, letterSpacing: -0.6, lineHeight: 36,
+    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 26,
+    color: AppColors.onSurface, letterSpacing: -0.6, lineHeight: 34,
   },
   heroSub: {
     fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14,
     color: AppColors.onSurfaceVariant, lineHeight: 20,
   },
 
-  // Bento grid
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   tile: {
     width: TILE_SIZE,
-    height: TILE_SIZE,
     backgroundColor: AppColors.surfaceContainerLowest,
-    borderRadius: 20,
-    padding: 18,
-    justifyContent: 'space-between',
+    borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: `${AppColors.outlineVariant}20`,
-    shadowColor: AppColors.onSurface,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderColor: `${AppColors.outlineVariant}15`,
   },
   tileActive: {
     borderColor: AppColors.primary,
-    backgroundColor: AppColors.surfaceContainerLowest,
-    shadowColor: AppColors.primary,
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 4,
+    backgroundColor: `${AppColors.primary}04`,
+  },
+  tileBody: {
+    padding: 16,
+    height: TILE_SIZE - 3,
+    justifyContent: 'space-between',
   },
   checkBadge: {
     position: 'absolute', top: 12, right: 12,
@@ -347,8 +365,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   tileIcon: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: AppColors.surfaceContainerHigh,
+    width: 46, height: 46, borderRadius: 23,
+    backgroundColor: `${AppColors.primary}12`,
     alignItems: 'center', justifyContent: 'center',
     alignSelf: 'flex-start',
   },
@@ -360,11 +378,13 @@ const styles = StyleSheet.create({
   tileLabelActive: { color: AppColors.primary },
   tileSub: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: AppColors.onSurfaceVariant },
 
-  // Temperature card
   tempCard: {
-    backgroundColor: AppColors.surfaceContainerLow,
-    borderRadius: 20, padding: 20, gap: 16,
-    borderWidth: 1, borderColor: `${AppColors.primary}15`,
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 18,
+    borderWidth: 1, borderColor: `${AppColors.primary}20`,
+  },
+  tempCardBody: {
+    padding: 18, gap: 16,
   },
   tempCardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tempCardTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onSurface },
@@ -378,10 +398,10 @@ const styles = StyleSheet.create({
   unitBtnTextActive: { color: AppColors.primary, fontFamily: 'PlusJakartaSans_700Bold' },
   tempRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   tempInput: {
-    flex: 1, height: 60, backgroundColor: AppColors.surfaceContainerLowest,
+    flex: 1, height: 56, backgroundColor: AppColors.surfaceContainerLow,
     borderRadius: 14, paddingHorizontal: 18,
-    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 28, color: AppColors.primary,
-    borderWidth: 1.5, borderColor: `${AppColors.primary}20`,
+    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 26, color: AppColors.primary,
+    borderWidth: 1.5, borderColor: `${AppColors.primary}15`,
   },
   tempSeverity: { gap: 6 },
   tempSeverityLabel: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.8 },
@@ -397,19 +417,17 @@ const styles = StyleSheet.create({
     lineHeight: 16, paddingHorizontal: 8,
   },
 
-  // Bottom CTA
-  bottomBar: {
-    paddingHorizontal: 20, paddingTop: 12,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderTopWidth: 1, borderTopColor: `${AppColors.outlineVariant}20`,
-    shadowColor: AppColors.onSurface,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 8,
+  footerWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  footer: {
+    paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16,
   },
   ctaBtn: { borderRadius: 999, overflow: 'hidden' },
-  ctaBtnDisabled: {},
   ctaGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 17 },
   ctaText: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16, color: AppColors.onPrimary },
   ctaTextDisabled: { color: AppColors.onSurfaceVariant },

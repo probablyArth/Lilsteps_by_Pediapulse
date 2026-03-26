@@ -4,6 +4,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,6 +21,8 @@ import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
 import { useCheckin } from '@/hooks/useCheckin';
 
+const HEADER_HEIGHT = 60;
+
 export default function CheckinChatScreen() {
   const insets = useSafeAreaInsets();
   const { complaint } = useLocalSearchParams<{ complaint: string }>();
@@ -31,10 +35,6 @@ export default function CheckinChatScreen() {
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [started, setStarted] = useState(false);
 
-  // Progress based on question count (assume ~4 questions typical)
-  const progress = Math.min(checkin.questionCount / 4, 1);
-
-  // Start check-in on mount with the complaint
   useEffect(() => {
     if (complaint && !started) {
       setStarted(true);
@@ -43,7 +43,6 @@ export default function CheckinChatScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [complaint]);
 
-  // Auto-scroll on new message
   useEffect(() => {
     const timer = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     return () => clearTimeout(timer);
@@ -56,7 +55,7 @@ export default function CheckinChatScreen() {
     try {
       await checkin.sendMessage(text);
     } catch {
-      // error is set in hook
+      // handled in hook
     }
   }
 
@@ -74,153 +73,169 @@ export default function CheckinChatScreen() {
   }
 
   const childName = child?.name ?? 'Child';
+  const showInput = !checkin.aiReady && !generatingSummary;
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.root, { paddingTop: insets.top }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
-      {/* Header + consultation banner */}
-      <View style={styles.header}>
-        <View style={styles.headerTopRow}>
-          <Pressable onPress={() => router.back()} disabled={generatingSummary}>
-            <Ionicons name="arrow-back" size={22} color={AppColors.onSurface} />
+    <View style={styles.root}>
+      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
+        <LinearGradient
+          colors={[
+            AppColors.surface,
+            AppColors.surface,
+            `${AppColors.surface}E8`,
+            `${AppColors.surface}B0`,
+            `${AppColors.surface}60`,
+            `${AppColors.surface}20`,
+            `${AppColors.surface}00`,
+          ]}
+          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+        />
+        <View style={styles.header} pointerEvents="box-none">
+          <Pressable style={styles.backBtn} onPress={() => router.back()} disabled={generatingSummary}>
+            <Ionicons name="chevron-back" size={24} color={AppColors.onSurface} />
           </Pressable>
-          <View style={{ width: 22 }} />
-        </View>
-
-        <View style={styles.consultBanner}>
-          <View style={styles.sessionPill}>
-            <Text style={styles.sessionPillText}>CONSULTATION SESSION</Text>
-          </View>
-          <Text style={styles.consultTitle}>LilSteps AI</Text>
-          <Text style={styles.consultSub}>
-            Reviewing health symptoms for{' '}
-            <Text style={styles.consultChildName}>{childName}</Text>
-          </Text>
+          <Text style={styles.headerTitle}>LilSteps AI</Text>
+          <View style={styles.statusDot} />
+          <View style={styles.headerSpacer} />
         </View>
       </View>
 
-      {/* Progress bar */}
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
-      </View>
-
-      {/* Messages */}
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={[styles.scroll, { paddingBottom: 16 }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        {checkin.messages.map((msg, index) => {
-          const isLastAi = msg.role === 'ai' && index === checkin.messages.length - 1;
-          return msg.role === 'ai' ? (
-            <AiBubble
-              key={msg.id}
-              text={msg.content}
-              quickOptions={isLastAi && !checkin.loading && !checkin.aiReady ? msg.quickOptions : undefined}
-              onOptionTap={sendReply}
-            />
-          ) : (
-            <UserBubble key={msg.id} text={msg.content} />
-          );
-        })}
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={[
+            styles.scroll,
+            { 
+              paddingTop: insets.top + HEADER_HEIGHT,
+              paddingBottom: showInput ? 100 + insets.bottom : 20 + insets.bottom 
+            }
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          bounces
+          alwaysBounceVertical
+          overScrollMode="always"
+          scrollEventThrottle={16}
+          removeClippedSubviews={Platform.OS === 'android'}
+        >
+          <View style={styles.sessionHeader}>
+            <Text style={styles.sessionLabel}>Health check-in for {childName}</Text>
+          </View>
 
-        {/* AI typing indicator */}
-        {checkin.loading && (
-          <View style={styles.aiBubbleRow}>
-            <View style={styles.aiAvatar}>
-              <Ionicons name="sparkles" size={14} color={AppColors.onPrimary} />
+          {checkin.messages.map((msg, index) => {
+            const isLastAi = msg.role === 'ai' && index === checkin.messages.length - 1;
+            return msg.role === 'ai' ? (
+              <AiMessage
+                key={msg.id}
+                text={msg.content}
+                quickOptions={isLastAi && !checkin.loading && !checkin.aiReady ? msg.quickOptions : undefined}
+                onOptionTap={sendReply}
+              />
+            ) : (
+              <UserMessage key={msg.id} text={msg.content} />
+            );
+          })}
+
+          {checkin.loading && <TypingIndicator />}
+
+          {checkin.error && (
+            <View style={styles.errorRow}>
+              <Text style={styles.errorText}>{checkin.error}</Text>
             </View>
-            <View style={styles.typingBubble}>
-              <View style={styles.typingDots}>
-                <View style={[styles.dot, styles.dot1]} />
-                <View style={[styles.dot, styles.dot2]} />
-                <View style={[styles.dot, styles.dot3]} />
+          )}
+
+          {checkin.aiReady && !generatingSummary && (
+            <View style={styles.summarySection}>
+              <View style={styles.summaryCard}>
+                <Ionicons name="checkmark-circle" size={20} color={AppColors.successGreen} />
+                <Text style={styles.summaryText}>
+                  Ready to generate {childName}&apos;s pre-visit summary
+                </Text>
+              </View>
+              <Pressable
+                style={({ pressed }) => [styles.summaryBtn, { opacity: pressed ? 0.9 : 1 }]}
+                onPress={handleGenerateSummary}
+              >
+                <LinearGradient
+                  colors={[AppColors.primary, AppColors.gradientEnd]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.summaryBtnGrad}
+                >
+                  <Text style={styles.summaryBtnText}>Generate Summary</Text>
+                  <Ionicons name="arrow-forward" size={18} color={AppColors.onPrimary} />
+                </LinearGradient>
+              </Pressable>
+            </View>
+          )}
+
+          {generatingSummary && (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color={AppColors.primary} />
+              <Text style={styles.loadingText}>Generating summary…</Text>
+            </View>
+          )}
+        </ScrollView>
+
+        {showInput && (
+          <View style={styles.inputWrapper} pointerEvents="box-none">
+            <LinearGradient
+              colors={[
+                `${AppColors.surface}00`,
+                `${AppColors.surface}40`,
+                `${AppColors.surface}B0`,
+                AppColors.surface,
+              ]}
+              locations={[0, 0.25, 0.5, 0.7]}
+              style={StyleSheet.absoluteFill}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              pointerEvents="none"
+            />
+            <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  ref={inputRef}
+                  style={styles.textInput}
+                  placeholder="Message"
+                  placeholderTextColor={AppColors.outlineVariant}
+                  value={inputText}
+                  onChangeText={setInputText}
+                  onSubmitEditing={() => sendReply()}
+                  returnKeyType="send"
+                  blurOnSubmit={false}
+                  editable={!checkin.loading}
+                  multiline
+                />
+                <Pressable
+                  style={[styles.sendBtn, (!inputText.trim() || checkin.loading) && styles.sendBtnDisabled]}
+                  onPress={() => sendReply()}
+                  disabled={!inputText.trim() || checkin.loading}
+                >
+                  <Ionicons
+                    name="arrow-up"
+                    size={18}
+                    color={inputText.trim() && !checkin.loading ? AppColors.onPrimary : AppColors.outlineVariant}
+                  />
+                </Pressable>
               </View>
             </View>
           </View>
         )}
-
-        {/* Error display */}
-        {checkin.error && (
-          <View style={styles.errorSection}>
-            <Text style={styles.errorText}>{checkin.error}</Text>
-          </View>
-        )}
-
-        {/* Generate Summary CTA — appears when AI signals readiness */}
-        {checkin.aiReady && !generatingSummary && (
-          <View style={styles.generateSection}>
-            <Text style={styles.generateHint}>I have enough information to prepare {childName}&apos;s summary for the doctor.</Text>
-            <Pressable
-              style={({ pressed }) => [styles.generateBtn, { opacity: pressed ? 0.88 : 1 }]}
-              onPress={handleGenerateSummary}
-            >
-              <LinearGradient
-                colors={[AppColors.primary, AppColors.gradientEnd]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.generateGrad}
-              >
-                <Ionicons name="sparkles" size={16} color={AppColors.onPrimary} />
-                <Text style={styles.generateBtnText}>Yes, generate summary</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
-        )}
-
-        {/* Generating loader */}
-        {generatingSummary && (
-          <View style={styles.loadingSection}>
-            <ActivityIndicator size="small" color={AppColors.primary} />
-            <Text style={styles.loadingText}>Generating pre-visit summary…</Text>
-          </View>
-        )}
-      </ScrollView>
-
-      {/* Input bar — hidden when generating or AI is ready */}
-      {!checkin.aiReady && !generatingSummary && (
-        <View style={[styles.inputBar, { paddingBottom: insets.bottom + 12 }]}>
-          <TextInput
-            ref={inputRef}
-            style={styles.textInput}
-            placeholder="Type your reply…"
-            placeholderTextColor={`${AppColors.onSurfaceVariant}60`}
-            value={inputText}
-            onChangeText={setInputText}
-            onSubmitEditing={() => sendReply()}
-            returnKeyType="send"
-            blurOnSubmit={false}
-            editable={!checkin.loading}
-          />
-          <Pressable
-            style={({ pressed }) => [styles.sendBtn, { opacity: pressed ? 0.8 : 1 }]}
-            onPress={() => sendReply()}
-            disabled={!inputText.trim() || checkin.loading}
-          >
-            <LinearGradient
-              colors={inputText.trim() && !checkin.loading ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.sendGrad}
-            >
-              <Ionicons
-                name="arrow-up"
-                size={18}
-                color={inputText.trim() && !checkin.loading ? AppColors.onPrimary : AppColors.onSurfaceVariant}
-              />
-            </LinearGradient>
-          </Pressable>
-        </View>
-      )}
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
-function AiBubble({
+function AiMessage({
   text,
   quickOptions,
   onOptionTap,
@@ -230,24 +245,24 @@ function AiBubble({
   onOptionTap?: (option: string) => void;
 }) {
   return (
-    <View style={styles.aiBubbleContainer}>
-      <View style={styles.aiBubbleRow}>
-        <LinearGradient colors={[AppColors.primary, AppColors.gradientEnd]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.aiAvatar}>
-          <Ionicons name="sparkles" size={14} color={AppColors.onPrimary} />
-        </LinearGradient>
-        <View style={styles.aiBubble}>
-          <Text style={styles.aiBubbleText}>{text}</Text>
+    <View style={styles.aiMessageContainer}>
+      <View style={styles.aiRow}>
+        <View style={styles.aiIcon}>
+          <Ionicons name="sparkles" size={16} color={AppColors.primary} />
+        </View>
+        <View style={styles.aiContent}>
+          <Text style={styles.aiText}>{text}</Text>
         </View>
       </View>
       {quickOptions && quickOptions.length > 0 && (
-        <View style={styles.chipsRow}>
+        <View style={styles.optionsRow}>
           {quickOptions.map((opt) => (
             <Pressable
               key={opt}
-              style={({ pressed }) => [styles.chip, { opacity: pressed ? 0.72 : 1 }]}
+              style={({ pressed }) => [styles.optionChip, { opacity: pressed ? 0.7 : 1 }]}
               onPress={() => onOptionTap?.(opt)}
             >
-              <Text style={styles.chipText}>{opt}</Text>
+              <Text style={styles.optionText}>{opt}</Text>
             </Pressable>
           ))}
         </View>
@@ -256,11 +271,51 @@ function AiBubble({
   );
 }
 
-function UserBubble({ text }: { text: string }) {
+function UserMessage({ text }: { text: string }) {
   return (
-    <View style={styles.userBubbleRow}>
+    <View style={styles.userRow}>
       <View style={styles.userBubble}>
-        <Text style={styles.userBubbleText}>{text}</Text>
+        <Text style={styles.userText}>{text}</Text>
+      </View>
+    </View>
+  );
+}
+
+function TypingIndicator() {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = (val: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(val, { toValue: 1, duration: 300, easing: Easing.ease, useNativeDriver: true }),
+          Animated.timing(val, { toValue: 0, duration: 300, easing: Easing.ease, useNativeDriver: true }),
+        ])
+      );
+    const a1 = animate(dot1, 0);
+    const a2 = animate(dot2, 150);
+    const a3 = animate(dot3, 300);
+    a1.start(); a2.start(); a3.start();
+    return () => { a1.stop(); a2.stop(); a3.stop(); };
+  }, [dot1, dot2, dot3]);
+
+  const scale = (v: Animated.Value) => v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] });
+  const opacity = (v: Animated.Value) => v.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
+
+  return (
+    <View style={styles.aiMessageContainer}>
+      <View style={styles.aiRow}>
+        <View style={styles.aiIcon}>
+          <Ionicons name="sparkles" size={16} color={AppColors.primary} />
+        </View>
+        <View style={styles.typingDots}>
+          <Animated.View style={[styles.dot, { transform: [{ scale: scale(dot1) }], opacity: opacity(dot1) }]} />
+          <Animated.View style={[styles.dot, { transform: [{ scale: scale(dot2) }], opacity: opacity(dot2) }]} />
+          <Animated.View style={[styles.dot, { transform: [{ scale: scale(dot3) }], opacity: opacity(dot3) }]} />
+        </View>
       </View>
     </View>
   );
@@ -268,101 +323,221 @@ function UserBubble({ text }: { text: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: AppColors.surface },
+
+  headerWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   header: {
-    backgroundColor: AppColors.surfaceContainerLow,
-    paddingHorizontal: 24,
-    paddingTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingTop: 8,
     paddingBottom: 20,
+    gap: 6,
+  },
+  backBtn: {
+    width: 44, height: 44,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  headerTitle: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 17,
+    color: AppColors.onSurface,
+  },
+  statusDot: {
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: AppColors.successGreen,
+  },
+  headerSpacer: { flex: 1 },
+
+  keyboardView: { flex: 1 },
+
+  scroll: { paddingHorizontal: 16, paddingTop: 8 },
+
+  sessionHeader: {
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  sessionLabel: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 13,
+    color: AppColors.onSurfaceVariant,
+    textAlign: 'center',
+  },
+
+  aiMessageContainer: {
+    marginBottom: 20,
+  },
+  aiRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  aiIcon: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: `${AppColors.primary}12`,
+    alignItems: 'center', justifyContent: 'center',
+    marginTop: 2,
+  },
+  aiContent: {
+    flex: 1,
+    paddingRight: 40,
+  },
+  aiText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 16,
+    color: AppColors.onSurface,
+    lineHeight: 24,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+    paddingLeft: 40,
+  },
+  optionChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}40`,
+    backgroundColor: AppColors.surfaceContainerLowest,
+  },
+  optionText: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 14,
+    color: AppColors.onSurface,
+  },
+
+  userRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 20,
+  },
+  userBubble: {
+    maxWidth: '80%',
+    backgroundColor: AppColors.primary,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  userText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 16,
+    color: AppColors.onPrimary,
+    lineHeight: 24,
+  },
+
+  typingDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 8,
+  },
+  dot: {
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: AppColors.primary,
+  },
+
+  errorRow: {
+    paddingVertical: 8,
+    paddingHorizontal: 40,
+  },
+  errorText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 14,
+    color: AppColors.errorRed,
+  },
+
+  summarySection: {
+    marginTop: 12,
     gap: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: `${AppColors.outlineVariant}20`,
   },
-  headerTopRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 40,
   },
-  consultBanner: { alignItems: 'center', gap: 6 },
-  sessionPill: {
-    backgroundColor: `${AppColors.outlineVariant}25`,
-    borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4,
+  summaryText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 14,
+    color: AppColors.onSurfaceVariant,
+    flex: 1,
   },
-  sessionPillText: {
-    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 10,
-    color: AppColors.onSurfaceVariant, letterSpacing: 1.2,
+  summaryBtn: {
+    borderRadius: 999,
+    overflow: 'hidden',
   },
-  consultTitle: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 22,
-    color: AppColors.onSurface, letterSpacing: -0.5,
+  summaryBtnGrad: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
   },
-  consultSub: {
-    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14,
+  summaryBtnText: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 16,
+    color: AppColors.onPrimary,
+  },
+
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 20,
+  },
+  loadingText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 14,
     color: AppColors.onSurfaceVariant,
   },
-  consultChildName: {
-    fontFamily: 'PlusJakartaSans_700Bold', color: AppColors.primary,
+
+  inputWrapper: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
-
-  progressTrack: { height: 3, backgroundColor: `${AppColors.outlineVariant}30`, marginHorizontal: 0 },
-  progressFill: { height: 3, backgroundColor: AppColors.primary, borderRadius: 999 },
-
-  scroll: { paddingHorizontal: 16, paddingTop: 16, gap: 12 },
-
-  aiBubbleContainer: { gap: 8 },
-  aiBubbleRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end', maxWidth: '88%' },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingLeft: 40 },
-  chip: {
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: `${AppColors.primary}12`,
-    borderWidth: 1, borderColor: `${AppColors.primary}30`,
-  },
-  chipText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.primary },
-  aiAvatar: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  aiBubble: {
-    backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 18, borderBottomLeftRadius: 4,
-    padding: 14, flex: 1,
-    shadowColor: AppColors.onSurface, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
-  },
-  aiBubbleText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurface, lineHeight: 21 },
-
-  userBubbleRow: { flexDirection: 'row', justifyContent: 'flex-end' },
-  userBubble: {
-    backgroundColor: AppColors.primary, borderRadius: 18, borderBottomRightRadius: 4,
-    padding: 14, maxWidth: '80%',
-  },
-  userBubbleText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 14, color: AppColors.onPrimary, lineHeight: 21 },
-
-  typingBubble: {
-    backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 18, borderBottomLeftRadius: 4,
-    paddingHorizontal: 16, paddingVertical: 14,
-  },
-  typingDots: { flexDirection: 'row', gap: 4, alignItems: 'center' },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: `${AppColors.onSurfaceVariant}50` },
-  dot1: {}, dot2: {}, dot3: {},
-
-  errorSection: { alignItems: 'center', paddingVertical: 8 },
-  errorText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.errorRed, textAlign: 'center' },
-
-  generateSection: { marginTop: 8, gap: 12, alignItems: 'center' },
-  generateHint: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: AppColors.onSurfaceVariant, textAlign: 'center', lineHeight: 19 },
-  generateBtn: { borderRadius: 999, overflow: 'hidden', alignSelf: 'stretch' },
-  generateGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16 },
-  generateBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: AppColors.onPrimary },
-
-  loadingSection: { alignItems: 'center', gap: 10, paddingVertical: 16 },
-  loadingText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant },
-
   inputBar: {
-    flexDirection: 'row', alignItems: 'flex-end', gap: 10,
-    paddingHorizontal: 16, paddingTop: 12,
-    backgroundColor: 'rgba(255,255,255,0.96)',
-    borderTopWidth: 1, borderTopColor: `${AppColors.outlineVariant}20`,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    backgroundColor: AppColors.surfaceContainerLow,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: `${AppColors.outlineVariant}20`,
+    paddingLeft: 16,
+    paddingRight: 5,
+    paddingVertical: 5,
   },
   textInput: {
-    flex: 1, backgroundColor: `${AppColors.surfaceContainerHigh}50`,
-    borderRadius: 22, paddingHorizontal: 16, paddingVertical: 12,
-    fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurface,
-    maxHeight: 100,
+    flex: 1,
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 16,
+    color: AppColors.onSurface,
+    paddingVertical: 8,
+    maxHeight: 120,
   },
-  sendBtn: { borderRadius: 999, overflow: 'hidden' },
-  sendGrad: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
+  sendBtn: {
+    width: 34, height: 34,
+    borderRadius: 17,
+    backgroundColor: AppColors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtnDisabled: {
+    backgroundColor: `${AppColors.outlineVariant}30`,
+  },
 });
