@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Card, Tabs } from 'heroui-native';
+import { Card, Menu, Tabs } from 'heroui-native';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -25,6 +26,14 @@ const CATEGORIES = [
   { key: 'reports', label: 'Reports', icon: 'analytics-outline' },
   { key: 'history', label: 'Visits', icon: 'time-outline' },
   { key: 'lab', label: 'Lab Tests', icon: 'flask-outline' },
+] as const;
+
+const ADD_OPTIONS = [
+  { key: 'prescription', label: 'Prescription', icon: 'document-text-outline', color: AppColors.primary },
+  { key: 'report', label: 'Medical Report', icon: 'analytics-outline', color: AppColors.secondary },
+  { key: 'lab_test', label: 'Lab Test', icon: 'flask-outline', color: AppColors.tertiary },
+  { key: 'visit_history', label: 'Visit Record', icon: 'time-outline', color: AppColors.accentBlue },
+  { key: 'other', label: 'Other Document', icon: 'folder-outline', color: AppColors.onSurfaceVariant },
 ] as const;
 
 const CATEGORY_FILTER_MAP: Record<string, DocumentRow['category'] | null> = {
@@ -169,19 +178,47 @@ export default function RecordsScreen() {
         </View>
       </TabScreenLayout>
 
-      <Pressable
-        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}
-        onPress={() => router.push('/records/upload')}
-      >
-        <LinearGradient
-          colors={[AppColors.primary, AppColors.gradientEnd]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.fabGrad}
-        >
-          <Ionicons name="add" size={28} color={AppColors.onPrimary} />
-        </LinearGradient>
-      </Pressable>
+      <Menu>
+        <Menu.Trigger asChild>
+          <Pressable style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 80 }]}>
+            <LinearGradient
+              colors={[AppColors.primary, AppColors.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.fabGrad}
+            >
+              <Ionicons name="add" size={28} color={AppColors.onPrimary} />
+            </LinearGradient>
+          </Pressable>
+        </Menu.Trigger>
+        <Menu.Portal>
+          <Menu.Overlay style={styles.menuOverlay}>
+            <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
+          </Menu.Overlay>
+          <Menu.Content
+            presentation="popover"
+            placement="top"
+            align="end"
+            width={190}
+            offset={10}
+            style={styles.menuContent}
+          >
+            <Menu.Label style={styles.menuLabel}>Add Record</Menu.Label>
+            {ADD_OPTIONS.map((option) => (
+              <Menu.Item
+                key={option.key}
+                style={styles.menuItem}
+                onPress={() => router.push({ pathname: '/records/upload', params: { category: option.key } } as any)}
+              >
+                <View style={[styles.menuItemIcon, { backgroundColor: `${option.color}10` }]}>
+                  <Ionicons name={option.icon as any} size={16} color={option.color} />
+                </View>
+                <Menu.ItemTitle style={styles.menuItemTitle}>{option.label}</Menu.ItemTitle>
+              </Menu.Item>
+            ))}
+          </Menu.Content>
+        </Menu.Portal>
+      </Menu>
     </>
   );
 }
@@ -473,5 +510,45 @@ const styles = StyleSheet.create({
   fabGrad: {
     width: 58, height: 58, borderRadius: 29,
     alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+  },
+
+  menuOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+  menuContent: {
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  menuLabel: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 11,
+    color: AppColors.onSurfaceVariant,
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
+  menuItemIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuItemTitle: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 14,
+    color: AppColors.onSurface,
   },
 });

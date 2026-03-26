@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Card } from 'heroui-native';
-import { memo } from 'react';
+import { Card, ListGroup, Separator } from 'heroui-native';
 import { ActivityIndicator, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { TabScreenLayout } from '@/components/TabScreenLayout';
@@ -165,15 +164,16 @@ export default function VaccineScreen() {
         {/* Vaccination list */}
         <View style={styles.listSection}>
           <Text style={styles.listTitle}>Schedule</Text>
-          <View style={styles.list}>
-            {vaccinations.map((vaccine) => (
-              <VaccineCard
+          <ListGroup style={styles.listGroup}>
+            {vaccinations.map((vaccine, index) => (
+              <VaccineListItem
                 key={vaccine.id}
                 vaccine={vaccine}
                 onMarkGiven={() => handleMarkGiven(vaccine.id)}
+                isLast={index === vaccinations.length - 1}
               />
             ))}
-          </View>
+          </ListGroup>
         </View>
 
         {/* Doctor's note */}
@@ -189,6 +189,91 @@ export default function VaccineScreen() {
           </Card.Body>
         </Card>
     </TabScreenLayout>
+  );
+}
+
+function VaccineListItem({
+  vaccine,
+  onMarkGiven,
+  isLast,
+}: {
+  vaccine: VaccinationRow;
+  onMarkGiven: () => void;
+  isLast: boolean;
+}) {
+  const { status, vaccine_name: name, dose_label } = vaccine;
+  const dateStr = new Date(vaccine.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const displayName = dose_label ? `${name} (${dose_label})` : name;
+
+  const getIconConfig = () => {
+    switch (status) {
+      case 'done':
+        return { name: 'checkmark-circle' as const, color: AppColors.successGreen, bgColor: AppColors.successGreenSurface };
+      case 'due_soon':
+        return { name: 'medical' as const, color: AppColors.primary, bgColor: `${AppColors.primaryContainer}35` };
+      case 'overdue':
+        return { name: 'alert-circle' as const, color: AppColors.errorRed, bgColor: AppColors.errorRedSurface };
+      default:
+        return { name: 'time-outline' as const, color: AppColors.onSurfaceVariant, bgColor: AppColors.surfaceContainerHigh };
+    }
+  };
+
+  const getBadgeConfig = () => {
+    switch (status) {
+      case 'done':
+        return { label: 'Given', bg: AppColors.successGreenSurface, color: AppColors.successGreenDark };
+      case 'due_soon':
+        return { label: 'Due Now', bg: AppColors.primary, color: AppColors.onPrimary };
+      case 'overdue':
+        return { label: 'Overdue', bg: AppColors.errorRedSurface, color: AppColors.errorRed };
+      default:
+        return { label: dateStr, bg: AppColors.surfaceContainerHigh, color: AppColors.onSurfaceVariant };
+    }
+  };
+
+  const iconConfig = getIconConfig();
+  const badgeConfig = getBadgeConfig();
+  const givenStr = vaccine.administered_date
+    ? new Date(vaccine.administered_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : null;
+
+  return (
+    <>
+      <ListGroup.Item
+        style={[
+          styles.listItem,
+          status === 'due_soon' && styles.listItemDueSoon,
+          status === 'upcoming' && styles.listItemUpcoming,
+        ]}
+        onPress={status === 'due_soon' ? onMarkGiven : undefined}
+      >
+        <ListGroup.ItemPrefix style={styles.listItemPrefix}>
+          <View style={[styles.listItemIcon, { backgroundColor: iconConfig.bgColor }]}>
+            <Ionicons name={iconConfig.name} size={20} color={iconConfig.color} />
+          </View>
+        </ListGroup.ItemPrefix>
+        <ListGroup.ItemContent style={styles.listItemContent}>
+          <ListGroup.ItemTitle
+            style={[
+              styles.listItemTitle,
+              status === 'due_soon' && styles.listItemTitleDue,
+              status === 'upcoming' && styles.listItemTitleUpcoming,
+            ]}
+          >
+            {displayName}
+          </ListGroup.ItemTitle>
+          <ListGroup.ItemDescription style={styles.listItemDesc}>
+            {status === 'done' && givenStr ? `Given ${givenStr}` : dateStr}
+          </ListGroup.ItemDescription>
+        </ListGroup.ItemContent>
+        <ListGroup.ItemSuffix>
+          <View style={[styles.listBadge, { backgroundColor: badgeConfig.bg }]}>
+            <Text style={[styles.listBadgeText, { color: badgeConfig.color }]}>{badgeConfig.label}</Text>
+          </View>
+        </ListGroup.ItemSuffix>
+      </ListGroup.Item>
+      {!isLast && <Separator style={styles.listSeparator} />}
+    </>
   );
 }
 
@@ -529,6 +614,67 @@ const styles = StyleSheet.create({
   listSection: { gap: 12 },
   listTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 18, color: AppColors.onSurface },
   list: { gap: 10 },
+
+  listGroup: {
+    backgroundColor: AppColors.surfaceContainerLowest,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  listItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  listItemDueSoon: {
+    backgroundColor: `${AppColors.primary}06`,
+  },
+  listItemUpcoming: {
+    opacity: 0.65,
+  },
+  listItemPrefix: {
+    marginRight: 14,
+  },
+  listItemIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listItemContent: {
+    gap: 2,
+  },
+  listItemTitle: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 15,
+    color: AppColors.onSurface,
+  },
+  listItemTitleDue: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    color: AppColors.primary,
+  },
+  listItemTitleUpcoming: {
+    color: AppColors.onSurfaceVariant,
+  },
+  listItemDesc: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 13,
+    color: AppColors.onSurfaceVariant,
+  },
+  listBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  listBadgeText: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  listSeparator: {
+    marginHorizontal: 16,
+    backgroundColor: `${AppColors.outlineVariant}20`,
+  },
 
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
   cardInfo: { flex: 1, gap: 2 },
