@@ -1,12 +1,36 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { AvatarStack } from '@/components/avatar-stack';
 import { OnboardingShell } from '@/components/onboarding-shell';
 import { AppColors } from '@/constants/theme';
-import { typography } from '@/styles/global';
+
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const SETUP_ITEMS: { icon: IoniconName; title: string; subtitle: string }[] = [
+  {
+    icon: 'person-outline',
+    title: 'Basics & birth',
+    subtitle: 'Name, age, biological details',
+  },
+  {
+    icon: 'shield-checkmark-outline',
+    title: 'Vaccines & milestones',
+    subtitle: "What's done, what's next",
+  },
+  {
+    icon: 'trending-up-outline',
+    title: 'Growth tracking',
+    subtitle: 'Weight, height, development',
+  },
+  {
+    icon: 'medkit-outline',
+    title: 'Health history',
+    subtitle: 'Allergies, conditions, diet',
+  },
+];
 
 function TrustBadge() {
   return (
@@ -22,52 +46,137 @@ export default function AddChildScreen() {
     <OnboardingShell
       progress={0.1}
       title="Add Your First Child"
-      subtitle="Let's set up your child's profile so we're ready when you need us."
-      ctaLabel="Add Child"
+      subtitle="A few quick questions help us personalise care for your little one."
+      ctaLabel="Let's begin"
       onCta={() => router.push('/(onboarding)/child-basics')}
       footerExtra={<TrustBadge />}
     >
-      <Animated.View entering={FadeIn.delay(300).duration(500)} style={styles.illustration}>
-        <LinearGradient
-          colors={[AppColors.primaryContainer, AppColors.primary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.iconCircle}
-        >
-          <Text style={styles.iconEmoji}>{'\u{1F476}'}</Text>
-        </LinearGradient>
-        <Text style={[typography.bodyMD, styles.helperText]}>
-          Adding your child&apos;s health profile helps doctors give faster, safer care during consultations.
+      <View style={styles.eyebrowRow}>
+        <Text style={styles.eyebrow}>HERE&apos;S WHAT WE&apos;LL CAPTURE</Text>
+        <View style={styles.eyebrowMeta}>
+          <Ionicons name="time-outline" size={12} color={AppColors.onSurfaceVariant} />
+          <Text style={styles.eyebrowMetaText}>~3 min</Text>
+        </View>
+      </View>
+
+      <View style={styles.list}>
+        {SETUP_ITEMS.map((item, idx) => (
+          <Animated.View
+            key={item.title}
+            entering={FadeInUp.delay(120 * idx).duration(400)}
+            style={[styles.row, idx === 0 && styles.rowFirst]}
+          >
+            <View style={styles.iconWrap}>
+              <Ionicons name={item.icon} size={20} color={AppColors.primary} />
+            </View>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>{item.title}</Text>
+              <Text style={styles.rowSubtitle}>{item.subtitle}</Text>
+            </View>
+            <View style={styles.stepNumber}>
+              <Text style={styles.stepNumberText}>{idx + 1}</Text>
+            </View>
+          </Animated.View>
+        ))}
+      </View>
+
+      <View style={styles.note}>
+        <Ionicons name="lock-closed-outline" size={14} color={AppColors.primary} />
+        <Text style={styles.noteText}>
+          Your child&apos;s data is encrypted and never shared without your consent.
         </Text>
-      </Animated.View>
+      </View>
     </OnboardingShell>
   );
 }
 
 const styles = StyleSheet.create({
-  illustration: {
+  eyebrowRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 24,
-    marginTop: 32,
+    justifyContent: 'space-between',
+    marginTop: 8,
   },
-  iconCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+  eyebrow: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 1.6,
+    color: AppColors.primary,
+  },
+  eyebrowMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  eyebrowMetaText: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 11,
+    color: AppColors.onSurfaceVariant,
+  },
+  list: {
+    backgroundColor: `${AppColors.surfaceContainerLowest}CC`,
+    borderRadius: 22,
+    padding: 6,
+    gap: 2,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  rowFirst: {},
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: `${AppColors.primaryContainer}40`,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: AppColors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 12,
   },
-  iconEmoji: {
-    fontSize: 40,
+  rowText: {
+    flex: 1,
+    gap: 2,
   },
-  helperText: {
-    textAlign: 'center',
-    maxWidth: 280,
+  rowTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 15,
+    color: AppColors.onSurface,
+    letterSpacing: -0.2,
+  },
+  rowSubtitle: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 13,
+    color: AppColors.onSurfaceVariant,
+  },
+  stepNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: `${AppColors.primary}14`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumberText: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 11,
+    color: AppColors.primary,
+  },
+  note: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 4,
+    paddingTop: 4,
+  },
+  noteText: {
+    flex: 1,
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 12,
+    color: AppColors.onSurfaceVariant,
+    lineHeight: 18,
   },
   trustBadge: {
     flexDirection: 'row',

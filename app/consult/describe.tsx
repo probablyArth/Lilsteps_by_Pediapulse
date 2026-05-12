@@ -135,7 +135,6 @@ export default function DescribeScreen() {
           <Pressable
             style={styles.textAreaWrap}
             onPress={() => inputRef.current?.focus()}
-            activeOpacity={1}
           >
             <TextInput
               ref={inputRef}

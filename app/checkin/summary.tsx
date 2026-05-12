@@ -2,33 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Card } from 'heroui-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CHECKIN_HEADER_HEIGHT, CheckinHeader } from '@/components/checkin/CheckinHeader';
+import { DateStrip, getNextDays } from '@/components/checkin/DateStrip';
+import { DoctorPicker } from '@/components/checkin/DoctorPicker';
+import { SlotPicker } from '@/components/checkin/SlotPicker';
+import { SummaryCard } from '@/components/checkin/SummaryCard';
 import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
-import { useDoctors, useTimeSlots } from '@/hooks/useDoctors';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useCheckin } from '@/hooks/useCheckin';
-
-const HEADER_HEIGHT = 60;
-
-function getNextDays(n: number) {
-  const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return Array.from({ length: n }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return {
-      label: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : labels[d.getDay()],
-      sub: `${d.getDate()} ${months[d.getMonth()]}`,
-      isoDate: d.toISOString().split('T')[0],
-    };
-  });
-}
-
-const DAYS = getNextDays(5);
+import { useDoctors, useTimeSlots } from '@/hooks/useDoctors';
 
 export default function CheckinSummaryScreen() {
   const insets = useSafeAreaInsets();
@@ -36,6 +23,8 @@ export default function CheckinSummaryScreen() {
   const checkin = useCheckin(child);
   const { doctors, loading: loadingDocs } = useDoctors();
   const { bookAppointment } = useAppointments(child?.id ?? null);
+
+  const days = useMemo(() => getNextDays(5), []);
 
   const [selectedDay, setSelectedDay] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -49,11 +38,11 @@ export default function CheckinSummaryScreen() {
     }
   }, [doctors, selectedDoctorId]);
 
-  const selectedDoctor = doctors.find(d => d.id === selectedDoctorId) ?? doctors[0] ?? null;
+  const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId) ?? doctors[0] ?? null;
 
   const { slots, loading: loadingSlots } = useTimeSlots(
     selectedDoctorId,
-    DAYS[selectedDay].isoDate
+    days[selectedDay].isoDate,
   );
 
   useEffect(() => {
@@ -70,7 +59,7 @@ export default function CheckinSummaryScreen() {
       await bookAppointment({
         child_id: child.id,
         doctor_id: selectedDoctor.id,
-        date: DAYS[selectedDay].isoDate,
+        date: days[selectedDay].isoDate,
         time: selectedSlot,
         ai_summary_id: checkin.sessionId ?? undefined,
       });
@@ -96,7 +85,11 @@ export default function CheckinSummaryScreen() {
           <Card style={styles.successCard}>
             <Card.Body style={styles.successCardBody}>
               <SuccessRow icon="person-outline" label="Doctor" value={selectedDoctor?.name ?? ''} />
-              <SuccessRow icon="calendar-outline" label="Date" value={`${DAYS[selectedDay].label}, ${DAYS[selectedDay].sub}`} />
+              <SuccessRow
+                icon="calendar-outline"
+                label="Date"
+                value={`${days[selectedDay].label}, ${days[selectedDay].sub}`}
+              />
               <SuccessRow icon="time-outline" label="Time" value={selectedSlot ?? ''} isLast />
             </Card.Body>
           </Card>
@@ -120,77 +113,19 @@ export default function CheckinSummaryScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
-        <LinearGradient
-          colors={[
-            AppColors.surface,
-            AppColors.surface,
-            `${AppColors.surface}E8`,
-            `${AppColors.surface}B0`,
-            `${AppColors.surface}60`,
-            `${AppColors.surface}20`,
-            `${AppColors.surface}00`,
-          ]}
-          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          pointerEvents="none"
-        />
-        <View style={styles.header} pointerEvents="box-none">
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={24} color={AppColors.onSurface} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Pre-visit Summary</Text>
-          <View style={styles.headerSpacer} />
-        </View>
-      </View>
+      <CheckinHeader title="Pre-visit Summary" onBack={() => router.back()} />
 
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: insets.top + HEADER_HEIGHT, paddingBottom: 100 + insets.bottom }
+          { paddingTop: insets.top + CHECKIN_HEADER_HEIGHT, paddingBottom: 100 + insets.bottom },
         ]}
         showsVerticalScrollIndicator={false}
         bounces
         alwaysBounceVertical
       >
         {summary ? (
-          <Card style={styles.summaryCard}>
-            <Card.Body style={styles.summaryCardBody}>
-              <View style={styles.summaryHeader}>
-                <View style={styles.aiBadge}>
-                  <Ionicons name="sparkles" size={12} color={AppColors.primary} />
-                  <Text style={styles.aiBadgeText}>AI Summary</Text>
-                </View>
-                <Text style={styles.summaryChildName}>{childName}</Text>
-              </View>
-              <Text style={styles.summaryComplaint}>{summary.chiefComplaint}</Text>
-              
-              <View style={styles.divider} />
-
-              {summary.details.map((d, i) => (
-                <View key={d.label} style={[styles.detailRow, i === summary.details.length - 1 && styles.detailRowLast]}>
-                  <Text style={styles.detailLabel}>{d.label}</Text>
-                  <Text style={styles.detailValue}>{d.value}</Text>
-                </View>
-              ))}
-
-              {summary.relevantHistory && (
-                <View style={styles.infoRow}>
-                  <Ionicons name="time-outline" size={14} color={AppColors.primary} />
-                  <Text style={styles.infoText}>{summary.relevantHistory}</Text>
-                </View>
-              )}
-
-              {summary.allergyNote && (
-                <View style={styles.warningRow}>
-                  <Ionicons name="warning-outline" size={14} color={AppColors.warningAmber} />
-                  <Text style={styles.warningText}>{summary.allergyNote}</Text>
-                </View>
-              )}
-            </Card.Body>
-          </Card>
+          <SummaryCard summary={summary} childName={childName} />
         ) : (
           <View style={styles.loadingSection}>
             <ActivityIndicator size="small" color={AppColors.primary} />
@@ -203,81 +138,21 @@ export default function CheckinSummaryScreen() {
           {loadingDocs ? (
             <ActivityIndicator size="small" color={AppColors.primary} />
           ) : (
-            <View style={styles.doctorList}>
-              {doctors.map((doc) => (
-                <Pressable
-                  key={doc.id}
-                  onPress={() => setSelectedDoctorId(doc.id)}
-                >
-                  <Card style={[styles.doctorCard, selectedDoctorId === doc.id && styles.doctorCardActive]}>
-                    <Card.Body style={styles.doctorCardBody}>
-                      <View style={[styles.docAvatar, selectedDoctorId === doc.id && styles.docAvatarActive]}>
-                        <Text style={[styles.docAvatarText, selectedDoctorId === doc.id && styles.docAvatarTextActive]}>
-                          {doc.name.charAt(0)}
-                        </Text>
-                      </View>
-                      <View style={styles.docInfo}>
-                        <Text style={styles.docName} numberOfLines={1}>{doc.name}</Text>
-                        <Text style={styles.docSpec} numberOfLines={1}>{doc.specialisation}</Text>
-                      </View>
-                      {selectedDoctorId === doc.id && (
-                        <View style={styles.checkCircle}>
-                          <Ionicons name="checkmark" size={14} color={AppColors.onPrimary} />
-                        </View>
-                      )}
-                    </Card.Body>
-                  </Card>
-                </Pressable>
-              ))}
-            </View>
+            <DoctorPicker doctors={doctors} selectedId={selectedDoctorId} onSelect={setSelectedDoctorId} />
           )}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Pick a Date</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateRow}>
-            {DAYS.map((d, i) => (
-              <Pressable
-                key={i}
-                style={[styles.dayChip, selectedDay === i && styles.dayChipActive]}
-                onPress={() => setSelectedDay(i)}
-              >
-                <Text style={[styles.dayLabel, selectedDay === i && styles.dayLabelActive]}>{d.label}</Text>
-                <Text style={[styles.dayDate, selectedDay === i && styles.dayDateActive]}>{d.sub}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <DateStrip days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Pick a Time</Text>
           {loadingSlots ? (
             <ActivityIndicator size="small" color={AppColors.primary} />
-          ) : slots.length === 0 ? (
-            <Text style={styles.noSlotsText}>No available slots for this date</Text>
           ) : (
-            <View style={styles.slotsGrid}>
-              {slots.map((slot) => (
-                <Pressable
-                  key={slot.id}
-                  disabled={!slot.is_available}
-                  style={[
-                    styles.slotChip,
-                    !slot.is_available && styles.slotDisabled,
-                    selectedSlot === slot.time && styles.slotSelected,
-                  ]}
-                  onPress={() => setSelectedSlot(slot.time)}
-                >
-                  <Text style={[
-                    styles.slotText,
-                    !slot.is_available && styles.slotTextDisabled,
-                    selectedSlot === slot.time && styles.slotTextSelected,
-                  ]}>
-                    {slot.time}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
+            <SlotPicker slots={slots} selectedTime={selectedSlot} onSelect={setSelectedSlot} />
           )}
         </View>
       </ScrollView>
@@ -303,7 +178,11 @@ export default function CheckinSummaryScreen() {
             onPress={handleConfirm}
           >
             <LinearGradient
-              colors={selectedSlot ? [AppColors.primary, AppColors.gradientEnd] : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]}
+              colors={
+                selectedSlot
+                  ? [AppColors.primary, AppColors.gradientEnd]
+                  : [AppColors.surfaceContainerHigh, AppColors.surfaceContainerHigh]
+              }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.confirmGrad}
@@ -330,7 +209,17 @@ export default function CheckinSummaryScreen() {
   );
 }
 
-function SuccessRow({ icon, label, value, isLast }: { icon: string; label: string; value: string; isLast?: boolean }) {
+function SuccessRow({
+  icon,
+  label,
+  value,
+  isLast,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  isLast?: boolean;
+}) {
   return (
     <View style={[styles.successRow, isLast && styles.successRowLast]}>
       <Ionicons name={icon as any} size={16} color={AppColors.onSurfaceVariant} />
@@ -343,264 +232,16 @@ function SuccessRow({ icon, label, value, isLast }: { icon: string; label: strin
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: AppColors.surface },
 
-  headerWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingTop: 8,
-    paddingBottom: 20,
-    gap: 6,
-  },
-  backBtn: {
-    width: 44, height: 44,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  headerTitle: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 17,
-    color: AppColors.onSurface,
-  },
-  headerSpacer: { flex: 1 },
-
   scroll: { paddingHorizontal: 20, gap: 24 },
 
   loadingSection: { alignItems: 'center', gap: 10, paddingVertical: 30 },
   loadingText: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 13, color: AppColors.onSurfaceVariant },
 
-  summaryCard: {
-    backgroundColor: AppColors.surfaceContainerLowest,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: `${AppColors.primary}20`,
-  },
-  summaryCardBody: { padding: 18, gap: 12 },
-  summaryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  aiBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: `${AppColors.primary}12`,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-  },
-  aiBadgeText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 11,
-    color: AppColors.primary,
-  },
-  summaryChildName: {
-    fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 12,
-    color: AppColors.onSurfaceVariant,
-  },
-  summaryComplaint: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 18,
-    color: AppColors.onSurface,
-    letterSpacing: -0.3,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: `${AppColors.outlineVariant}20`,
-    marginVertical: 4,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: `${AppColors.outlineVariant}15`,
-  },
-  detailRowLast: { borderBottomWidth: 0 },
-  detailLabel: {
-    fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 13,
-    color: AppColors.onSurfaceVariant,
-    flex: 1,
-  },
-  detailValue: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 13,
-    color: AppColors.onSurface,
-    flex: 2,
-    textAlign: 'right',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-start',
-    backgroundColor: `${AppColors.primary}08`,
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 4,
-  },
-  infoText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 13,
-    color: AppColors.onSurface,
-    flex: 1,
-    lineHeight: 18,
-  },
-  warningRow: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-start',
-    backgroundColor: `${AppColors.warningAmber}10`,
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: `${AppColors.warningAmber}30`,
-  },
-  warningText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 13,
-    color: AppColors.onSurface,
-    flex: 1,
-    lineHeight: 18,
-  },
-
   section: { gap: 14 },
-  sectionTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: AppColors.onSurface,
-  },
+  sectionTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onSurface },
 
-  doctorList: { gap: 10 },
-  doctorCard: {
-    backgroundColor: AppColors.surfaceContainerLowest,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: `${AppColors.outlineVariant}15`,
-  },
-  doctorCardActive: {
-    borderColor: AppColors.primary,
-    backgroundColor: `${AppColors.primary}04`,
-  },
-  doctorCardBody: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    padding: 14,
-  },
-  docAvatar: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: `${AppColors.primary}12`,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  docAvatarActive: {
-    backgroundColor: AppColors.primary,
-  },
-  docAvatarText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: AppColors.primary,
-  },
-  docAvatarTextActive: {
-    color: AppColors.onPrimary,
-  },
-  docInfo: { flex: 1, gap: 2 },
-  docName: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 14,
-    color: AppColors.onSurface,
-  },
-  docSpec: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 12,
-    color: AppColors.onSurfaceVariant,
-  },
-  checkCircle: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: AppColors.primary,
-    alignItems: 'center', justifyContent: 'center',
-  },
-
-  dateRow: { gap: 10 },
-  dayChip: {
-    alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: AppColors.surfaceContainerLowest,
-    borderWidth: 1.5,
-    borderColor: `${AppColors.outlineVariant}15`,
-    minWidth: 78,
-  },
-  dayChipActive: {
-    backgroundColor: AppColors.primary,
-    borderColor: AppColors.primary,
-  },
-  dayLabel: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 13,
-    color: AppColors.onSurface,
-  },
-  dayLabelActive: { color: AppColors.onPrimary },
-  dayDate: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 11,
-    color: AppColors.onSurfaceVariant,
-  },
-  dayDateActive: { color: `${AppColors.onPrimary}B0` },
-
-  noSlotsText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 13,
-    color: AppColors.onSurfaceVariant,
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-  slotsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  slotChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: AppColors.surfaceContainerLowest,
-    borderWidth: 1.5,
-    borderColor: `${AppColors.outlineVariant}20`,
-  },
-  slotDisabled: {
-    backgroundColor: AppColors.surfaceContainerHigh,
-    borderColor: 'transparent',
-  },
-  slotSelected: {
-    backgroundColor: AppColors.primary,
-    borderColor: AppColors.primary,
-  },
-  slotText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 13,
-    color: AppColors.onSurface,
-  },
-  slotTextDisabled: { color: `${AppColors.onSurfaceVariant}50` },
-  slotTextSelected: { color: AppColors.onPrimary },
-
-  footerWrapper: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-  },
+  footerWrapper: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10 },
+  footer: { paddingHorizontal: 20, paddingTop: 12 },
   confirmBtn: { borderRadius: 999, overflow: 'hidden' },
   confirmGrad: {
     flexDirection: 'row',
@@ -609,24 +250,17 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 16,
   },
-  confirmText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: AppColors.onPrimary,
-  },
+  confirmText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onPrimary },
   confirmTextDisabled: { color: AppColors.onSurfaceVariant },
 
-  successContainer: {
-    flex: 1,
+  successContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
+  successIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: `${AppColors.successGreen}15`,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
-    gap: 16,
-  },
-  successIcon: {
-    width: 88, height: 88, borderRadius: 44,
-    backgroundColor: `${AppColors.successGreen}15`,
-    alignItems: 'center', justifyContent: 'center',
     marginBottom: 8,
   },
   successTitle: {
@@ -671,20 +305,7 @@ const styles = StyleSheet.create({
     color: AppColors.onSurface,
     textAlign: 'right',
   },
-  doneBtn: {
-    width: '100%',
-    borderRadius: 999,
-    overflow: 'hidden',
-    marginTop: 8,
-  },
-  doneBtnGrad: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-  },
-  doneBtnText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: AppColors.onPrimary,
-  },
+  doneBtn: { width: '100%', borderRadius: 999, overflow: 'hidden', marginTop: 8 },
+  doneBtnGrad: { alignItems: 'center', justifyContent: 'center', paddingVertical: 16 },
+  doneBtnText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 16, color: AppColors.onPrimary },
 });

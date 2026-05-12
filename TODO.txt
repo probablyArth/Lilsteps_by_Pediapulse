@@ -1,0 +1,263 @@
+================================================================================
+PEDIA PULSE — PRODUCTION TODO LIST
+Source: Pedia Pulse Proposal (Mar 2026) vs current codebase audit
+Generated: 2026-05-07
+================================================================================
+
+CONTEXT
+-------
+Per the proposal (§5 MVP scope), this app must ship with: AI symptom intake,
+appointment booking with notifications (in-app/email/SMS), parent–doctor chat,
+in-platform video, doctor dashboard with AI summaries, digital prescription
+support, vaccination reminders, and child growth/health tracking.
+
+CURRENT STATE (good news)
+-------------------------
+- Parent app shell is solid: auth (email OTP), 18-route onboarding, all 5 tabs,
+  check-in flow with real Groq AI, consult booking, growth, vaccine, health-log,
+  records, profile.
+- mock/data.ts is already deleted (working tree).
+- Every data hook is real Supabase: useAppointments, useDoctors,
+  useConsultations, useVaccinations, useGrowth, useHealthNotes, useDocuments,
+  useChildren.
+- Doctors + time_slots seeded via supabase/seeds/01_doctors_and_time_slots.sql.
+- Sub-components built: components/checkin, components/consult,
+  components/growth, components/health-log.
+
+So "no more dummy data" is mostly already true on the parent app. The remaining
+work is the missing MVP pillars from the proposal and production hardening.
+
+
+================================================================================
+A. LISTED IN PROPOSAL — NOT BUILT
+================================================================================
+
+1. DOCTOR DASHBOARD (WEB)
+   Proposal §4 Doctor Dashboard, §5 MVP scope.
+   Scope:
+     - Separate web app (recommend Next.js 15 + Supabase, deployable to Vercel)
+     - Auth via Supabase with doctor role
+     - Live consultation queue with AI-generated patient summaries
+     - Chat consultation interface with message history
+     - Video consultation entry point
+     - Digital prescription composer + send-to-parent
+     - Appointment management + calendar view
+   Status: not started.
+
+2. PARENT-TO-DOCTOR CHAT CONSULTATION
+   Proposal §4 Parent App + Doctor Dashboard.
+   Scope:
+     - New tables: conversations, messages
+     - RLS: parent sees own conversations; doctor sees assigned
+     - Supabase Realtime channel for live updates
+     - Chat UI on parent app (new route: app/chat/[id].tsx)
+     - Chat UI on doctor dashboard
+     - Read receipts, typing indicator (optional v1)
+   Status: not started.
+
+3. VIDEO CONSULTATION (IN-PLATFORM)
+   Proposal §5 — explicitly allowed as final MVP feature; third-party fallback
+   permitted if delayed.
+   Scope:
+     - Pick provider: Daily.co (recommended for Expo + simple JWT) /
+       100ms (India-first) / Agora
+     - Edge Function to mint room tokens
+     - Parent video screen (app/consult/video/[id].tsx)
+     - Doctor video screen (dashboard)
+     - Permissions handling (camera/mic) on iOS/Android
+     - Fallback: third-party meeting link if delayed
+   Status: not started.
+
+4. DIGITAL PRESCRIPTION GENERATION + DELIVERY
+   Proposal §4 Doctor Dashboard, §5 MVP.
+   Current: consultations.prescription is a plain string displayed in
+            app/consult/[id].tsx — no composer, no PDF, no delivery.
+   Scope:
+     - New table: prescriptions (structured: medicine, dose, frequency, duration,
+       notes) linked to consultation
+     - Doctor composer UI (dashboard)
+     - PDF generation (Edge Function — react-pdf or pdfkit)
+     - Storage bucket "prescriptions" with signed-URL access
+     - Parent viewer + download in app/records/ and app/consult/[id].tsx
+     - Push notification on issue
+   Status: not started.
+
+5. NOTIFICATIONS — SMS / WHATSAPP / EMAIL / IN-APP PUSH
+   Proposal §4 Appointment Management — "Automated appointment confirmation
+   and reminders via SMS/WhatsApp".
+   Scope:
+     - Provider for India: MSG91 or Gupshup (WhatsApp + SMS) — Twilio works
+       but is pricier for IN
+     - Email: Resend or Supabase SMTP
+     - In-app push: expo-notifications + Supabase trigger
+     - Edge Functions:
+         on-appointment-insert  → confirmation (SMS+email+push)
+         on-appointment-reminder (cron 24h + 1h before)  → reminder
+         on-prescription-issued → notify parent
+         on-vaccine-due-soon (daily cron) → reminder
+         on-message-received    → push notify the other side
+     - Templates table for message bodies
+   Status: not started.
+
+6. VACCINATION REMINDERS (DELIVERY LAYER)
+   Schedule + status data already in vaccinations table.
+   Missing: scheduled push/SMS/email when due_soon → overdue.
+   Covered as part of item 5 (cron edge function).
+
+
+================================================================================
+B. LISTED IN PROPOSAL — PARTIALLY BUILT
+================================================================================
+
+7. AI SYMPTOM INTAKE — MOVE OFF CLIENT
+   Current: lib/groq.ts uses EXPO_PUBLIC_GROQ_API_KEY — extractable from any
+   built APK. Documented as MVP-only at lib/groq.ts:5-7.
+   Scope:
+     - Supabase Edge Function: ai-checkin-message, ai-checkin-summary
+     - Move system prompt server-side
+     - Rate limit per user (Edge Function + a usage table)
+     - Update useCheckin to call Edge Function instead of Groq directly
+     - Remove EXPO_PUBLIC_GROQ_API_KEY from .env.example
+   Status: not started. Launch blocker for any external rollout.
+
+8. OTP AUTH — DECIDE EMAIL VS PHONE
+   Current: email OTP via supabase.auth.signInWithOtp({ email })
+            (context/auth.tsx:89).
+   Proposal §10: "Authentication via OTP — no passwords stored." Doesn't
+   specify channel, but the SMS/WhatsApp reminder feature implies phone is the
+   parent-facing identity for the Indian market.
+   Decision required from Dr. Chavan / Shashank:
+     [ ] Keep email OTP (faster to ship, no SMS provider config)
+     [ ] Switch to phone OTP (requires Twilio/MSG91 in Supabase Auth settings,
+                              re-test signup/login flow, update copy)
+     [ ] Allow both
+   Scope if switching: ~1 day of work + provider configuration.
+
+9. APPOINTMENT BOOKING — CONFIRMATION SIDE
+   Booking + slot reservation works (hooks/useAppointments.ts:62-99 includes
+   double-booking guard). Missing: post-book confirmation/reminder dispatch.
+   Covered by item 5.
+
+
+================================================================================
+C. COMPLIANCE / HARDENING (Proposal §6, §7, §10)
+================================================================================
+
+10. SCHEMA + RLS IN supabase/migrations/
+    Current: only supabase/seeds/ exists — schema, RLS policies, and
+    handle_new_user trigger live only inside the Supabase project.
+    Risk: zero source control, painful recovery, no onboarding for any new
+    contributor, and you can't review RLS as code.
+    Scope:
+      - supabase db dump --schema-only > supabase/migrations/0001_init.sql
+      - supabase db dump --data-only --include-only-tables=vaccine_master ...
+        for any reference data
+      - Commit
+      - Document migration workflow in CLAUDE.md
+    RECOMMENDED FIRST TASK — small, reversible, prerequisite for items 2/4/5.
+
+11. DPDP-2023 ALIGNMENT (Proposal §10)
+    [ ] Verify Supabase project region = ap-south-1 (Mumbai). If not, plan
+        migration before any real data lands.
+    [ ] Storage buckets in same region.
+    [ ] Document data retention policy.
+    [ ] Document breach notification path.
+    [ ] DPA template between HealthNivaran and Pedia Pulse drafted and
+        reviewed before go-live (proposal §10).
+    [ ] Privacy policy URL (required for app stores anyway).
+
+12. RLS AUDIT
+    [ ] children: select/update/delete restricted to parent_id = auth.uid()
+    [ ] appointments: parent reads own, doctor reads assigned
+    [ ] consultations: parent reads own child's, doctor reads own
+    [ ] vaccinations, growth_measurements, documents, health_notes: parent-only
+    [ ] doctors: anyone authenticated can read (booking flow needs it)
+    [ ] time_slots: read public, write only via service role
+    [ ] messages (when added): conversation participants only
+    [ ] prescriptions (when added): parent of child + issuing doctor only
+    [ ] Storage buckets: signed URLs with short TTL for medical photos / PDFs
+
+13. ERROR BOUNDARIES + CRASH REPORTING
+    [ ] Add top-level ErrorBoundary in app/_layout.tsx
+    [ ] Sentry (sentry-expo) — at least crash reports
+    [ ] Sentry env tag (development / preview / production)
+
+14. ANALYTICS (lightweight)
+    [ ] Posthog or Amplitude — funnel: app open → check-in start → summary →
+        booking → confirmation
+    [ ] Track only events, never PHI
+
+15. APP STORE READINESS
+    [ ] App icon set (replace Expo default)
+    [ ] Splash screen (already styled in app/index.tsx — verify native splash)
+    [ ] Store listing copy + screenshots (5–8 per platform)
+    [ ] Privacy policy + terms hosted (link from Profile screen)
+    [ ] Apple Developer account ($99/yr) — clinic responsibility per proposal §5
+    [ ] Google Play Developer account ($25 one-time) — clinic responsibility
+    [ ] EAS build profiles (preview + production)
+    [ ] First TestFlight / Internal Testing build
+
+16. WARRANTY / SUPPORT INFRASTRUCTURE (Proposal §14 — 30-day post-launch)
+    [ ] Issue tracker (GitHub Issues or Linear) shared with clinic
+    [ ] Status page or simple uptime monitor (Upptime / BetterStack free tier)
+    [ ] Contact path for clinic to report bugs (email + form?)
+
+
+================================================================================
+RECOMMENDED EXECUTION ORDER
+================================================================================
+
+Proposal milestone 2 ("Development Phase") deliverable is:
+  "AI integration, parent app, doctor dashboard. Due when the core build is
+   demo-ready."
+
+Suggested order to get there fastest:
+
+  Step 1.  Lock schema (item 10)         — small, reversible, prerequisite
+  Step 2.  Groq → Edge Function (item 7) — removes launch blocker
+  Step 3.  Doctor dashboard scaffold (item 1)  — biggest missing piece
+  Step 4.  Chat (item 2) + Prescription (item 4) — share tables across apps
+  Step 5.  Notifications layer (item 5)  — once write events are real
+  Step 6.  Video (item 3)                — proposal allows this last
+  Step 7.  Pre-launch sweep              — items 8, 11, 12, 13, 15, 16
+
+Items 14 (analytics) and 16 (support infra) can run in parallel anytime.
+
+
+================================================================================
+DECISIONS NEEDED FROM YOU / DR. CHAVAN BEFORE WORK PROCEEDS
+================================================================================
+
+D1. Email OTP vs phone OTP (item 8). India market context favours phone.
+D2. Doctor dashboard stack: Next.js 15 (recommended) vs Expo web vs other.
+D3. SMS/WhatsApp provider for India: MSG91 / Gupshup / Twilio.
+D4. Video provider: Daily.co / 100ms / Agora / Jitsi.
+D5. Email provider: Resend / Supabase SMTP / SES.
+D6. Crash reporting: Sentry (recommended) vs Bugsnag vs none.
+D7. Analytics: Posthog vs Amplitude vs none.
+D8. Whether existing unstaged edits across 11 files are fair game to refactor,
+    or should be left untouched.
+
+
+================================================================================
+NOTES ON PROPOSAL SCOPE BOUNDARIES
+================================================================================
+
+In MVP (per proposal §5):
+  - AI symptom intake
+  - Appointment booking + notifications
+  - Chat
+  - Video (last)
+  - Doctor dashboard + AI summaries
+  - Digital prescription
+  - Vaccination reminders
+  - Growth + health tracking
+
+Out of MVP — Phase 2 (proposal §5, §13):
+  - Deep EMR / medical record integrations
+  - Multi-doctor / multi-clinic support
+  - Lab report upload with AI explanation
+  - AI follow-up care guidance post-consultation
+
+Any feature additions beyond §5 must be scoped + costed in writing
+(proposal §14 Scope & Change Requests).

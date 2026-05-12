@@ -2,33 +2,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-  Easing,
   FadeIn,
   FadeInDown,
   FadeInUp,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AvatarStack } from '@/components/avatar-stack';
 import { AppColors } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { dbg } from '@/lib/debug';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function SplashScreen() {
   const insets = useSafeAreaInsets();
   const { session, loading, hasChildren } = useAuth();
   const hasNavigated = useRef(false);
-  
-  const breatheScale = useSharedValue(1);
-  const breatheOpacity = useSharedValue(0.35);
 
   useEffect(() => {
     dbg.nav('Splash effect', { loading, hasSession: !!session, hasChildren, hasNavigated: hasNavigated.current });
@@ -41,52 +31,32 @@ export default function SplashScreen() {
     }
   }, [session, loading, hasChildren]);
 
-  useEffect(() => {
-    breatheScale.value = withRepeat(
-      withSequence(
-        withTiming(1.08, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-    
-    breatheOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.5, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.35, { duration: 4000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-  }, [breatheScale, breatheOpacity]);
-
-  const breatheStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: breatheScale.value }],
-    opacity: breatheOpacity.value,
-  }));
-
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[AppColors.surface, AppColors.surfaceContainer, AppColors.surfaceDim]}
-        locations={[0, 0.5, 1]}
+        colors={[AppColors.surface, AppColors.surfaceContainerLow, AppColors.surfaceContainer]}
+        locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
 
-      <Animated.View style={[styles.breatheOrb, breatheStyle]} />
-      <View style={styles.orbAccentSmall} />
+      <View style={styles.blobTopLeft} />
+      <View style={styles.blobBottomRight} />
 
-      <View style={[styles.content, { paddingTop: insets.top }]}>
+      <View style={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+        <Animated.View entering={FadeIn.duration(600)} style={styles.topRow}>
+          <View style={styles.statusDot} />
+          <Text style={styles.statusLabel}>PEDIATRIC HEALTH SUITE</Text>
+        </Animated.View>
+
         <View style={styles.heroSection}>
-          <Animated.View entering={FadeIn.duration(800)} style={styles.logoContainer}>
+          <Animated.View entering={FadeIn.delay(150).duration(700)} style={styles.logoWrap}>
             <LinearGradient
               colors={[AppColors.primary, AppColors.gradientEnd]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.logoIcon}
             >
-              <View style={styles.logoDotsContainer}>
+              <View style={styles.logoDots}>
                 <View style={[styles.logoDot, styles.logoDotLarge]} />
                 <View style={styles.logoDotRow}>
                   <View style={[styles.logoDot, styles.logoDotSmall]} />
@@ -96,21 +66,36 @@ export default function SplashScreen() {
             </LinearGradient>
           </Animated.View>
 
-          <Animated.View entering={FadeInUp.delay(300).duration(700)} style={styles.brandSection}>
-            <View style={styles.brandRow}>
-              <Text style={styles.brandLight}>Lil</Text>
-              <Text style={styles.brandBold}>Steps</Text>
-            </View>
-            <Text style={styles.tagline}>
-              Your child's health journey,{'\n'}simplified.
+          <Animated.View entering={FadeInUp.delay(300).duration(700)} style={styles.brandWrap}>
+            <Text style={styles.wordmark}>
+              <Text style={styles.wordmarkLight}>Lil</Text>
+              <Text style={styles.wordmarkBold}>Steps</Text>
+            </Text>
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(450).duration(700)} style={styles.headlineWrap}>
+            <Text style={styles.headline}>
+              Every little step,{'\n'}
+              <Text style={styles.headlineAccent}>gently guided.</Text>
+            </Text>
+            <Text style={styles.subhead}>
+              A calm, doctor-built sanctuary for your child&apos;s health journey.
             </Text>
           </Animated.View>
         </View>
 
-        <Animated.View entering={FadeIn.delay(600).duration(700)} style={styles.ctaSection}>
-          <Pressable 
-            onPress={() => router.push('/(auth)/signup')} 
-            style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+        <Animated.View entering={FadeInDown.delay(600).duration(700)} style={styles.bottomSection}>
+          <View style={styles.trustCard}>
+            <AvatarStack badgeLabel="500+" />
+            <View style={styles.trustTextWrap}>
+              <Text style={styles.trustEyebrow}>TRUSTED NETWORK</Text>
+              <Text style={styles.trustTitle}>Top-tier Specialists</Text>
+            </View>
+          </View>
+
+          <Pressable
+            onPress={() => router.push('/(auth)/signup')}
+            style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
           >
             <LinearGradient
               colors={[AppColors.primary, AppColors.gradientEnd]}
@@ -125,34 +110,12 @@ export default function SplashScreen() {
 
           <Pressable
             onPress={() => router.push('/(auth)/login')}
-            style={({ pressed }) => [styles.secondaryButton, { opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => [styles.secondaryButton, { opacity: pressed ? 0.6 : 1 }]}
           >
             <Text style={styles.secondaryButtonLabel}>I already have an account</Text>
           </Pressable>
         </Animated.View>
       </View>
-
-      <Animated.View 
-        entering={FadeInDown.delay(900).duration(600)}
-        style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}
-      >
-        <View style={styles.trustRow}>
-          <View style={styles.trustItem}>
-            <Ionicons name="shield-checkmark-outline" size={14} color={AppColors.primary} />
-            <Text style={styles.trustText}>HIPAA Compliant</Text>
-          </View>
-          <View style={styles.trustDot} />
-          <View style={styles.trustItem}>
-            <Ionicons name="people-outline" size={14} color={AppColors.primary} />
-            <Text style={styles.trustText}>10K+ Families</Text>
-          </View>
-          <View style={styles.trustDot} />
-          <View style={styles.trustItem}>
-            <Ionicons name="medkit-outline" size={14} color={AppColors.primary} />
-            <Text style={styles.trustText}>Doctor Built</Text>
-          </View>
-        </View>
-      </Animated.View>
     </View>
   );
 }
@@ -162,96 +125,153 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: AppColors.surface,
   },
-  breatheOrb: {
+  blobTopLeft: {
     position: 'absolute',
-    top: SCREEN_HEIGHT * 0.12,
-    alignSelf: 'center',
-    width: SCREEN_WIDTH * 0.85,
-    height: SCREEN_WIDTH * 0.85,
-    borderRadius: SCREEN_WIDTH * 0.5,
-    backgroundColor: `${AppColors.primaryContainer}50`,
+    top: -120,
+    left: -120,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    backgroundColor: `${AppColors.primaryContainer}33`,
   },
-  orbAccentSmall: {
+  blobBottomRight: {
     position: 'absolute',
-    top: SCREEN_HEIGHT * 0.06,
-    right: -30,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: `${AppColors.secondaryContainer}30`,
+    bottom: -140,
+    right: -100,
+    width: 360,
+    height: 360,
+    borderRadius: 180,
+    backgroundColor: `${AppColors.secondaryContainer}33`,
   },
   content: {
     flex: 1,
     paddingHorizontal: 28,
-    justifyContent: 'space-between',
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: AppColors.primary,
+  },
+  statusLabel: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 11,
+    letterSpacing: 2.4,
+    color: AppColors.onSurfaceVariant,
   },
   heroSection: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 40,
+    alignItems: 'flex-start',
+    gap: 28,
   },
-  logoContainer: {
-    marginBottom: 28,
+  logoWrap: {
+    alignSelf: 'flex-start',
   },
   logoIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 22,
+    width: 64,
+    height: 64,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 10,
   },
-  logoDotsContainer: {
+  logoDots: {
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
   },
   logoDot: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: 'rgba(255,255,255,0.96)',
     borderRadius: 999,
   },
   logoDotLarge: {
-    width: 11,
-    height: 11,
+    width: 9,
+    height: 9,
   },
   logoDotSmall: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
   },
   logoDotRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 5,
   },
-  brandSection: {
-    alignItems: 'center',
-    gap: 12,
-  },
-  brandRow: {
+  brandWrap: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
-  brandLight: {
+  wordmark: {
     fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 34,
+    fontSize: 22,
     color: AppColors.onSurfaceVariant,
-    letterSpacing: -0.8,
+    letterSpacing: -0.4,
   },
-  brandBold: {
+  wordmarkLight: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    color: AppColors.onSurfaceVariant,
+  },
+  wordmarkBold: {
     fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 34,
-    color: AppColors.primary,
-    letterSpacing: -0.8,
+    color: AppColors.onSurface,
   },
-  tagline: {
+  headlineWrap: {
+    gap: 14,
+  },
+  headline: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontSize: 40,
+    lineHeight: 46,
+    letterSpacing: -1.2,
+    color: AppColors.onSurface,
+  },
+  headlineAccent: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    color: AppColors.primary,
+    fontStyle: 'italic',
+  },
+  subhead: {
     fontFamily: 'PlusJakartaSans_500Medium',
     fontSize: 16,
-    color: AppColors.onSurfaceVariant,
-    textAlign: 'center',
     lineHeight: 24,
-    opacity: 0.85,
+    color: AppColors.onSurfaceVariant,
+    maxWidth: 320,
   },
-  ctaSection: {
-    gap: 14,
-    paddingBottom: 24,
+  bottomSection: {
+    gap: 16,
+  },
+  trustCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: `${AppColors.surfaceContainerLowest}CC`,
+    borderRadius: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    marginBottom: 4,
+  },
+  trustTextWrap: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  trustEyebrow: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 10,
+    letterSpacing: 1.5,
+    color: AppColors.primary,
+  },
+  trustTitle: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 14,
+    color: AppColors.onSurface,
   },
   primaryButton: {
     height: 56,
@@ -260,6 +280,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    shadowColor: AppColors.primary,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 20,
+    elevation: 8,
   },
   primaryButtonLabel: {
     fontFamily: 'PlusJakartaSans_700Bold',
@@ -270,37 +295,11 @@ const styles = StyleSheet.create({
   secondaryButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 6,
   },
   secondaryButtonLabel: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: 15,
     color: AppColors.onSurface,
-  },
-  footer: {
-    paddingHorizontal: 20,
-  },
-  trustRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  trustItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  trustText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 10,
-    color: AppColors.onSurfaceVariant,
-    letterSpacing: 0.3,
-  },
-  trustDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: AppColors.outlineVariant,
   },
 });

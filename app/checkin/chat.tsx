@@ -4,8 +4,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Animated,
-  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,11 +15,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AiMessage } from '@/components/checkin/AiMessage';
+import { CHECKIN_HEADER_HEIGHT, CheckinHeader } from '@/components/checkin/CheckinHeader';
+import { TypingIndicator } from '@/components/checkin/TypingIndicator';
+import { UserMessage } from '@/components/checkin/UserMessage';
 import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
 import { useCheckin } from '@/hooks/useCheckin';
-
-const HEADER_HEIGHT = 60;
 
 export default function CheckinChatScreen() {
   const insets = useSafeAreaInsets();
@@ -77,32 +77,7 @@ export default function CheckinChatScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.headerWrapper, { paddingTop: insets.top }]} pointerEvents="box-none">
-        <LinearGradient
-          colors={[
-            AppColors.surface,
-            AppColors.surface,
-            `${AppColors.surface}E8`,
-            `${AppColors.surface}B0`,
-            `${AppColors.surface}60`,
-            `${AppColors.surface}20`,
-            `${AppColors.surface}00`,
-          ]}
-          locations={[0, 0.35, 0.5, 0.65, 0.78, 0.9, 1]}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          pointerEvents="none"
-        />
-        <View style={styles.header} pointerEvents="box-none">
-          <Pressable style={styles.backBtn} onPress={() => router.back()} disabled={generatingSummary}>
-            <Ionicons name="chevron-back" size={24} color={AppColors.onSurface} />
-          </Pressable>
-          <Text style={styles.headerTitle}>LilSteps AI</Text>
-          <View style={styles.statusDot} />
-          <View style={styles.headerSpacer} />
-        </View>
-      </View>
+      <CheckinHeader onBack={() => router.back()} backDisabled={generatingSummary} showStatusDot />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
@@ -113,10 +88,10 @@ export default function CheckinChatScreen() {
           ref={scrollRef}
           contentContainerStyle={[
             styles.scroll,
-            { 
-              paddingTop: insets.top + HEADER_HEIGHT,
-              paddingBottom: showInput ? 100 + insets.bottom : 20 + insets.bottom 
-            }
+            {
+              paddingTop: insets.top + CHECKIN_HEADER_HEIGHT,
+              paddingBottom: showInput ? 100 + insets.bottom : 20 + insets.bottom,
+            },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -235,133 +210,12 @@ export default function CheckinChatScreen() {
   );
 }
 
-function AiMessage({
-  text,
-  quickOptions,
-  onOptionTap,
-}: {
-  text: string;
-  quickOptions?: string[];
-  onOptionTap?: (option: string) => void;
-}) {
-  return (
-    <View style={styles.aiMessageContainer}>
-      <View style={styles.aiRow}>
-        <View style={styles.aiIcon}>
-          <Ionicons name="sparkles" size={16} color={AppColors.primary} />
-        </View>
-        <View style={styles.aiContent}>
-          <Text style={styles.aiText}>{text}</Text>
-        </View>
-      </View>
-      {quickOptions && quickOptions.length > 0 && (
-        <View style={styles.optionsRow}>
-          {quickOptions.map((opt) => (
-            <Pressable
-              key={opt}
-              style={({ pressed }) => [styles.optionChip, { opacity: pressed ? 0.7 : 1 }]}
-              onPress={() => onOptionTap?.(opt)}
-            >
-              <Text style={styles.optionText}>{opt}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-}
-
-function UserMessage({ text }: { text: string }) {
-  return (
-    <View style={styles.userRow}>
-      <View style={styles.userBubble}>
-        <Text style={styles.userText}>{text}</Text>
-      </View>
-    </View>
-  );
-}
-
-function TypingIndicator() {
-  const dot1 = useRef(new Animated.Value(0)).current;
-  const dot2 = useRef(new Animated.Value(0)).current;
-  const dot3 = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const animate = (val: Animated.Value, delay: number) =>
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(val, { toValue: 1, duration: 300, easing: Easing.ease, useNativeDriver: true }),
-          Animated.timing(val, { toValue: 0, duration: 300, easing: Easing.ease, useNativeDriver: true }),
-        ])
-      );
-    const a1 = animate(dot1, 0);
-    const a2 = animate(dot2, 150);
-    const a3 = animate(dot3, 300);
-    a1.start(); a2.start(); a3.start();
-    return () => { a1.stop(); a2.stop(); a3.stop(); };
-  }, [dot1, dot2, dot3]);
-
-  const scale = (v: Animated.Value) => v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] });
-  const opacity = (v: Animated.Value) => v.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
-
-  return (
-    <View style={styles.aiMessageContainer}>
-      <View style={styles.aiRow}>
-        <View style={styles.aiIcon}>
-          <Ionicons name="sparkles" size={16} color={AppColors.primary} />
-        </View>
-        <View style={styles.typingDots}>
-          <Animated.View style={[styles.dot, { transform: [{ scale: scale(dot1) }], opacity: opacity(dot1) }]} />
-          <Animated.View style={[styles.dot, { transform: [{ scale: scale(dot2) }], opacity: opacity(dot2) }]} />
-          <Animated.View style={[styles.dot, { transform: [{ scale: scale(dot3) }], opacity: opacity(dot3) }]} />
-        </View>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: AppColors.surface },
-
-  headerWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingTop: 8,
-    paddingBottom: 20,
-    gap: 6,
-  },
-  backBtn: {
-    width: 44, height: 44,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  headerTitle: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 17,
-    color: AppColors.onSurface,
-  },
-  statusDot: {
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: AppColors.successGreen,
-  },
-  headerSpacer: { flex: 1 },
-
   keyboardView: { flex: 1 },
-
   scroll: { paddingHorizontal: 16, paddingTop: 8 },
 
-  sessionHeader: {
-    paddingVertical: 12,
-    marginBottom: 8,
-  },
+  sessionHeader: { paddingVertical: 12, marginBottom: 8 },
   sessionLabel: {
     fontFamily: 'PlusJakartaSans_400Regular',
     fontSize: 13,
@@ -369,148 +223,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  aiMessageContainer: {
-    marginBottom: 20,
-  },
-  aiRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  aiIcon: {
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: `${AppColors.primary}12`,
-    alignItems: 'center', justifyContent: 'center',
-    marginTop: 2,
-  },
-  aiContent: {
-    flex: 1,
-    paddingRight: 40,
-  },
-  aiText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 16,
-    color: AppColors.onSurface,
-    lineHeight: 24,
-  },
-  optionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 12,
-    paddingLeft: 40,
-  },
-  optionChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: `${AppColors.outlineVariant}40`,
-    backgroundColor: AppColors.surfaceContainerLowest,
-  },
-  optionText: {
-    fontFamily: 'PlusJakartaSans_500Medium',
-    fontSize: 14,
-    color: AppColors.onSurface,
-  },
+  errorRow: { paddingVertical: 8, paddingHorizontal: 40 },
+  errorText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.errorRed },
 
-  userRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 20,
-  },
-  userBubble: {
-    maxWidth: '80%',
-    backgroundColor: AppColors.primary,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  userText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 16,
-    color: AppColors.onPrimary,
-    lineHeight: 24,
-  },
+  summarySection: { marginTop: 12, gap: 16 },
+  summaryCard: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 40 },
+  summaryText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurfaceVariant, flex: 1 },
+  summaryBtn: { borderRadius: 999, overflow: 'hidden' },
+  summaryBtnGrad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 },
+  summaryBtnText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 16, color: AppColors.onPrimary },
 
-  typingDots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 8,
-  },
-  dot: {
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: AppColors.primary,
-  },
+  loadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 20 },
+  loadingText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: AppColors.onSurfaceVariant },
 
-  errorRow: {
-    paddingVertical: 8,
-    paddingHorizontal: 40,
-  },
-  errorText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 14,
-    color: AppColors.errorRed,
-  },
-
-  summarySection: {
-    marginTop: 12,
-    gap: 16,
-  },
-  summaryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 40,
-  },
-  summaryText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 14,
-    color: AppColors.onSurfaceVariant,
-    flex: 1,
-  },
-  summaryBtn: {
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  summaryBtnGrad: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-  },
-  summaryBtnText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 16,
-    color: AppColors.onPrimary,
-  },
-
-  loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 20,
-  },
-  loadingText: {
-    fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 14,
-    color: AppColors.onSurfaceVariant,
-  },
-
-  inputWrapper: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  inputBar: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  },
+  inputWrapper: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10 },
+  inputBar: { paddingHorizontal: 16, paddingTop: 12 },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -531,13 +258,12 @@ const styles = StyleSheet.create({
     maxHeight: 120,
   },
   sendBtn: {
-    width: 34, height: 34,
+    width: 34,
+    height: 34,
     borderRadius: 17,
     backgroundColor: AppColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sendBtnDisabled: {
-    backgroundColor: `${AppColors.outlineVariant}30`,
-  },
+  sendBtnDisabled: { backgroundColor: `${AppColors.outlineVariant}30` },
 });
