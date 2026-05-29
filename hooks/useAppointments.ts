@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/auth';
+import { notify } from '@/lib/notify';
 
 export interface AppointmentRow {
   id: string;
@@ -94,6 +95,28 @@ export function useAppointments(childId: string | null) {
         .eq('time', data.time);
       throw new Error(err.message);
     }
+
+    // Fire-and-forget confirmation SMS to the parent.
+    const { data: doctor } = await supabase
+      .from('doctors')
+      .select('name')
+      .eq('id', data.doctor_id)
+      .maybeSingle();
+
+    notify({
+      channel: 'sms',
+      template: 'appointment_confirmation',
+      params: {
+        doctor: doctor?.name ?? 'your doctor',
+        date: data.date,
+        time: data.time.slice(0, 5),
+      },
+      recipient: {
+        parent_id: user.id,
+        child_id: data.child_id,
+        appointment_id: appt.id,
+      },
+    });
 
     await fetch();
     return appt;

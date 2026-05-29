@@ -18,19 +18,31 @@ export default function SignupScreen() {
   const { signInWithOtp, verifyOtp } = useAuth();
 
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('+91');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'details' | 'otp'>('details');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function normalisedPhone() {
+    return phone.replace(/[\s-]/g, '');
+  }
+
   async function handleSendOtp() {
-    if (!email.trim() || !name.trim()) return;
+    const p = normalisedPhone();
+    if (!name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    if (!/^\+\d{10,15}$/.test(p)) {
+      setError('Enter your phone number in international format (e.g. +919876543210)');
+      return;
+    }
     setLoading(true);
     setError(null);
 
-    dbg.auth('Signup: sending OTP', { name: name.trim(), email: email.trim().toLowerCase() });
-    const { error: err } = await signInWithOtp(email.trim().toLowerCase());
+    dbg.auth('Signup: sending OTP', { name: name.trim(), phone: p });
+    const { error: err } = await signInWithOtp(p);
     setLoading(false);
 
     if (err) {
@@ -50,8 +62,9 @@ export default function SignupScreen() {
     setLoading(true);
     setError(null);
 
-    dbg.auth('Signup: verifying OTP', { email: email.trim().toLowerCase() });
-    const { error: err } = await verifyOtp(email.trim().toLowerCase(), otp);
+    const p = normalisedPhone();
+    dbg.auth('Signup: verifying OTP', { phone: p });
+    const { error: err } = await verifyOtp(p, otp);
 
     if (err) {
       setLoading(false);
@@ -69,7 +82,7 @@ export default function SignupScreen() {
         .upsert({
           id: currentUser.id,
           name: name.trim(),
-          email: email.trim().toLowerCase(),
+          phone: p,
         }, { onConflict: 'id' });
 
       if (upsertErr) {
@@ -117,7 +130,7 @@ export default function SignupScreen() {
             <Text style={[typography.bodySM, styles.subtitle]}>
               {step === 'details'
                 ? 'Join thousands of parents protecting their children\'s health'
-                : `We sent a 6-digit code to ${email}`}
+                : `We sent a 6-digit code to ${phone}`}
             </Text>
           </View>
 
@@ -135,13 +148,14 @@ export default function SignupScreen() {
                   onChangeText={setName}
                 />
                 <TextInputField
-                  label="Email"
-                  placeholder="you@example.com"
-                  keyboardType="email-address"
+                  label="Phone"
+                  hint="(with country code)"
+                  placeholder="+919876543210"
+                  keyboardType="phone-pad"
                   autoCapitalize="none"
-                  autoComplete="email"
-                  value={email}
-                  onChangeText={setEmail}
+                  autoComplete="tel"
+                  value={phone}
+                  onChangeText={setPhone}
                 />
               </View>
             ) : (

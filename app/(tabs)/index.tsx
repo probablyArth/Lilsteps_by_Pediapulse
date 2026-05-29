@@ -15,6 +15,7 @@ import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
 import { useVaccinations } from '@/hooks/useVaccinations';
 import { useDoctors } from '@/hooks/useDoctors';
+import { useConversations } from '@/hooks/useConversations';
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -28,6 +29,17 @@ export default function HomeScreen() {
   const { child, parentName, bracket } = useChild();
   const { vaccinations } = useVaccinations(child?.id ?? null);
   const { doctors } = useDoctors();
+  const { startConversation } = useConversations(child?.id ?? null);
+
+  async function handleProviderPress(doctorId: string) {
+    if (!child) return;
+    try {
+      const convo = await startConversation({ child_id: child.id, doctor_id: doctorId });
+      router.push(`/chat/${convo.id}`);
+    } catch {
+      // ignore — UI will show stale state, retry by tapping again
+    }
+  }
 
   const childName = child?.name ?? 'Child';
   const bracketKey = bracket ?? 'TODDLER';
@@ -93,7 +105,11 @@ export default function HomeScreen() {
           onViewSchedule={() => router.navigate('/(tabs)/vaccine')}
         />
 
-        <CareTeam providers={careProviders} onAddProvider={() => router.push('/consult/booking')} />
+        <CareTeam
+          providers={careProviders}
+          onAddProvider={() => router.push('/consult/booking')}
+          onProviderPress={handleProviderPress}
+        />
 
         <DailyInsight bracket={bracketKey} />
       </ScrollView>

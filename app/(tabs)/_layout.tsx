@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useChild } from '@/context/child';
 import { AppColors } from '@/constants/theme';
+import { usePushTokenRegistration } from '@/hooks/usePushToken';
 
 const UNDER_5_BRACKETS = ['NEWBORN', 'EARLY_INFANT', 'INFANT', 'TODDLER_EARLY', 'TODDLER', 'PRESCHOOL'];
 
@@ -138,6 +139,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 }
 
 export default function TabsLayout() {
+  usePushTokenRegistration();
   return (
     <Tabs tabBar={(props) => <CustomTabBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" />
