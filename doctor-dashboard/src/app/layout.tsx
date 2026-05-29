@@ -1,21 +1,30 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Fraunces, Geist, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { DashboardNav } from './nav';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const fraunces = Fraunces({
+  variable: '--font-fraunces',
   subsets: ['latin'],
+  display: 'swap',
+  axes: ['SOFT', 'WONK', 'opsz'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const geist = Geist({
+  variable: '--font-geist',
   subsets: ['latin'],
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: 'Pedia Pulse — Clinical Dashboard',
-  description: 'Doctor-facing dashboard for Pedia Pulse Paediatric Clinic.',
+  description: 'Paediatric consultation dashboard for Pedia Pulse, Pune.',
 };
 
 export default function RootLayout({
@@ -26,9 +35,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${geist.variable} ${jetbrainsMono.variable} h-full`}
     >
-      <body className="min-h-full bg-zinc-50 text-zinc-900 flex flex-col">
+      <body className="min-h-full flex flex-col">
         <DashboardNav />
         {children}
       </body>

@@ -26,6 +26,14 @@ function formatTime(iso: string) {
   });
 }
 
+function formatDay(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
 export default async function ConversationPage({
   params,
 }: {
@@ -49,29 +57,44 @@ export default async function ConversationPage({
     .order('created_at', { ascending: true })
     .returns<MessageRow[]>();
 
+  // Group messages by day for editorial section breaks
+  const grouped: { day: string; items: MessageRow[] }[] = [];
+  (messages ?? []).forEach((m) => {
+    const day = formatDay(m.created_at);
+    const last = grouped[grouped.length - 1];
+    if (last && last.day === day) last.items.push(m);
+    else grouped.push({ day, items: [m] });
+  });
+
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-0">
-      <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
-        <div>
-          <h1 className="text-lg font-semibold">
-            {conversation.children?.name ?? 'Unknown'}
-          </h1>
-          <p className="text-xs text-zinc-500">
-            Parent: {conversation.parents?.name ?? conversation.parents?.phone ?? '—'}
-          </p>
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-8">
+      {/* Editorial conversation header */}
+      <header className="py-10 fade-up">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-3)]">
+          Patient
         </div>
-        <div className="flex items-center gap-2">
+        <h1 className="mt-3 font-display text-[44px] leading-[1] tracking-[-0.025em] text-[var(--ink)]">
+          <span className="font-display-italic">{conversation.children?.name ?? 'Unknown'}</span>
+        </h1>
+        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">
+          Parent ·{' '}
+          <span className="lowercase tracking-normal">
+            {conversation.parents?.name ?? conversation.parents?.phone ?? '—'}
+          </span>
+        </p>
+
+        <div className="mt-7 flex flex-wrap items-center gap-3">
           {conversation.appointment_id && (
             <Link
               href={`/conversations/${id}/video`}
-              className="rounded-md border border-zinc-200 px-3 py-1.5 text-sm hover:bg-zinc-50"
+              className="editorial-btn-ghost"
             >
               Start video
             </Link>
           )}
           <Link
             href={`/prescriptions?child=${conversation.children?.id ?? ''}`}
-            className="rounded-md border border-zinc-200 px-3 py-1.5 text-sm hover:bg-zinc-50"
+            className="editorial-btn-ghost"
           >
             View prescriptions
           </Link>
@@ -79,44 +102,62 @@ export default async function ConversationPage({
             href={`/prescriptions/new?child=${conversation.children?.id ?? ''}${
               conversation.appointment_id ? `&appointment=${conversation.appointment_id}` : ''
             }`}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800"
+            className="editorial-btn"
           >
             Issue prescription
           </Link>
         </div>
       </header>
 
-      <section className="flex-1 overflow-y-auto bg-zinc-50 px-6 py-6">
-        {!messages || messages.length === 0 ? (
-          <p className="text-center text-sm text-zinc-500">
+      <section className="flex-1 border-t border-[var(--hairline)] py-10">
+        {grouped.length === 0 ? (
+          <p className="py-16 text-center font-display-italic text-[22px] text-[var(--ink-3)]">
             No messages yet.
           </p>
         ) : (
-          <ul className="space-y-3">
-            {messages.map((m) => (
-              <li
-                key={m.id}
-                className={`flex ${m.sender === 'doctor' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
-                    m.sender === 'doctor'
-                      ? 'bg-zinc-900 text-white'
-                      : 'bg-white text-zinc-900'
-                  }`}
-                >
-                  <div>{m.content}</div>
-                  <div
-                    className={`mt-1 text-[10px] ${
-                      m.sender === 'doctor' ? 'text-zinc-300' : 'text-zinc-400'
-                    }`}
-                  >
-                    {formatTime(m.created_at)}
-                  </div>
+          <div className="space-y-10">
+            {grouped.map((g) => (
+              <div key={g.day}>
+                <div className="mb-6 flex items-baseline gap-3">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-4)]">
+                    {g.day}
+                  </span>
+                  <span className="h-px flex-1 bg-[var(--hairline)]" />
                 </div>
-              </li>
+                <ul className="space-y-4">
+                  {g.items.map((m) => (
+                    <li
+                      key={m.id}
+                      className={`flex ${
+                        m.sender === 'doctor' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[78%] ${
+                          m.sender === 'doctor'
+                            ? 'border-r-2 border-[var(--ink)] pr-4 text-right'
+                            : 'border-l-2 border-[var(--accent)] pl-4'
+                        }`}
+                      >
+                        <div className="font-sans text-[15.5px] leading-[1.55] text-[var(--ink)]">
+                          {m.content}
+                        </div>
+                        <div
+                          className={`mt-1.5 flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--ink-4)] ${
+                            m.sender === 'doctor' ? 'justify-end' : ''
+                          }`}
+                        >
+                          <span>{m.sender === 'doctor' ? 'You' : 'Parent'}</span>
+                          <span className="text-[var(--hairline-strong)]">·</span>
+                          <span>{formatTime(m.created_at)}</span>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 

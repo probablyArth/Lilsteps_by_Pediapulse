@@ -20,13 +20,17 @@ export default async function NewPrescriptionPage({
   if (!child) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-      <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">New prescription</h1>
-        <p className="text-sm text-zinc-500">
-          Issue a prescription that the parent will see in the app.
-        </p>
+    <main className="mx-auto w-full max-w-3xl flex-1 px-8 py-16">
+      <header className="mb-12 fade-up">
+        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-3)]">
+          New entry
+        </div>
+        <h1 className="mt-4 font-display text-[56px] leading-[0.95] tracking-[-0.03em] text-[var(--ink)]">
+          A prescription <br />
+          for <span className="font-display-italic">{child.name}</span>
+        </h1>
       </header>
+
       <PrescriptionForm
         childId={child.id}
         childName={child.name}

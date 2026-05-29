@@ -3,10 +3,38 @@ import { StyleSheet } from 'react-native';
 import { AppColors } from '@/constants/theme';
 
 /**
- * Shared typography styles using Plus Jakarta Sans.
- * Use these instead of defining font families inline.
+ * Shared typography styles.
+ *
+ * Two families:
+ *   • Plus Jakarta Sans — the workhorse. Headlines through labels.
+ *   • Instrument Serif — reserved for editorial moments. Hero greetings,
+ *     emphasis on warm copy ("Welcome", "Today is...", child names in a
+ *     consultation summary). Use sparingly so each appearance feels intentional.
  */
 export const typography = StyleSheet.create({
+  // Editorial display — Instrument Serif. For hero moments only.
+  displayXL: {
+    fontFamily: 'InstrumentSerif_400Regular',
+    fontSize: 48,
+    color: AppColors.onSurface,
+    letterSpacing: -1,
+    lineHeight: 52,
+  },
+  displayLG: {
+    fontFamily: 'InstrumentSerif_400Regular',
+    fontSize: 36,
+    color: AppColors.onSurface,
+    letterSpacing: -0.6,
+    lineHeight: 40,
+  },
+  displayItalic: {
+    fontFamily: 'InstrumentSerif_400Regular_Italic',
+    fontSize: 36,
+    color: AppColors.primary,
+    letterSpacing: -0.4,
+    lineHeight: 40,
+  },
+
   headingXL: {
     fontFamily: 'PlusJakartaSans_800ExtraBold',
     fontSize: 36,

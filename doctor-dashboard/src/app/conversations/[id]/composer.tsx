@@ -27,32 +27,45 @@ export function Composer({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2 border-t border-zinc-200 bg-white p-3">
-      <textarea
-        ref={textareaRef}
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        placeholder="Reply to the parent…"
-        rows={1}
-        className="flex-1 resize-none rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-zinc-400"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            (e.currentTarget.form as HTMLFormElement).requestSubmit();
-          }
-        }}
-      />
-      <button
-        type="submit"
-        disabled={pending || draft.trim().length === 0}
-        className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-      >
-        {pending ? 'Sending…' : 'Send'}
-      </button>
+    <form
+      onSubmit={handleSubmit}
+      className="sticky bottom-0 border-t border-[var(--hairline)] bg-[var(--paper)]/95 backdrop-blur-sm"
+    >
+      <div className="flex items-end gap-4 py-5">
+        <div className="flex-1">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--ink-3)]">
+            Reply
+          </div>
+          <textarea
+            ref={textareaRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="A reply, in your own words…"
+            rows={2}
+            className="editorial-input resize-none italic placeholder:not-italic"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                (e.currentTarget.form as HTMLFormElement).requestSubmit();
+              }
+            }}
+          />
+          <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ink-4)]">
+            ⌘/Ctrl + Enter to send
+          </div>
+        </div>
+        <button
+          type="submit"
+          disabled={pending || draft.trim().length === 0}
+          className="editorial-btn shrink-0"
+        >
+          {pending ? 'Sending…' : 'Send'}
+        </button>
+      </div>
       {error && (
-        <span className="absolute -mt-12 rounded-md bg-red-50 px-2 py-1 text-xs text-red-700">
+        <p className="border-l-2 border-[var(--alert)] pl-3 pb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--alert)]">
           {error}
-        </span>
+        </p>
       )}
     </form>
   );

@@ -71,9 +71,11 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <Text style={styles.greeting}>
-            {getGreeting()}, {parentName || 'there'}.{'\n'}
-            {childName} is thriving today.
+          <Text style={styles.greetingTop}>
+            {getGreeting()}, {parentName || 'there'}.
+          </Text>
+          <Text style={styles.greetingItalic}>
+            {childName} <Text style={styles.greetingItalicSoft}>is thriving today.</Text>
           </Text>
           <Text style={styles.greetingSub}>
             {bracketCfg.greetingSubtext(childName)}
@@ -136,19 +138,32 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   section: {
-    gap: 4,
+    gap: 6,
   },
-  greeting: {
-    fontFamily: 'PlusJakartaSans_800ExtraBold',
-    fontSize: 32,
+  greetingTop: {
+    fontFamily: 'PlusJakartaSans_500Medium',
+    fontSize: 13,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+    color: AppColors.onSurfaceVariant,
+    marginBottom: 6,
+  },
+  greetingItalic: {
+    fontFamily: 'InstrumentSerif_400Regular',
+    fontSize: 44,
     color: AppColors.onSurface,
-    letterSpacing: -0.5,
-    lineHeight: 40,
+    letterSpacing: -0.8,
+    lineHeight: 50,
+  },
+  greetingItalicSoft: {
+    fontFamily: 'InstrumentSerif_400Regular_Italic',
+    color: AppColors.primary,
   },
   greetingSub: {
     fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 16,
+    fontSize: 15,
     color: AppColors.onSurfaceVariant,
-    lineHeight: 24,
+    lineHeight: 22,
+    marginTop: 4,
   },
 });

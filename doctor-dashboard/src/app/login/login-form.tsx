@@ -10,9 +10,12 @@ export function LoginForm({ initialError }: { initialError: string | null }) {
   );
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-1">
-        <label htmlFor="email" className="text-sm font-medium">
+    <form action={formAction} className="space-y-7 fade-up" style={{ animationDelay: '80ms' }}>
+      <div>
+        <label
+          htmlFor="email"
+          className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--ink-3)]"
+        >
           Email
         </label>
         <input
@@ -21,11 +24,16 @@ export function LoginForm({ initialError }: { initialError: string | null }) {
           type="email"
           autoComplete="email"
           required
-          className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-zinc-400"
+          className="editorial-input mt-1"
+          placeholder="dr.you@clinic.in"
         />
       </div>
-      <div className="space-y-1">
-        <label htmlFor="password" className="text-sm font-medium">
+
+      <div>
+        <label
+          htmlFor="password"
+          className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--ink-3)]"
+        >
           Password
         </label>
         <input
@@ -34,20 +42,19 @@ export function LoginForm({ initialError }: { initialError: string | null }) {
           type="password"
           autoComplete="current-password"
           required
-          className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-zinc-400"
+          className="editorial-input mt-1"
+          placeholder="••••••••"
         />
       </div>
 
       {state?.error && (
-        <p className="text-sm text-red-600">{state.error}</p>
+        <p className="border-l-2 border-[var(--alert)] pl-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--alert)]">
+          {state.error}
+        </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
-      >
-        {pending ? 'Signing in…' : 'Sign in'}
+      <button type="submit" disabled={pending} className="editorial-btn w-full">
+        {pending ? 'Signing in…' : 'Enter'}
       </button>
     </form>
   );

@@ -8,8 +8,17 @@ type ConversationRow = {
   parents: { name: string | null; phone: string | null } | null;
 };
 
-function formatTimestamp(iso: string) {
-  return new Date(iso).toLocaleString();
+function relative(iso: string): string {
+  const d = new Date(iso);
+  const ms = Date.now() - d.getTime();
+  const mins = Math.floor(ms / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d`;
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 }
 
 export default async function ConversationsPage() {
@@ -22,49 +31,67 @@ export default async function ConversationsPage() {
     .returns<ConversationRow[]>();
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-      <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Conversations</h1>
-        <p className="text-sm text-zinc-500">
-          Messages from parents about their children.
+    <main className="mx-auto w-full max-w-6xl flex-1 px-8 py-16">
+      <header className="mb-14 fade-up">
+        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-3)]">
+          Correspondence
+        </div>
+        <h1 className="mt-4 font-display text-[56px] leading-[0.95] tracking-[-0.03em] text-[var(--ink)]">
+          Open <span className="font-display-italic">conversations</span>
+        </h1>
+        <p className="mt-4 max-w-xl font-display-italic text-[18px] leading-[1.55] text-[var(--ink-2)]">
+          Threads from parents — most recent first.
         </p>
       </header>
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="border-l-2 border-[var(--alert)] px-5 py-4 font-mono text-[13px] text-[var(--alert)]">
           {error.message}
         </div>
       )}
 
       {!error && (!data || data.length === 0) && (
-        <div className="rounded-md border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">
-          No conversations yet.
+        <div className="border-t border-[var(--hairline)] py-24 text-center">
+          <p className="font-display-italic text-[26px] text-[var(--ink-3)]">
+            Nothing to read.
+          </p>
         </div>
       )}
 
       {data && data.length > 0 && (
-        <ul className="divide-y divide-zinc-100 overflow-hidden rounded-md border border-zinc-200 bg-white">
-          {data.map((c) => (
-            <li key={c.id}>
+        <ol className="space-y-0">
+          {data.map((c, idx) => (
+            <li
+              key={c.id}
+              className="fade-up border-t border-[var(--hairline)]"
+              style={{ animationDelay: `${idx * 35}ms` }}
+            >
               <Link
                 href={`/conversations/${c.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-zinc-50"
+                className="group grid grid-cols-[3rem_1fr_auto] items-baseline gap-6 px-0 py-6 transition-colors hover:bg-[var(--card-overlay)]"
               >
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ink-4)]">
+                  {String(idx + 1).padStart(3, '0')}
+                </div>
                 <div>
-                  <div className="text-sm font-medium">
-                    {c.children?.name ?? 'Unknown child'}
+                  <div className="font-display-italic text-[26px] leading-tight text-[var(--ink)]">
+                    {c.children?.name ?? 'Unknown'}
                   </div>
-                  <div className="text-xs text-zinc-500">
-                    Parent: {c.parents?.name ?? c.parents?.phone ?? '—'}
+                  <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">
+                    Parent ·{' '}
+                    <span className="lowercase tracking-normal">
+                      {c.parents?.name ?? c.parents?.phone ?? '—'}
+                    </span>
                   </div>
                 </div>
-                <div className="text-xs text-zinc-400">
-                  {formatTimestamp(c.last_message_at)}
+                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">
+                  {relative(c.last_message_at)}
                 </div>
               </Link>
             </li>
           ))}
-        </ul>
+          <li className="border-t border-[var(--hairline)]" />
+        </ol>
       )}
     </main>
   );
