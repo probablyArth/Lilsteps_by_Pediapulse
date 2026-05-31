@@ -4,22 +4,43 @@
 // 100ms's hosted Prebuilt — the latter requires a configured workspace
 // subdomain and 404s on the default app.100ms.live domain.
 //
-// EXPO_PUBLIC_VIDEO_BASE_URL controls where the parent browser is sent.
-// Defaults to http://localhost:3000 (works on web/iOS sim where the device
-// IS the Mac). For real-device testing add this to .env:
-//     EXPO_PUBLIC_VIDEO_BASE_URL=https://<your-tunnel-or-deployed-url>
-// (HTTPS required by browsers for getUserMedia outside localhost.)
+// Base URL resolution:
+//   1. EXPO_PUBLIC_VIDEO_BASE_URL if set (deployment or ngrok HTTPS URL)
+//   2. Otherwise auto-derive from Expo Metro's host so phone -> Mac works:
+//      Metro serves on 192.168.x.x:8082, dashboard runs on :3000.
+//
+// Phone-real-device caveat: browsers require HTTPS (or localhost) for
+// getUserMedia. Plain LAN-IP HTTP works only for loading the page, not for
+// camera/mic. For end-to-end phone testing run `ngrok http 3000` and set
+// EXPO_PUBLIC_VIDEO_BASE_URL to the https://*.ngrok-free.app URL.
 
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GradientBackground } from '@/components/gradient-background';
 import { AppColors } from '@/constants/theme';
 import { layout, typography } from '@/styles/global';
 import { supabase } from '@/lib/supabase';
+
+function resolveVideoBaseUrl(): string {
+  const explicit = process.env.EXPO_PUBLIC_VIDEO_BASE_URL;
+  if (explicit) return explicit.replace(/\/$/, '');
+
+  // Web bundle (Expo dev) — same machine, same origin works.
+  if (Platform.OS === 'web') return 'http://localhost:3000';
+
+  // Native — use Metro's host so the phone hits the dev Mac's LAN IP.
+  // hostUri looks like "192.168.29.127:8082". Strip the port, append :3000.
+  const hostUri = (Constants.expoConfig?.hostUri ?? '').split(':')[0];
+  if (hostUri) return `http://${hostUri}:3000`;
+
+  // Last resort
+  return 'http://localhost:3000';
+}
 
 interface VideoCodeResponse {
   code?: string;
@@ -49,8 +70,7 @@ export default function ParentVideoScreen() {
     })();
   }, [appointmentId]);
 
-  const videoBase =
-    process.env.EXPO_PUBLIC_VIDEO_BASE_URL ?? 'http://localhost:3000';
+  const videoBase = resolveVideoBaseUrl();
 
   function openRoom() {
     if (!code) return;
