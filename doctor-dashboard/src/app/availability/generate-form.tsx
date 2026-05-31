@@ -4,8 +4,8 @@ import { useState, useTransition } from 'react';
 import { generateSlotsAction } from './actions';
 
 function todayIso() {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
+  // Clinic-local (IST) — same convention as page.tsx / actions.ts.
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 }
 
 export function GenerateForm() {

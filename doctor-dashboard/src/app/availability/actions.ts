@@ -38,16 +38,24 @@ export async function generateSlotsAction(
   const supabase = await createSupabaseServerClient();
   const rows: { doctor_id: string; date: string; time: string; is_available: boolean }[] = [];
 
-  const start = new Date(`${input.startDate}T00:00:00`);
-  for (let d = 0; d < input.days; d++) {
-    const day = new Date(start);
-    day.setDate(start.getDate() + d);
+  // Parse YYYY-MM-DD as pure components — DON'T pass through new Date(string)
+  // then toISOString(), which would shift IST dates back a day in UTC and
+  // silently insert slots for yesterday.
+  const [startY, startM, startD] = input.startDate.split('-').map(Number);
+  if (!startY || !startM || !startD) return { error: 'Invalid start date' };
+
+  for (let dayOffset = 0; dayOffset < input.days; dayOffset++) {
+    const day = new Date(startY, startM - 1, startD + dayOffset);
     if (input.skipSundays && day.getDay() === 0) continue;
-    const isoDate = day.toISOString().slice(0, 10);
+
+    const y = day.getFullYear();
+    const mm = String(day.getMonth() + 1).padStart(2, '0');
+    const dd = String(day.getDate()).padStart(2, '0');
+    const isoDate = `${y}-${mm}-${dd}`;
 
     for (let h = input.startHour; h < input.endHour; h++) {
-      for (let m = 0; m < 60; m += input.intervalMinutes) {
-        const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+      for (let mins = 0; mins < 60; mins += input.intervalMinutes) {
+        const time = `${String(h).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
         rows.push({ doctor_id: doctorId, date: isoDate, time, is_available: true });
       }
     }

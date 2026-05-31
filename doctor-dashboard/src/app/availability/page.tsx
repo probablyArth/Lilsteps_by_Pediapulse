@@ -11,7 +11,10 @@ type SlotRow = {
 
 export default async function AvailabilityPage() {
   const supabase = await createSupabaseServerClient();
-  const todayIso = new Date().toISOString().slice(0, 10);
+  // Clinic-local (IST). The server is UTC, so a 5am-IST visit on May 31
+  // would otherwise compute 'today' as May 30 and show stale slots.
+  const todayIso = new Date()
+    .toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
   const { data, error } = await supabase
     .from('time_slots')
