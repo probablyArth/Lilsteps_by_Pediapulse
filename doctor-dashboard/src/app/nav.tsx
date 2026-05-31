@@ -30,6 +30,7 @@ export async function DashboardNav() {
           <NavLink href="/">Queue</NavLink>
           <NavLink href="/conversations">Messages</NavLink>
           <NavLink href="/prescriptions">Prescriptions</NavLink>
+          <NavLink href="/availability">Availability</NavLink>
           <span className="text-[var(--hairline-strong)]">·</span>
           <SignOutButton />
         </div>

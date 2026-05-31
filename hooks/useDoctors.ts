@@ -25,16 +25,19 @@ export function useDoctors() {
 
   useEffect(() => {
     (async () => {
+      // Inner-join through doctor_auth so only doctors who have signed up
+      // for the clinical dashboard surface in the parent app. Leftover seed
+      // rows without a doctor_auth link are filtered out.
       const { data, error: err } = await supabase
         .from('doctors')
-        .select('*')
+        .select('*, doctor_auth!inner(id)')
         .eq('is_available', true)
         .order('name');
 
       if (err) {
         setError(err.message);
       } else {
-        setDoctors(data ?? []);
+        setDoctors((data ?? []) as DoctorRow[]);
       }
       setLoading(false);
     })();
