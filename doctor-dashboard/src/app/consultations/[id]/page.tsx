@@ -10,6 +10,7 @@ type AppointmentRow = {
   ai_summary_id: string | null;
   children: { id: string; name: string; dob: string; sex: string; weight: number | null; height: number | null; blood_group: string | null } | null;
   parents: { name: string | null; phone: string | null } | null;
+  doctors: { default_meet_link: string | null } | null;
 };
 
 type AllergyRow = { id: string; name: string; severity: string; type: string };
@@ -57,7 +58,10 @@ export default async function ConsultationPage({
   const { data: appointment } = await supabase
     .from('appointments')
     .select(
-      'id, date, time, status, ai_summary_id, children(id, name, dob, sex, weight, height, blood_group), parents(name, phone)',
+      'id, date, time, status, ai_summary_id, ' +
+        'children(id, name, dob, sex, weight, height, blood_group), ' +
+        'parents(name, phone), ' +
+        'doctors(default_meet_link)',
     )
     .eq('id', id)
     .maybeSingle<AppointmentRow>();
@@ -123,9 +127,20 @@ export default async function ConsultationPage({
 
         {/* Actions */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <Link href={`/consultations/${appointment.id}/video`} className="editorial-btn">
-            Start video
-          </Link>
+          {appointment.doctors?.default_meet_link ? (
+            <a
+              href={appointment.doctors.default_meet_link}
+              target="_blank"
+              rel="noreferrer"
+              className="editorial-btn"
+            >
+              Start video
+            </a>
+          ) : (
+            <Link href="/settings" className="editorial-btn-ghost">
+              Set video link in Settings
+            </Link>
+          )}
           <Link href={`/conversations?child=${child.id}`} className="editorial-btn-ghost">
             Open chat
           </Link>

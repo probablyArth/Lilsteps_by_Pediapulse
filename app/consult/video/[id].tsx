@@ -1,24 +1,17 @@
 // Parent-side video consultation entry.
 //
-// Opens the self-hosted video page in the dashboard (/v/<code>) instead of
-// 100ms's hosted Prebuilt — the latter requires a configured workspace
-// subdomain and 404s on the default app.100ms.live domain.
+// Opens the doctor's Google Meet (or whichever conferencing URL the doctor
+// has saved in their dashboard Settings). The doctor admits the parent from
+// the Meet waiting room.
 //
-// Base URL resolution:
-//   1. EXPO_PUBLIC_VIDEO_BASE_URL if set (deployment or ngrok HTTPS URL)
-//   2. Otherwise auto-derive from Expo Metro's host so phone -> Mac works:
-//      Metro serves on 192.168.x.x:8082, dashboard runs on :3000.
-//
-// Phone-real-device caveat: browsers require HTTPS (or localhost) for
-// getUserMedia. Plain LAN-IP HTTP works only for loading the page, not for
-// camera/mic. For end-to-end phone testing run `ngrok http 3000` and set
-// EXPO_PUBLIC_VIDEO_BASE_URL to the https://*.ngrok-free.app URL.
+// No 100ms, no /v/<code>, no localhost juggling. The Meet URL is HTTPS-hosted
+// by Google, deep-links into the Meet app on iOS / Android, falls back to
+// the browser otherwise.
 
 import { Ionicons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GradientBackground } from '@/components/gradient-background';
@@ -26,32 +19,11 @@ import { AppColors } from '@/constants/theme';
 import { layout, typography } from '@/styles/global';
 import { supabase } from '@/lib/supabase';
 
-function resolveVideoBaseUrl(): string {
-  const explicit = process.env.EXPO_PUBLIC_VIDEO_BASE_URL;
-  if (explicit) return explicit.replace(/\/$/, '');
-
-  // Web bundle (Expo dev) — same machine, same origin works.
-  if (Platform.OS === 'web') return 'http://localhost:3000';
-
-  // Native — use Metro's host so the phone hits the dev Mac's LAN IP.
-  // hostUri looks like "192.168.29.127:8082". Strip the port, append :3000.
-  const hostUri = (Constants.expoConfig?.hostUri ?? '').split(':')[0];
-  if (hostUri) return `http://${hostUri}:3000`;
-
-  // Last resort
-  return 'http://localhost:3000';
-}
-
-interface VideoCodeResponse {
-  code?: string;
-  role?: string;
-  error?: string;
-}
-
 export default function ParentVideoScreen() {
   const insets = useSafeAreaInsets();
   const { id: appointmentId } = useLocalSearchParams<{ id: string }>();
-  const [code, setCode] = useState<string | null>(null);
+  const [meetLink, setMeetLink] = useState<string | null>(null);
+  const [doctorName, setDoctorName] = useState<string>('your doctor');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -59,22 +31,29 @@ export default function ParentVideoScreen() {
     if (!appointmentId) return;
     (async () => {
       setLoading(true);
-      const { data, error: err } = await supabase.functions.invoke<VideoCodeResponse>(
-        'video-room',
-        { body: { appointmentId } },
-      );
+      const { data, error: err } = await supabase
+        .from('appointments')
+        .select('doctors(name, default_meet_link)')
+        .eq('id', appointmentId)
+        .maybeSingle<{ doctors: { name: string; default_meet_link: string | null } | null }>();
+
       if (err) setError(err.message);
-      else if (!data?.code) setError(data?.error ?? 'No room code');
-      else setCode(data.code);
+      else if (!data?.doctors?.default_meet_link) {
+        setError(
+          `${data?.doctors?.name ?? 'The doctor'} hasn't set up a video room yet. ` +
+            'Please send them a message to reschedule.',
+        );
+        if (data?.doctors?.name) setDoctorName(data.doctors.name);
+      } else {
+        setMeetLink(data.doctors.default_meet_link);
+        setDoctorName(data.doctors.name);
+      }
       setLoading(false);
     })();
   }, [appointmentId]);
 
-  const videoBase = resolveVideoBaseUrl();
-
   function openRoom() {
-    if (!code) return;
-    Linking.openURL(`${videoBase}/v/${code}`);
+    if (meetLink) Linking.openURL(meetLink);
   }
 
   return (
@@ -100,7 +79,7 @@ export default function ParentVideoScreen() {
             </View>
             <Text style={[typography.headingMD, styles.title]}>Ready to connect</Text>
             <Text style={[typography.bodySM, styles.subtitle]}>
-              Tap below to join the consultation in your browser.
+              You&apos;ll join {doctorName} in Google Meet. They&apos;ll let you in from the waiting room.
             </Text>
 
             <Pressable
@@ -108,7 +87,7 @@ export default function ParentVideoScreen() {
               onPress={openRoom}
             >
               <Ionicons name="videocam" size={18} color={AppColors.onPrimary} />
-              <Text style={styles.joinBtnText}>Join video call</Text>
+              <Text style={styles.joinBtnText}>Open Meet</Text>
             </Pressable>
           </>
         )}
@@ -155,7 +134,7 @@ const styles = StyleSheet.create({
     color: AppColors.onSurfaceVariant,
     lineHeight: 22,
   },
-  errorText: { color: AppColors.tertiary, textAlign: 'center' },
+  errorText: { color: AppColors.tertiary, textAlign: 'center', lineHeight: 22 },
   joinBtn: {
     flexDirection: 'row',
     alignItems: 'center',

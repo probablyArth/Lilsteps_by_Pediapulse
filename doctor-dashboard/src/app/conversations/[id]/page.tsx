@@ -17,6 +17,7 @@ type ConversationDetail = {
   appointment_id: string | null;
   children: { id: string; name: string; dob: string; sex: string } | null;
   parents: { name: string | null; phone: string | null } | null;
+  doctors: { default_meet_link: string | null } | null;
 };
 
 function formatTime(iso: string) {
@@ -44,7 +45,7 @@ export default async function ConversationPage({
 
   const { data: conversation } = await supabase
     .from('conversations')
-    .select('id, appointment_id, children(id, name, dob, sex), parents(name, phone)')
+    .select('id, appointment_id, children(id, name, dob, sex), parents(name, phone), doctors(default_meet_link)')
     .eq('id', id)
     .maybeSingle<ConversationDetail>();
 
@@ -84,14 +85,16 @@ export default async function ConversationPage({
         </p>
 
         <div className="mt-7 flex flex-wrap items-center gap-3">
-          {conversation.appointment_id && (
-            <Link
-              href={`/conversations/${id}/video`}
+          {conversation.doctors?.default_meet_link ? (
+            <a
+              href={conversation.doctors.default_meet_link}
+              target="_blank"
+              rel="noreferrer"
               className="editorial-btn-ghost"
             >
               Start video
-            </Link>
-          )}
+            </a>
+          ) : null}
           <Link
             href={`/prescriptions?child=${conversation.children?.id ?? ''}`}
             className="editorial-btn-ghost"
