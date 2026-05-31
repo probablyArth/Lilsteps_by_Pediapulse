@@ -13,6 +13,10 @@ interface OnboardingState {
   bloodGroup: string;
   allergies: string[];
   conditions: string[];
+  /** Canonical IAP vaccine names the parent marked as "Given" in onboarding.
+   *  Used by confirm.tsx to mark the trigger-generated vaccination rows as
+   *  status='done' (only the doses whose scheduled_date is on/before today). */
+  vaccinationsGiven: string[];
   setChildName: (name: string) => void;
   setBracket: (bracket: AgeBracket) => void;
   setChildSex: (sex: ChildSex) => void;
@@ -22,6 +26,7 @@ interface OnboardingState {
   setBloodGroup: (bg: string) => void;
   setAllergies: (allergies: string[]) => void;
   setConditions: (conditions: string[]) => void;
+  setVaccinationsGiven: (names: string[]) => void;
 }
 
 const OnboardingContext = createContext<OnboardingState | null>(null);
@@ -36,13 +41,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [bloodGroup, setBloodGroup] = useState('');
   const [allergies, setAllergies] = useState<string[]>([]);
   const [conditions, setConditions] = useState<string[]>([]);
+  const [vaccinationsGiven, setVaccinationsGiven] = useState<string[]>([]);
 
   return (
     <OnboardingContext.Provider
       value={{
         childName, bracket, childSex, dob, weight, height, bloodGroup, allergies, conditions,
+        vaccinationsGiven,
         setChildName, setBracket, setChildSex, setDob, setWeight, setHeight, setBloodGroup,
-        setAllergies, setConditions,
+        setAllergies, setConditions, setVaccinationsGiven,
       }}
     >
       {children}
