@@ -41,21 +41,35 @@ function ConferenceUI({ onLeave }: { onLeave: () => void }) {
   const hmsActions = useHMSActions();
   const [permErr, setPermErr] = useState<string | null>(null);
 
+  async function ensurePermission(kind: 'audio' | 'video') {
+    const stream = await navigator.mediaDevices.getUserMedia(
+      kind === 'audio' ? { audio: true } : { video: true },
+    );
+    stream.getTracks().forEach((t) => t.stop());
+  }
   async function toggleAudio() {
     setPermErr(null);
-    try {
-      await hmsActions.setLocalAudioEnabled(!isAudioOn);
-    } catch (e) {
-      setPermErr(`Mic: ${e instanceof Error ? e.message : 'permission denied'}`);
+    if (!isAudioOn) {
+      try { await ensurePermission('audio'); }
+      catch (e) {
+        setPermErr(`Mic blocked: ${e instanceof Error ? e.message : 'access denied'}`);
+        return;
+      }
     }
+    try { await hmsActions.setLocalAudioEnabled(!isAudioOn); }
+    catch (e) { setPermErr(`Mic: ${e instanceof Error ? e.message : 'toggle failed'}`); }
   }
   async function toggleVideo() {
     setPermErr(null);
-    try {
-      await hmsActions.setLocalVideoEnabled(!isVideoOn);
-    } catch (e) {
-      setPermErr(`Camera: ${e instanceof Error ? e.message : 'permission denied'}`);
+    if (!isVideoOn) {
+      try { await ensurePermission('video'); }
+      catch (e) {
+        setPermErr(`Camera blocked: ${e instanceof Error ? e.message : 'access denied'}`);
+        return;
+      }
     }
+    try { await hmsActions.setLocalVideoEnabled(!isVideoOn); }
+    catch (e) { setPermErr(`Camera: ${e instanceof Error ? e.message : 'toggle failed'}`); }
   }
   async function leave() {
     await hmsActions.leave();

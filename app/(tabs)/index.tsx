@@ -52,7 +52,18 @@ export default function HomeScreen() {
 
   const allergies = child?.allergies.map(a => a.name) ?? [];
 
-  const nextVaccine = vaccinations.find(v => v.status === 'due_soon' || v.status === 'upcoming');
+  // Prioritise overdue (clinically urgent) over upcoming so the card surfaces
+  // the most actionable thing — "All caught up!" was misleading when many
+  // doses were overdue but none upcoming.
+  const overdueVaccine = vaccinations.find(v => v.status === 'overdue');
+  const upcomingVaccine = vaccinations.find(v => v.status === 'due_soon' || v.status === 'upcoming');
+  const vaccineToShow = overdueVaccine ?? upcomingVaccine;
+  const vaccineLabel = overdueVaccine
+    ? `Overdue: ${overdueVaccine.vaccine_name}`
+    : upcomingVaccine?.vaccine_name ?? 'All caught up!';
+  const vaccineDate = vaccineToShow?.scheduled_date
+    ? new Date(vaccineToShow.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '—';
 
   const careProviders: CareProvider[] = doctors.slice(0, 3).map((doc) => ({
     id: doc.id,
@@ -132,8 +143,8 @@ export default function HomeScreen() {
         <GrowthCards data={{ weight: child?.weight ?? 0, height: child?.height ?? 0 }} />
 
         <VaccinationCard
-          nextVaccine={nextVaccine?.vaccine_name ?? 'All caught up!'}
-          nextDate={nextVaccine?.scheduled_date ? new Date(nextVaccine.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+          nextVaccine={vaccineLabel}
+          nextDate={vaccineDate}
           onViewSchedule={() => router.navigate('/(tabs)/vaccine')}
         />
 
