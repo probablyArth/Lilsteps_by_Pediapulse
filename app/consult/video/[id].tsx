@@ -31,22 +31,29 @@ export default function ParentVideoScreen() {
     if (!appointmentId) return;
     (async () => {
       setLoading(true);
+      // Preference order:
+      //   1. appointments.meet_link — per-appointment, created by the
+      //      create-meet-event Edge Function from the doctor's Calendar
+      //   2. doctors.default_meet_link — the manual permanent room
       const { data, error: err } = await supabase
         .from('appointments')
-        .select('doctors(name, default_meet_link)')
+        .select('meet_link, doctors(name, default_meet_link)')
         .eq('id', appointmentId)
-        .maybeSingle<{ doctors: { name: string; default_meet_link: string | null } | null }>();
+        .maybeSingle<{
+          meet_link: string | null;
+          doctors: { name: string; default_meet_link: string | null } | null;
+        }>();
 
-      if (err) setError(err.message);
-      else if (!data?.doctors?.default_meet_link) {
-        setError(
+      if (err) {
+        setError(err.message);
+      } else {
+        if (data?.doctors?.name) setDoctorName(data.doctors.name);
+        const link = data?.meet_link ?? data?.doctors?.default_meet_link ?? null;
+        if (link) setMeetLink(link);
+        else setError(
           `${data?.doctors?.name ?? 'The doctor'} hasn't set up a video room yet. ` +
             'Please send them a message to reschedule.',
         );
-        if (data?.doctors?.name) setDoctorName(data.doctors.name);
-      } else {
-        setMeetLink(data.doctors.default_meet_link);
-        setDoctorName(data.doctors.name);
       }
       setLoading(false);
     })();

@@ -8,6 +8,7 @@ type AppointmentRow = {
   time: string;
   status: 'upcoming' | 'completed' | 'cancelled';
   ai_summary_id: string | null;
+  meet_link: string | null;
   children: { id: string; name: string; dob: string; sex: string; weight: number | null; height: number | null; blood_group: string | null } | null;
   parents: { name: string | null; phone: string | null } | null;
   doctors: { default_meet_link: string | null } | null;
@@ -58,7 +59,7 @@ export default async function ConsultationPage({
   const { data: appointment } = await supabase
     .from('appointments')
     .select(
-      'id, date, time, status, ai_summary_id, ' +
+      'id, date, time, status, ai_summary_id, meet_link, ' +
         'children(id, name, dob, sex, weight, height, blood_group), ' +
         'parents(name, phone), ' +
         'doctors(default_meet_link)',
@@ -127,20 +128,20 @@ export default async function ConsultationPage({
 
         {/* Actions */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          {appointment.doctors?.default_meet_link ? (
-            <a
-              href={appointment.doctors.default_meet_link}
-              target="_blank"
-              rel="noreferrer"
-              className="editorial-btn"
-            >
-              Start video
-            </a>
-          ) : (
-            <Link href="/settings" className="editorial-btn-ghost">
-              Set video link in Settings
-            </Link>
-          )}
+          {(() => {
+            // Prefer the per-appointment Calendar-event Meet link;
+            // fall back to the doctor's permanent room.
+            const meet = appointment.meet_link ?? appointment.doctors?.default_meet_link;
+            return meet ? (
+              <a href={meet} target="_blank" rel="noreferrer" className="editorial-btn">
+                Start video
+              </a>
+            ) : (
+              <Link href="/settings" className="editorial-btn-ghost">
+                Set video link in Settings
+              </Link>
+            );
+          })()}
           <Link href={`/conversations?child=${child.id}`} className="editorial-btn-ghost">
             Open chat
           </Link>

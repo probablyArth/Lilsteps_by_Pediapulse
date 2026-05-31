@@ -118,6 +118,16 @@ export function useAppointments(childId: string | null) {
       },
     });
 
+    // Fire-and-forget — create a per-appointment Google Meet link via the
+    // doctor's connected Calendar. If the doctor hasn't connected Google
+    // (or anything else fails), the appointment is still booked and the
+    // parent's Join video button falls back to doctors.default_meet_link.
+    supabase.functions
+      .invoke('create-meet-event', { body: { appointmentId: appt.id } })
+      .catch(() => {
+        /* logged on the function side; UI falls back to default link */
+      });
+
     await fetch();
     return appt;
   }
