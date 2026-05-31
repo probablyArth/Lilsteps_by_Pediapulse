@@ -87,28 +87,58 @@ export default function ChildBasicsScreen() {
           <Text style={styles.dobLabel}>Date of Birth</Text>
           <Text style={styles.fieldHint}>(Helps us tailor health advice by age)</Text>
         </View>
-        <Pressable
-          onPress={openPicker}
-          style={({ pressed }) => [
-            styles.dateField,
-            dob && styles.dateFieldFilled,
-            pressed && styles.dateFieldPressed,
-          ]}
-        >
-          <Ionicons
-            name="calendar-outline"
-            size={18}
-            color={dob ? AppColors.primary : AppColors.outlineVariant}
-          />
-          <Text style={dob ? styles.dateText : styles.datePlaceholder}>
-            {dob ? formatDate(dob) : 'Tap to select your child’s birthdate'}
-          </Text>
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color={dob ? AppColors.onSurfaceVariant : AppColors.outlineVariant}
-          />
-        </Pressable>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.dateField, dob && styles.dateFieldFilled]}>
+            <Ionicons
+              name="calendar-outline"
+              size={18}
+              color={dob ? AppColors.primary : AppColors.outlineVariant}
+            />
+            {/* Native browser date picker — react-native-web passes <input> to DOM */}
+            <input
+              type="date"
+              max={new Date().toISOString().split('T')[0]}
+              value={dob ? dob.toISOString().split('T')[0] : ''}
+              onChange={(e: { target: { value: string } }) => {
+                const val = e.target.value;
+                setDob(val ? new Date(val) : null);
+              }}
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontFamily: 'PlusJakartaSans_600SemiBold',
+                fontSize: 16,
+                color: dob ? AppColors.onSurface : AppColors.onSurfaceVariant,
+                cursor: 'pointer',
+              }}
+            />
+          </View>
+        ) : (
+          <Pressable
+            onPress={openPicker}
+            style={({ pressed }) => [
+              styles.dateField,
+              dob && styles.dateFieldFilled,
+              pressed && styles.dateFieldPressed,
+            ]}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={18}
+              color={dob ? AppColors.primary : AppColors.outlineVariant}
+            />
+            <Text style={dob ? styles.dateText : styles.datePlaceholder}>
+              {dob ? formatDate(dob) : 'Tap to select your child’s birthdate'}
+            </Text>
+            <Ionicons
+              name="chevron-down"
+              size={16}
+              color={dob ? AppColors.onSurfaceVariant : AppColors.outlineVariant}
+            />
+          </Pressable>
+        )}
         {dob && (
           <View style={styles.ageRow}>
             <View style={styles.ageDot} />
