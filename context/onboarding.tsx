@@ -9,6 +9,7 @@ interface OnboardingState {
   childSex: ChildSex;
   dob: Date | null;
   weight: string;
+  height: string;
   bloodGroup: string;
   allergies: string[];
   conditions: string[];
@@ -17,6 +18,7 @@ interface OnboardingState {
   setChildSex: (sex: ChildSex) => void;
   setDob: (dob: Date) => void;
   setWeight: (weight: string) => void;
+  setHeight: (height: string) => void;
   setBloodGroup: (bg: string) => void;
   setAllergies: (allergies: string[]) => void;
   setConditions: (conditions: string[]) => void;
@@ -30,6 +32,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [childSex, setChildSex] = useState<ChildSex>(null);
   const [dob, setDob] = useState<Date | null>(null);
   const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
   const [allergies, setAllergies] = useState<string[]>([]);
   const [conditions, setConditions] = useState<string[]>([]);
@@ -37,8 +40,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   return (
     <OnboardingContext.Provider
       value={{
-        childName, bracket, childSex, dob, weight, bloodGroup, allergies, conditions,
-        setChildName, setBracket, setChildSex, setDob, setWeight, setBloodGroup,
+        childName, bracket, childSex, dob, weight, height, bloodGroup, allergies, conditions,
+        setChildName, setBracket, setChildSex, setDob, setWeight, setHeight, setBloodGroup,
         setAllergies, setConditions,
       }}
     >

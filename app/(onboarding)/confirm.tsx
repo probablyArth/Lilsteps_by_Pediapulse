@@ -27,7 +27,7 @@ function getAge(dob: Date): string {
 
 export default function ConfirmScreen() {
   const insets = useSafeAreaInsets();
-  const { childName, childSex, dob, weight, bloodGroup, allergies, conditions } = useOnboarding();
+  const { childName, childSex, dob, weight, height, bloodGroup, allergies, conditions } = useOnboarding();
   const { user, refreshHasChildren } = useAuth();
   const [agreed, setAgreed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -62,15 +62,19 @@ export default function ConfirmScreen() {
       }
 
       // Insert child
+      const now = new Date().toISOString();
+      const parsedWeight = weight ? parseFloat(weight) : null;
+      const parsedHeight = height ? parseFloat(height) : null;
       const childPayload = {
         parent_id: user.id,
         name: childName.trim(),
         dob: dob.toISOString().split('T')[0],
         sex: childSex,
         blood_group: bloodGroup || null,
-        weight: weight ? parseFloat(weight) : null,
-        height: null,
-        weight_updated_at: weight ? new Date().toISOString() : null,
+        weight: parsedWeight,
+        height: parsedHeight,
+        weight_updated_at: parsedWeight != null ? now : null,
+        height_updated_at: parsedHeight != null ? now : null,
       };
       dbg.db('Confirm: inserting child', childPayload);
 
