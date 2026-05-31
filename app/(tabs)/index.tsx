@@ -209,14 +209,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   greetingItalic: {
-    fontFamily: 'InstrumentSerif_400Regular',
-    fontSize: 44,
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontSize: 36,
     color: AppColors.onSurface,
-    letterSpacing: -0.8,
-    lineHeight: 50,
+    letterSpacing: -1,
+    lineHeight: 42,
   },
   greetingItalicSoft: {
-    fontFamily: 'InstrumentSerif_400Regular_Italic',
+    fontFamily: 'PlusJakartaSans_500Medium',
     color: AppColors.primary,
   },
   greetingSub: {

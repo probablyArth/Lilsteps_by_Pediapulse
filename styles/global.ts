@@ -5,33 +5,30 @@ import { AppColors } from '@/constants/theme';
 /**
  * Shared typography styles.
  *
- * Two families:
- *   • Plus Jakarta Sans — the workhorse. Headlines through labels.
- *   • Instrument Serif — reserved for editorial moments. Hero greetings,
- *     emphasis on warm copy ("Welcome", "Today is...", child names in a
- *     consultation summary). Use sparingly so each appearance feels intentional.
+ * Sole family: Plus Jakarta Sans (per DESIGN.md). Variations come from
+ * weight + size, not a second typeface.
  */
 export const typography = StyleSheet.create({
-  // Editorial display — Instrument Serif. For hero moments only.
+  // Display scales for hero moments (welcome, milestone callouts).
   displayXL: {
-    fontFamily: 'InstrumentSerif_400Regular',
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
     fontSize: 48,
     color: AppColors.onSurface,
-    letterSpacing: -1,
+    letterSpacing: -1.4,
     lineHeight: 52,
   },
   displayLG: {
-    fontFamily: 'InstrumentSerif_400Regular',
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
     fontSize: 36,
     color: AppColors.onSurface,
-    letterSpacing: -0.6,
+    letterSpacing: -1,
     lineHeight: 40,
   },
   displayItalic: {
-    fontFamily: 'InstrumentSerif_400Regular_Italic',
+    fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 36,
     color: AppColors.primary,
-    letterSpacing: -0.4,
+    letterSpacing: -0.8,
     lineHeight: 40,
   },
 

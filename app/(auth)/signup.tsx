@@ -64,7 +64,7 @@ export default function SignupScreen() {
 
     const p = normalisedPhone();
     dbg.auth('Signup: verifying OTP', { phone: p });
-    const { error: err } = await verifyOtp(p, otp);
+    const { error: err, isNewUser } = await verifyOtp(p, otp);
 
     if (err) {
       setLoading(false);
@@ -73,7 +73,17 @@ export default function SignupScreen() {
       return;
     }
 
-    // Update parent name — use upsert for safety
+    // Returning parent (already has at least one child): skip onboarding
+    // and drop straight into the app. Don't overwrite their stored name.
+    if (!isNewUser) {
+      setLoading(false);
+      dbg.nav('Signup → Tabs (returning user with children)');
+      router.replace('/(tabs)');
+      return;
+    }
+
+    // New parent: stamp the name they just typed onto the parents row.
+    // The handle_new_user trigger created the row with phone only.
     dbg.db('Signup: upserting parent name');
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (currentUser) {
@@ -87,7 +97,6 @@ export default function SignupScreen() {
 
       if (upsertErr) {
         dbg.dbError('Signup: parent upsert failed', upsertErr);
-        // Non-fatal — name can be updated later in onboarding
       } else {
         dbg.db('Signup: parent upsert success');
       }
@@ -96,7 +105,7 @@ export default function SignupScreen() {
     }
 
     setLoading(false);
-    dbg.nav('Signup → Onboarding');
+    dbg.nav('Signup → Onboarding (new user)');
     router.replace('/(onboarding)/parent-details');
   }
 
