@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AllergyBanner } from '@/components/home/AllergyBanner';
@@ -10,12 +11,14 @@ import { HomeHeader } from '@/components/home/HomeHeader';
 import { PrimaryCtaCard } from '@/components/home/PrimaryCtaCard';
 import { QuickActions } from '@/components/home/QuickActions';
 import { VaccinationCard } from '@/components/home/VaccinationCard';
+import { AppointmentCard } from '@/components/consult/AppointmentCard';
 import { BRACKET_CONFIG } from '@/constants/bracketConfig';
 import { AppColors } from '@/constants/theme';
 import { useChild } from '@/context/child';
 import { useVaccinations } from '@/hooks/useVaccinations';
 import { useDoctors } from '@/hooks/useDoctors';
 import { useConversations } from '@/hooks/useConversations';
+import { useAppointments } from '@/hooks/useAppointments';
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -30,6 +33,8 @@ export default function HomeScreen() {
   const { vaccinations } = useVaccinations(child?.id ?? null);
   const { doctors } = useDoctors();
   const { startConversation } = useConversations(child?.id ?? null);
+  const { upcoming, cancelAppointment } = useAppointments(child?.id ?? null);
+  const nextTwo = upcoming.slice(0, 2);
 
   async function handleProviderPress(doctorId: string) {
     if (!child) return;
@@ -99,6 +104,31 @@ export default function HomeScreen() {
           onPress={() => router.push('/checkin')}
         />
 
+        {nextTwo.length > 0 && (
+          <View style={styles.upcomingBlock}>
+            <View style={styles.upcomingHeader}>
+              <Text style={styles.sectionTitle}>Upcoming consultations</Text>
+              <Pressable onPress={() => router.navigate('/(tabs)/consult')}>
+                <Text style={styles.seeAll}>See all →</Text>
+              </Pressable>
+            </View>
+            {nextTwo.map((a) => (
+              <AppointmentCard
+                key={a.id}
+                doctorName={a.doctors?.name ?? 'Doctor'}
+                doctorSpecialisation={a.doctors?.specialisation ?? ''}
+                hospital={a.doctors?.hospital ?? ''}
+                date={a.date}
+                time={a.time.slice(0, 5)}
+                onJoinVideo={() =>
+                  router.push({ pathname: '/consult/video/[id]', params: { id: a.id } })
+                }
+                onCancel={() => cancelAppointment(a.id).catch(() => {})}
+              />
+            ))}
+          </View>
+        )}
+
         <GrowthCards data={{ weight: child?.weight ?? 0, height: child?.height ?? 0 }} />
 
         <VaccinationCard
@@ -139,6 +169,25 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: 6,
+  },
+  upcomingBlock: {
+    gap: 12,
+  },
+  upcomingHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  sectionTitle: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontSize: 18,
+    color: AppColors.onSurface,
+    letterSpacing: -0.3,
+  },
+  seeAll: {
+    fontFamily: 'PlusJakartaSans_600SemiBold',
+    fontSize: 13,
+    color: AppColors.primary,
   },
   greetingTop: {
     fontFamily: 'PlusJakartaSans_500Medium',
