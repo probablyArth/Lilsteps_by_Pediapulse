@@ -53,6 +53,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "TODO_run_npx_eas_init_to_populate"
+      }
     }
   }
 }

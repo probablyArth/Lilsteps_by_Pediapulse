@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button, Card, Tabs } from 'heroui-native';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { GrowthChart, valueForTab } from '@/components/growth/GrowthChart';
 import { LogMeasurementSheet } from '@/components/growth/LogMeasurementSheet';
@@ -56,8 +56,14 @@ export default function GrowthScreen() {
   async function handleSaveMeasurement(data: { weight?: number; height?: number; note?: string }) {
     try {
       await addMeasurement(data);
-    } catch {
-      // error handled in hook
+    } catch (e) {
+      // The hook just rethrows — surface it so the user knows the save failed
+      // (the prior silent catch was why "I added height" appeared not to work).
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      Alert.alert(
+        "Couldn't save measurement",
+        `${message}\n\nThe new measurement wasn't recorded. Please try again.`,
+      );
     }
   }
 
