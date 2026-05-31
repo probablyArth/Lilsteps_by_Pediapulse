@@ -124,7 +124,7 @@ export default async function QueuePage() {
                 {/* Patient */}
                 <div>
                   <Link
-                    href={`/conversations?child=${child?.id ?? ''}`}
+                    href={`/consultations/${appt.id}`}
                     className="link-underline font-display-italic text-[26px] leading-tight text-[var(--ink)]"
                   >
                     {child?.name ?? 'Unknown'}
