@@ -1,8 +1,5 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
 
 import { useAuth } from '@/context/auth';
 import { supabase } from '@/lib/supabase';
@@ -10,25 +7,36 @@ import { dbg } from '@/lib/debug';
 
 /**
  * Registers for Expo push notifications and upserts the token into
- * `parents.expo_push_token`. Idempotent. No-op on simulators.
+ * `parents.expo_push_token`. Idempotent. No-op on simulators and on web.
  *
- * Call once from a tree below AuthProvider after the user is signed in
- * — e.g. from a tabs layout effect.
+ * `expo-notifications` runs DOM/localStorage side effects at module load
+ * which crash under Expo's web SSR (Node injects a half-broken localStorage
+ * stub). We dynamically import the package only when actually registering
+ * on iOS/Android, so the web bundle never pulls it in.
  */
 export function usePushTokenRegistration() {
   const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return;
+    if (Platform.OS === 'web') {
+      dbg.hook('usePushToken: skipped — web');
+      return;
+    }
     let cancelled = false;
 
     (async () => {
-      if (!Device.isDevice) {
-        dbg.hook('usePushToken: skipped — not a physical device');
-        return;
-      }
-
       try {
+        // Dynamic import — keeps the package out of the web bundle.
+        const Device = await import('expo-device');
+        const Notifications = await import('expo-notifications');
+        const Constants = (await import('expo-constants')).default;
+
+        if (!Device.isDevice) {
+          dbg.hook('usePushToken: skipped — not a physical device');
+          return;
+        }
+
         const settings = await Notifications.getPermissionsAsync();
         let status = settings.status;
         if (status !== 'granted') {
@@ -49,7 +57,8 @@ export function usePushTokenRegistration() {
 
         const projectId =
           Constants.expoConfig?.extra?.eas?.projectId ??
-          (Constants as unknown as { easConfig?: { projectId?: string } }).easConfig?.projectId;
+          (Constants as unknown as { easConfig?: { projectId?: string } }).easConfig
+            ?.projectId;
 
         const tokenResp = await Notifications.getExpoPushTokenAsync(
           projectId ? { projectId } : undefined,
@@ -57,7 +66,9 @@ export function usePushTokenRegistration() {
 
         if (cancelled || !tokenResp.data) return;
 
-        dbg.hook('usePushToken: got token', { tokenPrefix: tokenResp.data.slice(0, 12) });
+        dbg.hook('usePushToken: got token', {
+          tokenPrefix: tokenResp.data.slice(0, 12),
+        });
 
         const { error } = await supabase
           .from('parents')
