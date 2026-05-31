@@ -26,7 +26,7 @@ function PeerTile({ peer }: { peer: HMSPeer }) {
         playsInline
         className="h-full w-full object-cover"
       />
-      <span className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-0.5 text-xs text-white">
+      <span className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">
         {peer.name}
         {peer.isLocal ? ' (you)' : ''}
       </span>
@@ -52,32 +52,41 @@ function ConferenceUI({ onLeave }: { onLeave: () => void }) {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-black">
-      <div className="flex-1 grid gap-3 p-4" style={{ gridTemplateColumns: peers.length > 1 ? '1fr 1fr' : '1fr' }}>
-        {peers.map((p) => (
-          <PeerTile key={p.id} peer={p} />
-        ))}
+    <div className="fixed inset-0 z-50 flex flex-col bg-black">
+      <div
+        className="flex-1 grid gap-3 overflow-hidden p-4"
+        style={{
+          gridTemplateColumns: peers.length > 1 ? 'repeat(2, minmax(0, 1fr))' : '1fr',
+        }}
+      >
+        {peers.length === 0 ? (
+          <div className="flex items-center justify-center text-sm text-zinc-400">
+            Waiting for someone to join…
+          </div>
+        ) : (
+          peers.map((p) => <PeerTile key={p.id} peer={p} />)
+        )}
       </div>
-      <div className="flex items-center justify-center gap-3 border-t border-zinc-800 bg-zinc-950 px-4 py-3">
+      <div className="flex items-center justify-center gap-3 border-t border-zinc-800 bg-zinc-950 px-4 py-4">
         <button
           onClick={toggleAudio}
-          className={`rounded-full px-4 py-2 text-sm font-medium ${
-            isAudioOn ? 'bg-zinc-800 text-white' : 'bg-red-600 text-white'
+          className={`rounded-full px-5 py-2.5 text-sm font-medium ${
+            isAudioOn ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-red-600 text-white hover:bg-red-700'
           }`}
         >
           {isAudioOn ? 'Mute' : 'Unmute'}
         </button>
         <button
           onClick={toggleVideo}
-          className={`rounded-full px-4 py-2 text-sm font-medium ${
-            isVideoOn ? 'bg-zinc-800 text-white' : 'bg-red-600 text-white'
+          className={`rounded-full px-5 py-2.5 text-sm font-medium ${
+            isVideoOn ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-red-600 text-white hover:bg-red-700'
           }`}
         >
           {isVideoOn ? 'Stop video' : 'Start video'}
         </button>
         <button
           onClick={leave}
-          className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white"
+          className="rounded-full bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
         >
           Leave
         </button>
@@ -105,6 +114,10 @@ function VideoRoomInner({ appointmentId, onLeave }: { appointmentId: string; onL
         await hmsActions.join({
           userName: 'Doctor',
           authToken,
+          settings: {
+            isAudioMuted: false,
+            isVideoMuted: false,
+          },
         });
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to join');
@@ -119,14 +132,14 @@ function VideoRoomInner({ appointmentId, onLeave }: { appointmentId: string; onL
 
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center text-sm text-red-600">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black px-6 text-center text-sm text-red-400">
         {error}
       </div>
     );
   }
   if (!isConnected) {
     return (
-      <div className="flex h-screen items-center justify-center text-sm text-zinc-500">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black text-sm text-zinc-400">
         Connecting…
       </div>
     );
