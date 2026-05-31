@@ -39,12 +39,25 @@ function ConferenceUI({ onLeave }: { onLeave: () => void }) {
   const isAudioOn = useHMSStore(selectIsLocalAudioEnabled);
   const isVideoOn = useHMSStore(selectIsLocalVideoEnabled);
   const hmsActions = useHMSActions();
+  const [permErr, setPermErr] = useState<string | null>(null);
 
+  // setLocalAudio/VideoEnabled triggers getUserMedia on first call. We catch
+  // permission denials and report them so the toggle isn't a silent no-op.
   async function toggleAudio() {
-    await hmsActions.setLocalAudioEnabled(!isAudioOn);
+    setPermErr(null);
+    try {
+      await hmsActions.setLocalAudioEnabled(!isAudioOn);
+    } catch (e) {
+      setPermErr(`Mic: ${e instanceof Error ? e.message : 'permission denied'}`);
+    }
   }
   async function toggleVideo() {
-    await hmsActions.setLocalVideoEnabled(!isVideoOn);
+    setPermErr(null);
+    try {
+      await hmsActions.setLocalVideoEnabled(!isVideoOn);
+    } catch (e) {
+      setPermErr(`Camera: ${e instanceof Error ? e.message : 'permission denied'}`);
+    }
   }
   async function leave() {
     await hmsActions.leave();
@@ -69,6 +82,17 @@ function ConferenceUI({ onLeave }: { onLeave: () => void }) {
           peers.map((p) => <PeerTile key={p.id} peer={p} />)
         )}
       </div>
+      {!isAudioOn && !isVideoOn && (
+        <div className="border-t border-zinc-800 bg-zinc-900 px-4 py-2 text-center text-xs text-zinc-300">
+          Click <span className="font-semibold text-white">Unmute</span> or{' '}
+          <span className="font-semibold text-white">Start video</span> below — your browser will ask for permission.
+        </div>
+      )}
+      {permErr && (
+        <div className="border-t border-red-900/40 bg-red-950/40 px-4 py-2 text-center text-xs text-red-300">
+          {permErr} — open the address bar lock icon and allow camera/mic for this site.
+        </div>
+      )}
       <div className="flex items-center justify-center gap-3 border-t border-zinc-800 bg-zinc-950 px-4 py-4">
         <button
           onClick={toggleAudio}
@@ -113,14 +137,15 @@ function VideoRoomInner({ appointmentId, onLeave }: { appointmentId: string; onL
       }
       try {
         const authToken = await hmsActions.getAuthTokenByRoomCode({ roomCode: res.code });
-        // Join with audio + video on so the browser prompts for permissions
-        // immediately and the local tile shows the doctor's feed.
+        // Join MUTED — many browsers silently deny getUserMedia when it's
+        // not driven by a user gesture. The user explicitly clicks Unmute /
+        // Start video to trigger the permission prompt from a real click.
         await hmsActions.join({
           userName: 'Doctor',
           authToken,
           settings: {
-            isAudioMuted: false,
-            isVideoMuted: false,
+            isAudioMuted: true,
+            isVideoMuted: true,
           },
         });
       } catch (e) {
