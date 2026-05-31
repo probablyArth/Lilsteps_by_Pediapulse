@@ -1,9 +1,14 @@
 // Parent-side video consultation entry.
 //
-// We use the 100ms hosted preview URL (open in the device browser) so that the
-// app can ship on Expo Go without an EAS prebuild. The native SDK
-// (@100mslive/react-native-room-kit) gives a richer in-app experience but
-// requires `npx eas-cli prebuild` first — wire it after EAS init.
+// Opens the self-hosted video page in the dashboard (/v/<code>) instead of
+// 100ms's hosted Prebuilt — the latter requires a configured workspace
+// subdomain and 404s on the default app.100ms.live domain.
+//
+// EXPO_PUBLIC_VIDEO_BASE_URL controls where the parent browser is sent.
+// Defaults to http://localhost:3000 (works on web/iOS sim where the device
+// IS the Mac). For real-device testing add this to .env:
+//     EXPO_PUBLIC_VIDEO_BASE_URL=https://<your-tunnel-or-deployed-url>
+// (HTTPS required by browsers for getUserMedia outside localhost.)
 
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -44,10 +49,12 @@ export default function ParentVideoScreen() {
     })();
   }, [appointmentId]);
 
+  const videoBase =
+    process.env.EXPO_PUBLIC_VIDEO_BASE_URL ?? 'http://localhost:3000';
+
   function openRoom() {
     if (!code) return;
-    const url = `https://app.100ms.live/preview/${code}`;
-    Linking.openURL(url);
+    Linking.openURL(`${videoBase}/v/${code}`);
   }
 
   return (

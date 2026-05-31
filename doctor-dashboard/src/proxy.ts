@@ -33,6 +33,11 @@ export async function proxy(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
   const isLoginRoute = path.startsWith('/login');
+  // /v/<code> is the public video room (used by parents via the mobile app),
+  // no auth required — the room code itself is the access token.
+  const isPublicVideo = path.startsWith('/v/');
+
+  if (isPublicVideo) return res;
 
   if (!user && !isLoginRoute) {
     const url = req.nextUrl.clone();
