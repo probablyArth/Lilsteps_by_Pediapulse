@@ -103,7 +103,7 @@ export default function DescribeScreen() {
             <Ionicons name="sparkles" size={14} color={AppColors.primary} />
             <Text style={styles.aiChipText}>AI-assisted triage</Text>
           </View>
-          <Text style={styles.promptTitle}>What's concerning you today?</Text>
+          <Text style={styles.promptTitle}>What&apos;s concerning you today?</Text>
           <Text style={styles.promptSub}>
             Select all that apply or describe in your own words. Our AI will help the doctor prepare.
           </Text>

@@ -10,6 +10,7 @@ import { GradientButton } from '@/components/gradient-button';
 import { AppColors } from '@/constants/theme';
 import { useOnboarding } from '@/context/onboarding';
 import { useAuth } from '@/context/auth';
+import { useChild } from '@/context/child';
 import { supabase } from '@/lib/supabase';
 import { dbg } from '@/lib/debug';
 
@@ -32,6 +33,7 @@ export default function ConfirmScreen() {
     allergies, conditions, vaccinationsGiven,
   } = useOnboarding();
   const { user, refreshHasChildren } = useAuth();
+  const { refetch: refetchChildren, selectChild } = useChild();
   const [agreed, setAgreed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,9 +147,13 @@ export default function ConfirmScreen() {
         else dbg.db('Confirm: vaccines marked done', { count });
       }
 
-      // Refresh auth context so it knows we have children now
-      await refreshHasChildren();
-      dbg.db('Confirm: hasChildren refreshed');
+      // Refresh auth context so it knows we have children now, reload the
+      // ChildProvider list (it only refetches on user change), and make the
+      // child we just created the active one — otherwise the home screen
+      // keeps showing the previously selected child.
+      await Promise.all([refreshHasChildren(), refetchChildren()]);
+      selectChild(child.id);
+      dbg.db('Confirm: contexts refreshed, new child selected', { childId: child.id });
 
       router.replace('/(onboarding)/complete');
     } catch (err: unknown) {
