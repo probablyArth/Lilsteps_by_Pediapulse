@@ -69,12 +69,15 @@ test.describe('Tracking — vaccines auto-generate + growth measurements', () =>
     await page.goto(`/consultations/${apptId}`);
 
     await expect(page.getByRole('heading', { name: /immunisation/i })).toBeVisible();
-    await expect(page.locator('text=/done/i')).toBeVisible();
-    await expect(page.locator('text=/overdue/i')).toBeVisible();
-    await expect(page.locator('text=/upcoming/i')).toBeVisible();
+    // Match the count line ("N done · N overdue · N upcoming") specifically —
+    // the bare words also appear as sub-headings, tripping strict mode.
+    await expect(page.locator('text=/\\d+ done/i')).toBeVisible();
+    await expect(page.locator('text=/\\d+ overdue/i')).toBeVisible();
+    await expect(page.locator('text=/\\d+ upcoming/i')).toBeVisible();
 
     await expect(page.getByRole('heading', { name: /vitals/i })).toBeVisible();
-    await expect(page.locator('text=12.4')).toBeVisible(); // weight value
-    await expect(page.locator('text=86')).toBeVisible();   // height value
+    // Values render in both the vitals card and the history list — assert the first.
+    await expect(page.locator('text=12.4').first()).toBeVisible(); // weight value
+    await expect(page.locator('text=86').first()).toBeVisible();   // height value
   });
 });

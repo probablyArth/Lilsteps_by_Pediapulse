@@ -41,7 +41,12 @@ test.describe('Doctor auth', () => {
     await page.getByLabel(/email/i).fill(EMAIL);
     await page.getByLabel(/password/i).fill(PASSWORD);
     await page.getByRole('button', { name: /enter/i }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // Wait for the queue page specifically — the login page has an h1 too,
+    // so a bare h1 check passes before the login action completes.
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      /consultations/i,
+      { timeout: 15_000 },
+    );
 
     await page.getByRole('button', { name: /sign out/i }).click();
     await expect(page).toHaveURL(/\/login/);

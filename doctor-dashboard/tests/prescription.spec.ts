@@ -35,14 +35,14 @@ test.describe('Issue prescription', () => {
 
     // First medicine prefilled fieldset
     await page.locator('input[placeholder*="Paracetamol"]').first().fill('Paracetamol');
-    await page.locator('input[placeholder*="Dose"]').first().fill('5ml');
+    await page.locator('input[placeholder*="5ml"]').first().fill('5ml');
     await page.locator('input[placeholder*="times a day"]').first().fill('3 times a day');
-    await page.locator('input[placeholder*="days"]').first().fill('5 days');
+    await page.locator('input[placeholder*="5 days"]').first().fill('5 days');
 
     // Add a second
     await page.getByRole('button', { name: /add another medicine/i }).click();
     await page.locator('input[placeholder*="Paracetamol"]').nth(1).fill('Ibuprofen');
-    await page.locator('input[placeholder*="Dose"]').nth(1).fill('2.5ml');
+    await page.locator('input[placeholder*="5ml"]').nth(1).fill('2.5ml');
     await page.locator('input[placeholder*="times a day"]').nth(1).fill('twice a day');
 
     await page.getByRole('button', { name: /issue prescription/i }).click();
