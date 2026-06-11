@@ -30,6 +30,7 @@ function getAge(dob: Date): string {
 export default function ConfirmScreen() {
   const insets = useSafeAreaInsets();
   const {
+    parentName, parentCity, parentLanguage,
     childName, childSex, dob, weight, height, bloodGroup,
     allergies, conditions, vaccinationsGiven,
   } = useOnboarding();
@@ -56,11 +57,17 @@ export default function ConfirmScreen() {
     setError(null);
 
     try {
-      // First ensure parent row exists
+      // First ensure parent row exists, carrying any details collected on the
+      // parent-details screen. Fields stay out of the payload when empty so an
+      // add-child flow (which skips parent-details) never clobbers stored values.
       dbg.db('Confirm: ensuring parent row', { userId: user.id });
+      const parentPayload: Record<string, unknown> = { id: user.id, email: user.email };
+      if (parentName.trim()) parentPayload.name = parentName.trim();
+      if (parentCity) parentPayload.city = parentCity;
+      if (parentLanguage) parentPayload.preferred_language = parentLanguage;
       const { error: parentErr } = await supabase
         .from('parents')
-        .upsert({ id: user.id, email: user.email }, { onConflict: 'id' });
+        .upsert(parentPayload, { onConflict: 'id' });
 
       if (parentErr) {
         dbg.dbError('Confirm: parent upsert failed', parentErr);

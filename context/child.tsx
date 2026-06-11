@@ -52,7 +52,9 @@ export function ChildProvider({ children: providerChildren }: { children: ReactN
   const bracket = child ? getBracket(new Date(child.dob)) : null;
   const age = child ? formatAge(new Date(child.dob)) : '';
 
-  // Get parent name
+  // Get parent name. Re-runs when the children list refreshes too — onboarding
+  // saves the parent's name right before refetching children, so this is what
+  // keeps the home greeting fresh without an app restart.
   const [parentName, setParentName] = useState('');
   useEffect(() => {
     if (!user) return;
@@ -67,7 +69,7 @@ export function ChildProvider({ children: providerChildren }: { children: ReactN
         setParentName(data.name);
       }
     })();
-  }, [user]);
+  }, [user, children]);
 
   function selectChild(childId: string) {
     dbg.hook('ChildProvider: selecting child', { childId });

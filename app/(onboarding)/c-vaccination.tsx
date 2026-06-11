@@ -21,14 +21,13 @@ const VACCINES: { name: string; note: string; canonical: string[] }[] = [
 ];
 
 export default function VaccinationOlderScreen() {
-  const { vaccinationsGiven, setVaccinationsGiven } = useOnboarding();
-  // Restore "Given" marks from any saved draft (Missed/Not sure aren't persisted)
-  const [vaccineStatus, setVaccineStatus] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      VACCINES.filter((v) => v.canonical.every((c) => vaccinationsGiven.includes(c)))
-        .map((v) => [v.name, 'Given'])
-    )
-  );
+  const {
+    vaccineStatus: savedStatus,
+    setVaccinationsGiven,
+    setVaccineStatus: saveStatus,
+  } = useOnboarding();
+  // Seed every mark (Given/Missed/Not sure) from any restored draft
+  const [vaccineStatus, setVaccineStatus] = useState<Record<string, string>>(savedStatus);
 
   const updateStatus = (vaccine: string, val: string[]) => {
     setVaccineStatus((prev) => ({ ...prev, [vaccine]: val[0] ?? '' }));
@@ -41,6 +40,7 @@ export default function VaccinationOlderScreen() {
       .filter((v) => vaccineStatus[v.name] === 'Given')
       .flatMap((v) => v.canonical);
     setVaccinationsGiven(given);
+    saveStatus(vaccineStatus);
     router.push('/(onboarding)/c-sleep');
   }
 
