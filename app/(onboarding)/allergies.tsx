@@ -13,15 +13,25 @@ const FOOD_ALLERGIES = ['Nuts', 'Dairy', 'Eggs', 'Shellfish', 'Gluten', 'Soy', '
 const OTHER_ALLERGIES = ['Latex', 'Dust', 'Pollen', 'Animal dander', 'Insect stings', 'Not known', 'Other'];
 
 export default function AllergiesScreen() {
-  const { childName, setAllergies: saveAllergies } = useOnboarding();
+  const { childName, allergies: savedAllergies, setAllergies: saveAllergies } = useOnboarding();
   const displayName = childName || 'your child';
 
-  const [medAllergies, setMedAllergies] = useState<string[]>([]);
-  const [foodAllergies, setFoodAllergies] = useState<string[]>([]);
-  const [otherAllergies, setOtherAllergies] = useState<string[]>([]);
+  // Seed from any restored draft: known chips back into their category,
+  // custom entries (typed via "Other") collected into the Other free-text.
+  const seed = (options: string[]) =>
+    options.filter((o) => o !== 'Not known' && o !== 'Other' && savedAllergies.includes(o));
+  const knownOptions = [...MED_ALLERGIES, ...FOOD_ALLERGIES, ...OTHER_ALLERGIES];
+  const savedCustom = savedAllergies.filter((a) => !knownOptions.includes(a));
+
+  const [medAllergies, setMedAllergies] = useState<string[]>(() => seed(MED_ALLERGIES));
+  const [foodAllergies, setFoodAllergies] = useState<string[]>(() => seed(FOOD_ALLERGIES));
+  const [otherAllergies, setOtherAllergies] = useState<string[]>(() => [
+    ...seed(OTHER_ALLERGIES),
+    ...(savedCustom.length > 0 ? ['Other'] : []),
+  ]);
   const [medOther, setMedOther] = useState('');
   const [foodOther, setFoodOther] = useState('');
-  const [otherOther, setOtherOther] = useState('');
+  const [otherOther, setOtherOther] = useState(savedCustom.join(', '));
 
   // Collect all selected allergies (excluding "None" and "Other") for preview
   const allSelected = [

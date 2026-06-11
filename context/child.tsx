@@ -3,6 +3,7 @@ import { useAuth } from '@/context/auth';
 import { useChildren, ChildWithDetails } from '@/hooks/useChildren';
 import { getBracket, formatAge, AgeBracket } from '@/constants/bracketConfig';
 import { dbg } from '@/lib/debug';
+import { appStorage, StorageKeys } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
 interface ChildContextState {
@@ -31,12 +32,20 @@ export function ChildProvider({ children: providerChildren }: { children: ReactN
   const { children, loading, refetch } = useChildren();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Auto-select first child when loaded
+  // Auto-select when loaded: prefer the persisted choice, else first child
   useEffect(() => {
-    if (children.length > 0 && !selectedId) {
-      dbg.hook('ChildProvider: auto-selecting first child', { id: children[0].id, name: children[0].name });
-      setSelectedId(children[0].id);
-    }
+    if (children.length === 0 || selectedId) return;
+    let cancelled = false;
+    (async () => {
+      const saved = await appStorage.getItem(StorageKeys.activeChildId);
+      if (cancelled) return;
+      const match = saved ? children.find(c => c.id === saved) : undefined;
+      const pick = match ?? children[0];
+      dbg.hook('ChildProvider: auto-selecting child', { id: pick.id, name: pick.name, restored: !!match });
+      // Don't clobber a selection the user made while storage was loading
+      setSelectedId(prev => prev ?? pick.id);
+    })();
+    return () => { cancelled = true; };
   }, [children, selectedId]);
 
   const child = children.find(c => c.id === selectedId) ?? children[0] ?? null;
@@ -63,6 +72,7 @@ export function ChildProvider({ children: providerChildren }: { children: ReactN
   function selectChild(childId: string) {
     dbg.hook('ChildProvider: selecting child', { childId });
     setSelectedId(childId);
+    appStorage.setItem(StorageKeys.activeChildId, childId); // fire-and-forget
   }
 
   return (

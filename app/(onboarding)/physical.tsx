@@ -12,13 +12,17 @@ const BLOOD_GROUPS = ['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-', "Don't k
 
 export default function PhysicalScreen() {
   const {
+    weight: savedWeight,
+    height: savedHeight,
+    bloodGroup: savedBloodGroup,
     setWeight: saveWeight,
     setHeight: saveHeight,
     setBloodGroup: saveBloodGroup,
   } = useOnboarding();
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [bloodGroup, setBloodGroup] = useState<string[]>([]);
+  // Seed from any restored draft so a killed app doesn't lose typed data
+  const [weight, setWeight] = useState(savedWeight);
+  const [height, setHeight] = useState(savedHeight);
+  const [bloodGroup, setBloodGroup] = useState<string[]>(savedBloodGroup ? [savedBloodGroup] : []);
 
   const handleContinue = () => {
     saveWeight(weight);

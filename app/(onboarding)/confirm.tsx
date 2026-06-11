@@ -11,6 +11,7 @@ import { AppColors } from '@/constants/theme';
 import { useOnboarding } from '@/context/onboarding';
 import { useAuth } from '@/context/auth';
 import { useChild } from '@/context/child';
+import { appStorage, StorageKeys } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import { dbg } from '@/lib/debug';
 
@@ -153,6 +154,9 @@ export default function ConfirmScreen() {
       // keeps showing the previously selected child.
       await Promise.all([refreshHasChildren(), refetchChildren()]);
       selectChild(child.id);
+      // Child is saved — drop the persisted draft. In-memory state stays so the
+      // complete screen can still greet by name; it dies with the group unmount.
+      appStorage.removeItem(StorageKeys.onboardingDraft);
       dbg.db('Confirm: contexts refreshed, new child selected', { childId: child.id });
 
       router.replace('/(onboarding)/complete');

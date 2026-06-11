@@ -19,8 +19,14 @@ const VACCINES: { name: string; note: string; canonical: string[] }[] = [
 ];
 
 export default function VaccinationYoungScreen() {
-  const { setVaccinationsGiven } = useOnboarding();
-  const [vaccineStatus, setVaccineStatus] = useState<Record<string, string>>({});
+  const { vaccinationsGiven, setVaccinationsGiven } = useOnboarding();
+  // Restore "Given" marks from any saved draft (Missed/Not sure aren't persisted)
+  const [vaccineStatus, setVaccineStatus] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      VACCINES.filter((v) => v.canonical.every((c) => vaccinationsGiven.includes(c)))
+        .map((v) => [v.name, 'Given'])
+    )
+  );
 
   const updateStatus = (vaccine: string, val: string[]) => {
     setVaccineStatus((prev) => ({ ...prev, [vaccine]: val[0] ?? '' }));

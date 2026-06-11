@@ -3,6 +3,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { dbg } from '@/lib/debug';
 import { analytics, crash } from '@/lib/observability';
+import { appStorage, StorageKeys } from '@/lib/storage';
 
 interface AuthState {
   session: Session | null;
@@ -187,6 +188,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setSession(null);
     setHasChildren(null);
+    // Per-account preferences must not leak into the next sign-in
+    appStorage.removeItem(StorageKeys.activeChildId);
+    appStorage.removeItem(StorageKeys.onboardingDraft);
   }
 
   async function refreshHasChildren() {

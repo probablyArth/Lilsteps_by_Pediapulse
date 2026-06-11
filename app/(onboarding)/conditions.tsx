@@ -22,9 +22,16 @@ interface MedEntry {
 }
 
 export default function ConditionsScreen() {
-  const { bracket, setConditions: saveConditions } = useOnboarding();
-  const [conditions, setConditions] = useState<string[]>([]);
-  const [conditionOther, setConditionOther] = useState('');
+  const { bracket, conditions: savedConditions, setConditions: saveConditions } = useOnboarding();
+  // Seed from any restored draft: known chips re-select, a custom entry
+  // re-opens "Other" with its text.
+  const savedKnown = savedConditions.filter((c) => CONDITIONS.includes(c));
+  const savedCustom = savedConditions.find((c) => !CONDITIONS.includes(c));
+  const [conditions, setConditions] = useState<string[]>(() => [
+    ...savedKnown,
+    ...(savedCustom ? ['Other'] : []),
+  ]);
+  const [conditionOther, setConditionOther] = useState(savedCustom ?? '');
   const [takingMeds, setTakingMeds] = useState<string[]>([]);
   const [meds, setMeds] = useState<MedEntry[]>([{ name: '', dose: '', frequency: '' }]);
 

@@ -64,12 +64,18 @@ function calculateAgeLabel(dob: Date): string {
 }
 
 export default function ChildBasicsScreen() {
-  const { setChildName, setBracket, setChildSex, setDob: saveDob } = useOnboarding();
-  const [firstName, setFirstName] = useState('');
-  const [dob, setDob] = useState<Date | null>(null);
+  const {
+    childName: savedName, childSex: savedSex, dob: savedDobValue,
+    setChildName, setBracket, setChildSex, setDob: saveDob,
+  } = useOnboarding();
+  // Seed from any restored draft so a killed app doesn't lose typed data
+  const [firstName, setFirstName] = useState(savedName);
+  const [dob, setDob] = useState<Date | null>(savedDobValue);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [draftDob, setDraftDob] = useState<Date>(new Date());
-  const [sex, setSex] = useState<string[]>([]);
+  const [sex, setSex] = useState<string[]>(
+    savedSex ? [savedSex === 'male' ? 'Male' : 'Female'] : []
+  );
   const [relationship, setRelationship] = useState<string[]>([]);
 
   const openPicker = () => {
